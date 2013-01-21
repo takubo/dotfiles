@@ -1,3 +1,5 @@
+#bindkey -v
+
 function is-null {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
@@ -35,20 +37,23 @@ function is-null {
 # to add other keys to this hash, see: man 5 terminfo
 typeset -A key
 
-if [ 1 ] ; then
-    key[Home]="[H"
-else
-    key[Home]=${terminfo[khome]}
-    key[End]=${terminfo[kend]}
-    key[Insert]=${terminfo[kich1]}
-    key[Delete]=${terminfo[kdch1]}
-    key[Up]=${terminfo[kcuu1]}
-    key[Down]=${terminfo[kcud1]}
-    key[Left]=${terminfo[kcub1]}
-    key[Right]=${terminfo[kcuf1]}
-    key[PageUp]=${terminfo[kpp]}
-    key[PageDown]=${terminfo[knp]}
-fi
+case `uname` in
+    *CYGWIN* )
+	key[Home]="[H"
+	;;
+    * )
+	key[Home]=${terminfo[khome]}
+	key[End]=${terminfo[kend]}
+	key[Insert]=${terminfo[kich1]}
+	key[Delete]=${terminfo[kdch1]}
+	key[Up]=${terminfo[kcuu1]}
+	key[Down]=${terminfo[kcud1]}
+	key[Left]=${terminfo[kcub1]}
+	key[Right]=${terminfo[kcuf1]}
+	key[PageUp]=${terminfo[kpp]}
+	key[PageDown]=${terminfo[knp]}
+	;;
+esac
 
 
 
@@ -57,15 +62,6 @@ fi
 
 autoload colors
 colors
-#PROMPT="%{${fg[magenta]}%}%h %{${fg[red]}%}%n@%~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] --%D{%Y/%m/%d %H:%M:%S}-- %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %{${fg[cyan]}%}-%D{%y/%m/%d %H:%M:%S}-%{${fg[magenta]}%} %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h%{${fg[cyan]}%}[%j] %?%{${fg[magenta]}%} -%D{%y/%m/%d %H:%M:%S}- %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%w> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%D{%y-%m-%d %H:%M:%S}> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
 PROMPT="%U%{${fg[magenta]}%}%h:%j - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
 %%%{${reset_color}%} "
 
@@ -145,6 +141,7 @@ setopt inc_append_history
 setopt share_history
 ## C-sでのヒストリ検索が潰されてしまうため、出力停止・開始用にC-s/C-qを使わない。
 setopt no_flow_control
+
 ## コマンド履歴検索
 #Ctrl-P/Ctrl-Nで、入力中の文字から始まるコマンドの履歴が表示される。
 #"l"と入力した状態でCtrl-Pを押すと、"ls"や"less"が次々に表示されていく。
@@ -173,18 +170,23 @@ function go-home-quickly {
 }
 zle -N go-home-quickly
 bindkey ${key[Home]} go-home-quickly
-bindkey "~~" go-home-quickly
+#bindkey "~~" go-home-quickly
 
-## ^^で "cd .." 実行
-function top-dir {
-    zle push-input
-    BUFFER="cd .."
-    zle accept-line
+## 行頭の*で "cd ~" 実行
+function ghq2 {
+    local current=${BUFFER}
+    if [ "${current}" = "" ] ; then
+	zle push-input
+	BUFFER="cd ~"
+	zle accept-line
+    else
+	zle self-insert
+    fi
 }
-zle -N top-dir
-bindkey "\^\^" top-dir
+zle -N ghq2
+bindkey "\*" ghq2
 
-## ^で "cd .." 実行
+## 行頭の^で "cd .." 実行
 function top-dir2 {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
@@ -198,30 +200,7 @@ function top-dir2 {
 zle -N top-dir2
 bindkey "\^" top-dir2
 
-## ^^で "cd -" 実行
-function next-dir {
-    zle push-input
-    BUFFER="cd -"
-    zle accept-line
-}
-zle -N next-dir
-bindkey "^\^" next-dir
-
-## \tで "cd -" 実行
-function prev-dir2 {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	zle push-input
-	BUFFER="cd -"
-	zle accept-line
-    else
-	zle expand-or-complete
-    fi
-}
-zle -N prev-dir2
-bindkey "\t" prev-dir2
-
-## ^[で "popd" 実行
+## ^]で "popd" 実行
 function prev-dir {
     zle push-input
     BUFFER="popd"
@@ -245,19 +224,19 @@ function input-cd {
 zle -N input-cd
 bindkey "\t" input-cd
 
-## \tで "cd " 入力
-function input-cd2 {
+## 行頭の ; で "cd -" 実行
+function prev-dir2 {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
 	zle push-input
-	BUFFER="cd "
-	zle end-of-line
+	BUFFER="cd -"
+	zle accept-line
     else
 	zle self-insert
     fi
 }
-zle -N input-cd2
-bindkey ";" input-cd2
+zle -N prev-dir2
+bindkey ";" prev-dir2
 
 
 
@@ -265,9 +244,11 @@ bindkey ";" input-cd2
 
 # ^Zで "fg %" 実行
 function run-fglast {
-    zle push-input
-    BUFFER="fg %"
-    zle accept-line
+    #zle push-input
+    #BUFFER="fg %"
+    #zle accept-line
+    fg %
+    zle reset-prompt
 }
 zle -N run-fglast
 bindkey "^z" run-fglast
@@ -329,7 +310,10 @@ autoload zed
 setopt FUNCTION_ARGZERO
 
 # `.' で開始するファイル名にマッチさせるとき、先頭に明示的に `.' を指定する必要がなくなる
-setopt GLOB_DOTS
+#setopt GLOB_DOTS
+
+# ZMV をLoad
+autoload zmv
 
 
 
@@ -366,6 +350,7 @@ function zcalc-bc {
 }
 zle -N zcalc-bc
 bindkey "\#\#" zcalc-bc
+
 function zcalc-bc {
     #echo "\n"`echo "${BUFFER}" | bc -l`"\n"
     echo "\n"$(( ${BUFFER} ))"\n"
@@ -394,24 +379,7 @@ function zcalc-bc {
 zle -N zcalc-bc
 bindkey "^q" zcalc-bc
 
-#function zawk {
-#    local current=$BUFFER
-#    zle push-input
-#    BUFFER=${current}"awk 'BEGIN{  }'"
-#    zle forward-word
-#    zle forward-word
-#    zle backward-char
-#}
 function zawk {
-    zle push-input
-    BUFFER="awk 'BEGIN{  }'"
-    zle forward-word
-    zle forward-word
-    zle backward-char
-}
-zle -N zawk
-bindkey "\@\@" zawk
-function zawk2 {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
 	BUFFER="awk 'BEGIN{  }'"
@@ -422,31 +390,21 @@ function zawk2 {
 	zle beginning-of-line
     fi
 }
-zle -N zawk2
-bindkey "^a" zawk2
+zle -N zawk
+bindkey "^a" zawk
 
 function zvim {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
-	BUFFER="vim"
-	zle accept-line
-    else
-	zle end-of-line
+	BUFFER="vim "
+	#zle accept-line
     fi
+    zle end-of-line
 }
 zle -N zvim
 bindkey "^e" zvim
 
-function command-time {
-    local current=$BUFFER
-    zle push-input
-    BUFFER="time "${current}
-    zle end-of-line
-}
-zle -N command-time
-bindkey "::" command-time
-
-## ]で "ls" 実行
+## 行頭の ] で "ls" 実行
 function beg-ls {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
@@ -459,42 +417,177 @@ function beg-ls {
 zle -N beg-ls
 bindkey "]" beg-ls
 
-## [で "popd" 実行
-function beg-popd {
+## 行頭の , で "cat" 入力
+function beg-cat {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
-	BUFFER="popd"
-	zle accept-line
+	BUFFER="cat "
+	zle end-of-line
     else
 	zle self-insert
     fi
 }
-zle -N beg-popd
-bindkey "[" beg-popd
+zle -N beg-cat
+bindkey "," beg-cat
 
-
-
-
-function h2b()
-{
-	echo "ibase=16; obase=2; $@ " | bc
+## jjで "$" 入力
+function input-dollar {
+    BUFFER=${BUFFER}'$_'
+    zle forward-char
+    zle forward-char
 }
-function b2h()
-{
-	echo "ibase=2; obase=16; $@ " | bc
-}
-function h2d()
-{
-	echo "ibase=16; obase=10; $@ " | bc
-}
-function d2h()
-{
-	echo "ibase=10; obase=16; $@ " | bc
-}
+zle -N input-dollar
+bindkey "jj" input-dollar
 
-function radcon()
-{
+## で "./" 入力
+function input-dotsla {
+    local current=${BUFFER}
+    if [ "${current}" = "" ] ; then
+	BUFFER="./"
+	zle end-of-line
+    else
+	zle self-insert
+    fi
 }
+zle -N input-dotsla
+bindkey "." input-dotsla
+
+### で "./" 入力
+#function a-dot-out {
+#    local current=${BUFFER}
+#    if [ "${current}" = "" ] ; then
+#	BUFFER="./a.out "
+#	zle end-of-line
+#    else
+#	zle self-insert
+#    fi
+#}
+#zle -N a-dot-out
+#bindkey "&" a-dot-out
 
 
 
+
+#function h2b()
+#{
+#	echo "ibase=16; obase=2; $@ " | bc
+#}
+#function b2h()
+#{
+#	echo "ibase=2; obase=16; $@ " | bc
+#}
+#function h2d()
+#{
+#	echo "ibase=16; obase=10; $@ " | bc
+#}
+#function d2h()
+#{
+#	echo "ibase=10; obase=16; $@ " | bc
+#}
+#
+#function radcon()
+#{
+#}
+
+
+### \tで "cd -" 実行
+#function prev-dir2 {
+#    local current=${BUFFER}
+#    if [ "${current}" = "" ] ; then
+#	zle push-input
+#	BUFFER="cd -"
+#	zle accept-line
+#    else
+#	zle expand-or-complete
+#    fi
+#}
+#zle -N prev-dir2
+#bindkey "\t" prev-dir2
+
+### [で "popd" 実行
+#function beg-popd {
+#    local current=${BUFFER}
+#    if [ "${current}" = "" ] ; then
+#	BUFFER="popd"
+#	zle accept-line
+#    else
+#	zle self-insert
+#    fi
+#}
+#zle -N beg-popd
+#bindkey "[" beg-popd
+
+#function command-time {
+#    local current=$BUFFER
+#    zle push-input
+#    BUFFER="time "${current}
+#    zle end-of-line
+#}
+#zle -N command-time
+#bindkey "::" command-time
+
+#function zawk {
+#    zle push-input
+#    BUFFER="awk 'BEGIN{  }'"
+#    zle forward-word
+#    zle forward-word
+#    zle backward-char
+#}
+#zle -N zawk
+#bindkey "\@\@" zawk
+
+### ^^で "cd -" 実行
+#function next-dir {
+#    zle push-input
+#    BUFFER="cd -"
+#    zle accept-line
+#}
+#zle -N next-dir
+#bindkey "^\^" next-dir
+
+#function input-cd2 {
+#    local current=${BUFFER}
+#    if [ "${current}" = "" ] ; then
+#	zle push-input
+#	BUFFER="cd  - "
+#	zle end-of-line
+#    else
+#	zle self-insert
+#    fi
+#}
+
+### ^^で "cd .." 実行
+#function top-dir {
+#    zle push-input
+#    BUFFER="cd .."
+#    zle accept-line
+#}
+#zle -N top-dir
+#bindkey "\^\^" top-dir
+
+
+#if [ `uname` =~ "CYGWIN" ] ; then
+#    echo "CYG"
+#    key[Home]="[H"
+#else
+#    key[Home]=${terminfo[khome]}
+#    key[End]=${terminfo[kend]}
+#    key[Insert]=${terminfo[kich1]}
+#    key[Delete]=${terminfo[kdch1]}
+#    key[Up]=${terminfo[kcuu1]}
+#    key[Down]=${terminfo[kcud1]}
+#    key[Left]=${terminfo[kcub1]}
+#    key[Right]=${terminfo[kcuf1]}
+#    key[PageUp]=${terminfo[kpp]}
+#    key[PageDown]=${terminfo[knp]}
+#fi
+
+#PROMPT="%{${fg[magenta]}%}%h %{${fg[red]}%}%n@%~
+#PROMPT="%U%{${fg[magenta]}%}%h[%j] --%D{%Y/%m/%d %H:%M:%S}-- %n (%?) %~
+#PROMPT="%U%{${fg[magenta]}%}%h[%j] %{${fg[cyan]}%}-%D{%y/%m/%d %H:%M:%S}-%{${fg[magenta]}%} %n (%?) %~
+#PROMPT="%U%{${fg[magenta]}%}%h%{${fg[cyan]}%}[%j] %?%{${fg[magenta]}%} -%D{%y/%m/%d %H:%M:%S}- %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
+#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
+#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
+#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%w> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
+#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%D{%y-%m-%d %H:%M:%S}> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
+#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
