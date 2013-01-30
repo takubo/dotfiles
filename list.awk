@@ -2,6 +2,9 @@
 
 ## .zshrc
 ## .tmux.conf
+## .gitconfig
+## .vimperatorrc
+
 
 
 /^##/ {

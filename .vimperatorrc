@@ -1,0 +1,68 @@
+set toolbars=tabs
+set noscrollbars
+
+"ヒントを英字表記に
+set hintchars=;asdfghjkl
+
+set complete=S
+
+autocmd PageLoad .* <silent> set toolbars=tabs
+autocmd PageLoad .* <silent> hi CmdLine font-size: 12px;
+autocmd LocationChange .* <silent> hi CmdLine font-size: 12px;
+
+"nnoremap j 3j "<down>
+"nnoremap k 3k "<up>
+
+nnoremap h H
+nnoremap l L
+nnoremap H h
+nnoremap L l
+
+nnoremap d dgT
+
+nnoremap i gi<c-a>
+nnoremap I gi<c-a><c-k>
+nnoremap a gi<c-e> 
+nnoremap A gi<c-e>
+nnoremap s gi<c-a><c-k>
+
+nnoremap gi i
+
+"nnoremap o :set toolbars=navigation<CR><c-k>
+"nnoremap <f2> <expr> &toolbars =~ "navi" ? ':set toolbars=<CR>' : ':set toolbars=navigation<CR>'
+nnoremap <F2> :set toolbars=tabs,navigation<CR>
+nnoremap <F3> :set toolbars=tabs,nonavigation<CR>
+
+inoremap <c-f> <right>
+inoremap <c-b> <left>
+inoremap <c-n> <down>
+inoremap <c-p> <up>
+
+cnoremap <c-n> <down>
+cnoremap <c-p> <up>
+
+hi CmdLine -append font-size: 12px // コマンドラインの文字サイズを指定できる。
+
+nnoremap o :hi CmdLine font-size: 25px<CR>o
+nnoremap t :hi CmdLine font-size: 25px<CR>t
+nnoremap : :hi CmdLine font-size: 25px<CR>:
+nnoremap / :hi CmdLine font-size: 25px<CR>/
+nnoremap f <Esc>:hi CmdLine font-size: 25px<CR>f
+nnoremap F <Esc>:hi CmdLine font-size: 25px<CR>F
+
+"cnoremap <CR> <CR>:hi CmdLine font-size: 12px<CR>
+"cnoremap <c-m> <c-m>:hi CmdLine font-size: 12px<CR>
+cnoremap <Esc> <Esc>:hi CmdLine font-size: 12px<CR>
+nnoremap <Esc> <Esc>:hi CmdLine font-size: 12px<CR>
+"nnoremap j <Esc>:hi CmdLine font-size: 12px<CR>3j "<down>
+"nnoremap k <Esc>:hi CmdLine font-size: 12px<CR>3k "<up>
+nnoremap j 3<c-e>
+nnoremap k 3<c-y>
+"inoremap <Esc> <Esc>:hi CmdLine font-size: 12px<CR>
+
+
+
+"hi Hint -append font-size: 39px // コマンドラインの文字サイズを指定できる。
+hi Hint z-index:5000; font-family:Menlo; font-size:14px; color:white; background-color:gray; border-color:ButtonShadow; border-width:0px; border-style:solid; padding:2px 2px 2px 2px; position:absolute;
+
+hi HintElem background-color: cyan; color: black;
