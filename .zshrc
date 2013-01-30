@@ -76,9 +76,9 @@ compinit
 ## 補完侯補をメニューから選択する。
 ### select=2: 補完候補を一覧から選択する。
 #zstyle ':completion:*:default' menu select
-###           ただし、補完候補が5つ以上なければすぐに補完する。
-#zstyle ':completion:*:default' menu select=5
-zstyle ':completion:*:default' menu true
+###           ただし、補完候補が3つ以上なければすぐに補完する。
+zstyle ':completion:*:default' menu select=3
+#zstyle ':completion:*:default' menu true
 #
 ## 補完候補に色を付ける。
 ### "": 空文字列はデフォルト値を使うという意味。
