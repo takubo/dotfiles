@@ -2,6 +2,7 @@
 
 ## .zshrc
 ## .tmux.conf
+## tmux
 ## .gitconfig
 ## .vimperatorrc
 

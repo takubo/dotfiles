@@ -1,0 +1,16 @@
+#!/bin/sh
+cat /proc/acpi/battery/BAT$1/state /proc/acpi/battery/BAT$1/info | mawk '
+
+(/^present:/) && ($2 != "yes") { print "-------"; exit }
+
+/^charging state:/ {
+	if ($3 == "discharging") state = "<<"
+	else state = ">>"
+}
+
+/^remaining capacity:/ { remaining = $3 }
+
+/^last full capacity:/ { full = $4 }
+
+END { printf "%s%3d%%", state, remaining / full * 100 }
+'
