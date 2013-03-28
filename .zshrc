@@ -285,6 +285,7 @@ alias -g A='| awk'
 #alias e='echo'
 #alias H='popd'
 #alias L='cd -'
+alias -g s2t="sed -e 's/[ \t][ \t]*/\t/g'"
 
 
 
