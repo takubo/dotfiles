@@ -312,6 +312,7 @@ alias l='ls'
 alias t='cat'
 alias m='man'
 alias v='vg'
+alias vg='gvim'
 alias af='awk -f'
 
 #alias gt='git'
@@ -371,7 +372,6 @@ autoload zmv
 ######## ローカル ########
 
 PATH=~/bin:$PATH
-alias vg='~/bin/gvim'
 
 
 
