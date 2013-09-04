@@ -1,3 +1,6 @@
 [alias]
 	st = status
 	ci = commit
+[user]
+	name = Takubo Morio
+	email = takubo.morio@gmail.com
