@@ -4,3 +4,5 @@
 [user]
 	name = Takubo Morio
 	email = takubo.morio@gmail.com
+[color]
+	ui = auto
