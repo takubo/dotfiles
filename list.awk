@@ -1,6 +1,7 @@
 #!/usr/bin/awk -f
 
 ## .zshrc
+## .screenrc
 ## .tmux.conf
 ## tmux
 ## .gitconfig

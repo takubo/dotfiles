@@ -1,0 +1,38 @@
+startup_message off
+
+#escape ^Tt
+escape ^T^T
+next ^T^N
+prev ^T^P
+next ^T^F
+prev ^T^B
+
+
+shelltitle "% |zsh"
+
+#hardstatus alwayslastline "%{= kr}@ %{= wk} %-w %n %t %+w %l %Y/%m/%d %02c:%s"
+#hardstatus alwayslastline " %Y/%m/%d %02c:%s %{= kr} @ %{= wk} %-w %n %t %+w %l    WiFi: [|||  ]    B: ||||-    Bat: [|||||||i  ] 89.8% / 9:23 / ~:~~ "
+#hardstatus alwayslastline "%m/%d %02c:%s %{= kr} @ %{= wk} %-w %n %t %+w %l    WiFi: |||..    [||i  ] 89.8%% / 9:23 / ~:~~ "
+#hardstatus alwayslastline "%m/%d %02c %{= kr} %{-}%{= wk}%-w%{= mk} %n %t %{-}%{= wk}%+w%{-}%{= kr} %{-} 89.8%% / 9:23 / ~:~~ "
+#hardstatus alwayslastline "%m/%d %02c %{= wk}%-w%{-}%{= Rk} %n %t %{-}%{= wk}%+w%{-} 89.8%% / 9:23 / ~:~~ "
+#caption always "%02c %n %t %%"
+
+caption always "%{= Rk}%-w%{-}%{= kR} %n %t %{-}%{= Rk}%+w"
+caption always "%{= wk}%-w%{-}%{= Rk} %n %t %{-}%{= wk}%+w%{-}"
+caption always "%{= kR}%-w%{-}%{= Rk} %n %t %{-}%{= kR}%+w"
+caption always "%{= kr}%-w%{-}%{= rk} %n %t %{-}%{= kr}%+w"
+caption always "%{= Rw}%-w%{-}%{= wk} %n %t %{-}%{= Rw}%+w"
+caption always "%{= Rk} %H %-w%{-}%{= kR} %n %t %{= Rk}%+w"
+hardstatus alwayslastline "%{= kR}%Y/%m/%d %02c:%s %3       89.8%% / 9:23 / ~:~~ "
+hardstatus alwayslastline "%{= kR}%Y/%m/%d %D %02c:%s  [89.8%% / 9:23 / ~:~~] WiFi[---] CPU: 77%%, 77%%, 77%%, 77%%, 77%% %5` "
+
+altscreen on
+shell /bin/zsh
+defscrollback 10000
+
+# battery
+# wifi
+# CPU temp
+# CPU usage
+# Mem usage
+backtick 5 0 10 $HOME/bin/screen_mem /proc/meminfo
