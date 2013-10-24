@@ -64,7 +64,13 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 
+
+
+
 "morio add
+
+
+
 noremap <leader>r :vimgrep 
 noremap <leader>g :vimgrep //j *c *.h
 noremap <leader>G :grep  *c *.h
@@ -73,17 +79,17 @@ noremap <leader>w :vimgrep 
 
 
 " 演算子の間に空白を入れる
-inoremap <buffer><expr> + smartchr#one_of(' + ', '++', '+')
-inoremap <buffer><expr> - smartchr#one_of(' - ', '--', '-')
-inoremap <buffer><expr> * smartchr#one_of(' * ', '*')
-inoremap <buffer><expr> / smartchr#one_of(' / ', '/')
+inoremap <buffer><expr> + (<SID>in_str() != 0) ? '+' : smartchr#one_of(' + ', '++', '+')
+inoremap <buffer><expr> - (<SID>in_str() != 0) ? '-' : smartchr#one_of(' - ', '--', '-')
+"inoremap <buffer><expr> * smartchr#one_of(' * ', '*')		下で特殊対応
+"inoremap <buffer><expr> / smartchr#one_of(' / ', '/')		下で特殊対応
 inoremap <buffer><expr> % (<SID>in_str() != 0) ? '%' : smartchr#one_of(' % ', '%')
-inoremap <buffer><expr> ^ smartchr#one_of(' ^ ', '^')
-inoremap <buffer><expr> & smartchr#one_of(' & ', ' && ', '&')
-inoremap <buffer><expr> <Bar> smartchr#one_of(' <Bar> ', ' <Bar><Bar> ', '<Bar>')
+inoremap <buffer><expr> ^ (<SID>in_str() != 0) ? '^' : smartchr#one_of(' ^ ', '^')
+"inoremap <buffer><expr> & smartchr#one_of(' & ', ' && ', '&')	下で特殊対応
+inoremap <buffer><expr> <Bar> (<SID>in_str() != 0) ? '<Bar>' : smartchr#one_of(' <Bar> ', ' <Bar><Bar> ', '<Bar>')
 
-inoremap <buffer><expr> < search('^#include\%#', 'bcn') ? ' <' : smartchr#one_of(' < ', ' << ', '<')
-inoremap <buffer><expr> > search('^#include <.*\%#', 'bcn') ? '>' : smartchr#one_of(' > ', ' >> ', '>')
+inoremap <buffer><expr> < (<SID>in_str() != 0) ? '<' : search('^#include\%#', 'bcn') ? ' <' : smartchr#one_of(' < ', ' << ', '<')
+inoremap <buffer><expr> > (<SID>in_str() != 0) ? '>' : search('^#include <.*\%#', 'bcn') ? '>' : smartchr#one_of(' > ', ' >> ', '>')
 
 inoremap <buffer><expr> = (<SID>in_str() != 0) ? '=' : Imap_eq()
 
@@ -94,30 +100,29 @@ inoremap <buffer><expr> . (<SID>in_str() != 0) ? '.' : smartchr#one_of('.', '->'
 inoremap <buffer><expr> ? (<SID>in_str() != 0) ? '?' : smartchr#one_of(' ? ', '?')
 inoremap <buffer><expr> : (<SID>in_str() != 0) ? ':' : smartchr#one_of(' : ', ':')
 
-  " 行先頭での#入力で、プリプロセス命令文を入力
-  "inoremap <buffer><expr> # search('^\(#.*\)\?\%#','bcn')? smartchr#loop('#define ', '#include', '#ifdef ', '#elif ', '#endif', '#')
-  "?inoremap <buffer><expr> # search('^\s*#.*\%#','bcn') ? smartchr#loop('#define ', '#include', '#ifdef ', '#elif ', '#endif', '#') : '#'
-  "\ : smartchr#one_of('/*  */<left><left><left><left>', '<Right><Right><Right><BS><BS><BS><BS><BS>#', '##')
-	"\ : smartchr#one_of('//', '/*  */<left><left><left>', '##')
-  "?inoremap <buffer><expr> " search('^#include\%#', 'bcn')? ' "': '"'
+" * はポインタで使う
+inoremap <buffer><expr> * (<SID>in_str() != 0) ? '*' :
+      \ ( search('\(&\<bar><bar>\<bar>+\<bar>-\<bar>\*\<bar>/\<bar>%\<bar>\^\<bar>>\<bar><\<bar>=\<bar>?\<bar>:\<bar>,\) \?\%#', 'bcn')
+      \ <bar><bar> search('\(^\<bar>{\)\s*\%#', 'bcn') <bar><bar> search('(\%#', 'bcn') ) ? '*' :
+      \ search('\(^\<bar>,\<bar>(\<bar>{\)\s*\(\w\s*\)*\i\+\s\?\%#', 'bcn') ? ' *' : smartchr#one_of(' * ', '*', '* ')
 
-  " *はポインタで使う
-  "inoremap <buffer><expr> * search('^/\?\%#','bcn') ? smartchr#one_of(' * ', '*')
-  "inoremap <buffer><expr> * search('^/\?\%#','bcn') ? smartchr#one_of(' *', '*')
-  inoremap <buffer><expr> *
-	\ ( search('\(&\<bar><bar>\<bar>+\<bar>-\<bar>\*\<bar>/\<bar>%\<bar>\^\<bar>>\<bar><\<bar>=\<bar>?\<bar>:\<bar>,\) \?\%#', 'bcn')
-	\ <bar><bar> search('\(^\<bar>{\)\s*\%#', 'bcn') ) ? '*' :
-	\ search('\(^\<bar>,\<bar>(\<bar>{\)\s*\(\w\s*\)*\i\+\s\?\%#', 'bcn') ? ' *' : smartchr#one_of(' * ', '*', '* ')
-  inoremap <buffer><expr> &
-	\   search('\(<bar>\<bar>+\<bar>-\<bar>\*\<bar>/\<bar>%\<bar>\^\<bar>>\<bar><\<bar>=\<bar>?\<bar>:\<bar>,\) \?\%#', 'bcn')
-	\ ?  smartchr#one_of('&', ' & ') : smartchr#one_of(' & ', ' && ', '&')
-	"\ ?  smartchr#one_of('&', ' & ') : smartchr#one_of(' & ', ' && ', '&', '&  &')
-	"\   search('\(&\<bar><bar>\<bar>+\<bar>-\<bar>\*\<bar>/\<bar>%\<bar>\^\<bar>>\<bar><\<bar>=\<bar>?\<bar>:\<bar>,\) \?\%#', 'bcn')
+" & は参照で使う
+inoremap <buffer><expr> & (<SID>in_str() != 0) ? '&' :
+      \ search('\(<bar>\<bar>+\<bar>-\<bar>\*\<bar>/\<bar>%\<bar>\^\<bar>>\<bar><\<bar>=\<bar>?\<bar>:\<bar>,\) \?\%#', 'bcn')
+      \ ?  smartchr#one_of('&', ' & ') : smartchr#one_of(' & ', ' && ', '&')
+
 " //コメントを楽に入れる
 inoremap <buffer><expr> / search('\(^\<bar>;\<bar>{\<bar>}\<bar>,\)\s*/\?/\?\s\?\%#','bcn') ? smartchr#one_of('// ', '//', '\<bs>/') : smartchr#one_of(' / ', '/')
-  " /* */コメントを楽に入れる
-  inoremap <buffer><expr> # search('/\* \%#','bcn') && search('\%# \*/','cn') ? '<Right><Right><Right><BS><BS><BS><BS><BS><BS>#' : '/*  */<left><left><left>'
-  "inoremap <buffer><expr> @ search('/\* \%#','bcn') && search('\%# \*/','cn') ? '<Right><Right><Right><BS><BS><BS><BS><BS><BS>@' : '/*  */<left><left><left>'
+
+" /* */コメントを楽に入れる
+inoremap <buffer><expr> @ (<SID>in_str() != 0) ? '@' : '/*  */<left><left><left>'
+
+
+
+" 文字列
+"inoremap <buffer><expr> $ (<SID>in_str() != 0) ? '@' : '""<left>'
+
+
 
   "inoremap <buffer><expr> ; smartchr#one_of(';<CR>', ';')
   "inoremap <buffer> ;; ;
@@ -126,8 +131,7 @@ inoremap <buffer><expr> / search('\(^\<bar>;\<bar>{\<bar>}\<bar>,\)\s*/\?/\?\s\?
 "	\ search('\(\k\<bar>)\<bar>]\)\%#', 'bcn') ? search('^\k.*\%#', 'bcn') ? '<CR>' : ';<CR>' : '<CR>'
   "inoremap <buffer><expr> <s-CR> search('^\s*\%#', 'bcn') ? '<ESC>kA' : '<CR>'
   "inoremap <buffer><expr> ; smartchr#one_of(';', ';<cr>')
-
-  inoremap <buffer><expr> ## smartchr#one_of('#', '/*  */\<left>\<left>\<left>', '##')
+  "
 
 
 "function! s:semicolon()
