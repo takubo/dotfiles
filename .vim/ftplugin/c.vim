@@ -210,7 +210,6 @@ function! s:Tab()
 endfunction
 inoremap <buffer>	<Tab>	<C-R>=<SID>Tab()<CR>
 inoremap <buffer><expr>	<S-Tab>	pumvisible() ? '<C-p>' : '<C-p><C-n>'
-inoremap <buffer><expr>	k	pumvisible() ? '<C-p>' : 'k'
 "function! s:jj()
 ""    if pumvisible()
 ""	call feedkeys("\<C-n>")
@@ -224,8 +223,66 @@ inoremap <buffer><expr>	k	pumvisible() ? '<C-p>' : 'k'
 "	return 'j' . c
 ""    endif
 "endfunction
-inoremap <buffer><expr>	j	pumvisible() ? '<C-n>' : 'j'
-inoremap <buffer><expr>	jj	pumvisible() ? '<C-n><C-n>' : <SID>semicolon() . '<ESC>:w<CR>'
+let s:jjj_old_t = 0
+let s:kkk_old_t = 0
+function! s:jjj()
+    if pumvisible()
+	call feedkeys("\<C-n>")
+	return ''
+    else
+      "echo reltimestr(reltime())
+      "echo reltime()
+      let t = str2float(reltimestr(reltime()))
+      let diff = t - s:jjj_old_t
+      echo diff
+      let s:jjj_old_t = t
+      if diff < 0.3
+	call feedkeys("\<ESC>:w\<CR>")
+	"echo <SID>semicolon()
+	"return "\<BS>" . <SID>semicolon()
+	return "\<BS>"
+      else
+	return 'j'
+      endif
+"      let c = getchar(0)
+"	if c == 0
+"	  return 'j'
+"	elseif c == char2nr('j')
+"	  echo io
+"	  return <Esc>
+"	else
+"	  call feedkeys(c)
+"	  return 'j' . nr2char(c)
+"	endif
+    endif
+endfunction
+function! s:kkk()
+    if pumvisible()
+	call feedkeys("\<C-p>")
+	return ''
+    else
+      let t = str2float(reltimestr(reltime()))
+      let diff = t - s:kkk_old_t
+      echo diff
+      let s:kkk_old_t = t
+      if diff < 0.3
+	call feedkeys("\<C-p>")
+	return "\<BS>"
+      else
+	return 'k'
+      endif
+    endif
+endfunction
+"inoremap <buffer><expr>	j	pumvisible() ? '<C-n>' : 'j'
+"inoremap <buffer><expr>	jj	pumvisible() ? '<C-n><C-n>' : <SID>semicolon() . '<ESC>:w<CR>'
+"inoremap <buffer><expr>	j	<SID>jjj()
+inoremap <buffer>	j	<C-R>=<SID>jjj()<CR>
+inoremap <buffer>	k	<C-R>=<SID>kkk()<CR>
+inoremap <buffer><expr>	l	pumvisible() ? '<C-y>' : 'l'
+"inoremap <buffer><expr>	k	pumvisible() ? '<C-p>' : 'k'
+"inoremap <buffer>	kk	<C-p>
+iunmap jj
+iunmap <buffer> jj
 "iunmap jj
 "inoremap <buffer><expr> j pumvisible() ? '<C-n>' : <SID>jj()
 
