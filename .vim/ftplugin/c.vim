@@ -66,23 +66,40 @@ unlet s:cpo_save
 
 
 
-
-
-" morio add
+"""""""""" Morio Add
 
 
 
-" 演算子の間に空白を入れる
+""""" Grep
+noremap <buffer> <leader>r :vimgrep 
+noremap <buffer> <leader>g :set nocursorline<CR>:vimgrep /\C\<<C-r><C-w>\>/j *c *.h *.s *.S<CR>:set cursorline<CR>
+noremap <buffer> <leader>G :set nocursorline<CR>:grep "\C\<<C-r><C-w>\>" *c *.h *.s *.S<CR>:set cursorline<CR>
+noremap <buffer> <leader>w :vimgrep <C-r><C-w>
+noremap <buffer> <leader>i :vimgrep /<S-Insert>/j *c *.h *.s *.S<CR>
+
+nnoremap [[ [[k
+vnoremap [[ [[k
+
+vnoremap af ][<ESC>V[[kk
+
+
+
+""""" 演算子の間に空白を入れる
+
 inoremap <buffer><expr> + (<SID>in_str() != 0) ? '+' : smartchr#one_of(' + ', '++', '+')
+
 inoremap <buffer><expr> - (<SID>in_str() != 0) ? '-' : smartchr#one_of(' - ', '--', '-')
-"inoremap <buffer><expr> * smartchr#one_of(' * ', '*')		下で特殊対応
-"inoremap <buffer><expr> / smartchr#one_of(' / ', '/')		下で特殊対応
+
 inoremap <buffer><expr> % (<SID>in_str() != 0) ? '%' : smartchr#one_of(' % ', '%')
+
 inoremap <buffer><expr> ^ (<SID>in_str() != 0) ? '^' : smartchr#one_of(' ^ ', '^')
-"inoremap <buffer><expr> & smartchr#one_of(' & ', ' && ', '&')	下で特殊対応
+
+inoremap <buffer><expr> ~ (<SID>in_str() != 0) ? '~' : smartchr#one_of(' ~ ', '~')
+
 inoremap <buffer><expr> <Bar> (<SID>in_str() != 0) ? '<Bar>' : smartchr#one_of(' <Bar> ', ' <Bar><Bar> ', '<Bar>')
 
 inoremap <buffer><expr> < (<SID>in_str() != 0) ? '<' : search('^#include\%#', 'bcn') ? ' <' : smartchr#one_of(' < ', ' << ', '<')
+
 inoremap <buffer><expr> > (<SID>in_str() != 0) ? '>' : search('^#include <.*\%#', 'bcn') ? '>' : smartchr#one_of(' > ', ' >> ', '>')
 
 inoremap <buffer><expr> = (<SID>in_str() != 0) ? '=' : Imap_eq('=')
@@ -111,10 +128,12 @@ inoremap <buffer><expr> / search('\(^\<bar>;\<bar>{\<bar>}\<bar>,\)\s*/\?/\?\s\?
 " /* */コメントを楽に入れる
 inoremap <buffer><expr> @ (<SID>in_str() != 0) ? '@' : '/*  */<left><left><left>'
 
-" 文字列
-"inoremap <buffer><expr> $ (<SID>in_str() != 0) ? '$' : '""<left>'
+" 文字列を楽に入れる
+inoremap <buffer><expr> $ (<SID>in_str() != 0) ? '$' : '""<left>'
 
 
+
+""""" セミコロンの自動挿入
 
 function! s:semicolon()
   if search("^#.*\\%#", 'bcn')
@@ -144,11 +163,10 @@ endfunction
 
 inoremap <buffer><expr>	<CR>	pumvisible() ? '<C-y>' : (<SID>in_str() != 0) ? '<CR>' : <SID>semicolon() . '<CR>'
 inoremap <buffer><expr>	<ESC>	pumvisible() ? '<C-e>' : (<SID>in_str() != 0) ? '<ESC>' : <SID>semicolon() . '<ESC>'
-"inoremap <buffer><expr>	<S-CR>	pumvisible() ? '<C-y>' : <CR>'
-"inoremap <buffer><expr>	<S-ESC>	pumvisible() ? '<C-e>' : '<ESC>'
-"inoremap <buffer><expr> ; (<SID>in_str() != 0) ? ';' : ;<CR>
 
 
+
+""""" Snipet
 
 function! s:Tab()
     if pumvisible()
@@ -160,18 +178,19 @@ function! s:Tab()
 endfunction
 
 "inoremap <buffer>	<Tab>	<C-R>=<SID>Tab()<CR>
-"iunmap <Tab>
 inoremap <buffer>	<Tab>	<C-R>=TriggerSnippet()<CR>
 inoremap <buffer><expr>	<S-Tab>	pumvisible() ? '<C-p>' : '<C-p><C-n>'
 
 
 
-" 補完
+""""" 補完
+
 so $HOME/.vim/macros/complete.vim
 inoremap <buffer><expr> . pumvisible() ? "\<C-E>.\<C-X>\<C-O>\<C-N>" : ".\<C-X>\<C-O>\<C-N>"
-"inoremap <buffer><expr>	\	(<SID>in_str() != 0) ? '\' : '<C-p><C-n>'
 
 
+
+""""" in_str()
 
 "let s:mdHed = -99	"行頭
 let s:mdSlsh = -3	"単独/ (コメント開始記号の開始の可能性がある)
@@ -259,19 +278,6 @@ function! s:in_str()
   return mode
 endfunction
 
-
-
-noremap <buffer> <leader>r :vimgrep 
-noremap <buffer> <leader>g :set nocursorline<CR>:vimgrep /\C\<<C-r><C-w>\>/j *c *.h *.s *.S<CR>:set cursorline<CR>
-noremap <buffer> <leader>G :set nocursorline<CR>:grep "\C\<<C-r><C-w>\>" *c *.h *.s *.S<CR>:set cursorline<CR>
-noremap <buffer> <leader>w :vimgrep <C-r><C-w>
-noremap <buffer> <leader>i :vimgrep /<S-Insert>/j *c *.h *.s *.S<CR>
-
-
-nnoremap [[ [[k
-vnoremap [[ [[k
-
-vnoremap af ][<ESC>V[[kk
-
-
-" TODO アドレスの & を打ちやすくする
+func! Test()
+    echo <SID>in_str()
+endfunc

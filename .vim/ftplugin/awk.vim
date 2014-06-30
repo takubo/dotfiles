@@ -8,8 +8,7 @@ function! s:in_str()
   let mode = s:mdNon
   let lin = getline(".")
   let col = col(".") - 1
-  "let str = strpart(lin, 0, col - 1)
-  "echo strpart(lin, 0, col)
+
   let i = 0
   while i < col
     let chr = strpart(lin, i, 1)
@@ -53,7 +52,6 @@ function! s:in_str()
       let mode = s:mdNon
     endif
   endwhile
-  "echo chr
   return mode
 endfunction
 func! Test()
