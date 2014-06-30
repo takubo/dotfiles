@@ -58,14 +58,10 @@ esac
 
 
 
-######## プロンプト ########
+######## Prompt ########
 
 autoload colors
 colors
-#PROMPT="%U%{${fg[magenta]}%}%h:%j - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#%%%{${reset_color}%} "
-#PROMPT="%{${fg[red]}%}%h:%j %{${fg[magenta]}%}%n %{${fg[blue]}%}%m%u %{${fg[green]}%}%w %D{%H:%M} %{${fg[cyan]}%}%~%{${fg[red]}%}
-#%%%{${reset_color}%} "
 case `uname` in
     *CYGWIN* )
 	PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[green]}%}%m%u %{${fg[cyan]}%}%~%{${fg[red]}%}
@@ -76,15 +72,18 @@ case `uname` in
 %%%{${reset_color}%} "
 	;;
 esac
-#PROMPT="%B%U%{${fg[red]}%}%h [%j]%u %{${fg[blue]}%}%~%{${fg[red]}%}
-#%%%{${reset_color}%} "
-#PROMPT="%B%{${fg[red]}%}[ %h:%j ]%% %{${reset_color}%}"
-#RPROMPT="%B%{${fg[blue]}%}[ %~ ]%{${reset_color}%} "
 
 
 
 
-######## 補完 ########
+######## PATH ########
+
+PATH=~/bin:$PATH
+
+
+
+
+######## Completion ########
 
 ## 初期化
 autoload -U compinit
@@ -139,7 +138,8 @@ zstyle ':completion:sudo:*' environ PATH="$SUDO_PATH:$PATH"
 
 
 
-######## 履歴 ########
+
+######## History ########
 
 ## ヒストリを保存するファイル
 HISTFILE=~/.zsh_history
@@ -173,7 +173,7 @@ bindkey "^N" history-beginning-search-forward-end
 
 
 
-######## ディレクトリ移動 ########
+######## Changing Directly ########
 
 ## コマンド名がディレクトリ時にcdする
 setopt auto_cd
@@ -248,7 +248,57 @@ bindkey ";" prev-dir2
 
 
 
-######## プロセス制御 ########
+
+######## ZLE ########
+autoload zed
+
+# 改行を入力しやすくする
+bindkey "^j" self-insert
+bindkey -s "^[^m" "\n"
+
+## jjで "$_" 入力
+function input-dollar-underbar {
+    BUFFER=${LBUFFER}'$_'${RBUFFER}
+    zle forward-char
+    zle forward-char
+}
+zle -N input-dollar-underbar
+bindkey "jj" input-dollar-underbar
+
+## kkで "$" 入力
+function input-dollar {
+    BUFFER=${LBUFFER}'$'${RBUFFER}
+    zle forward-char
+}
+zle -N input-dollar
+bindkey "kk" input-dollar
+
+## 行頭の . で "./" 入力    (TODO パイプの後も)
+function input-dotsla {
+    local current=${BUFFER}
+    if [ "${current}" = "" ] ; then
+	BUFFER="./"
+	zle end-of-line
+    else
+	zle self-insert
+    fi
+}
+zle -N input-dotsla
+bindkey "." input-dotsla
+
+## ~で "~/" 入力    (TODO パイプの後も)
+function input-homedir {
+    BUFFER=${LBUFFER}'~/'${RBUFFER}
+    zle forward-char
+    zle forward-char
+}
+zle -N input-homedir
+bindkey "~" input-homedir
+
+
+
+
+######## Process Control ########
 
 # ^Zで "fg %" 実行
 function run-fglast {
@@ -261,10 +311,23 @@ function run-fglast {
 zle -N run-fglast
 bindkey "^z" run-fglast
 
+## 実行したプロセスの消費時間が5秒以上かかったら
+## 自動的に消費時間の統計情報を表示する。
+REPORTTIME=5
+
+#function command-time {
+#    local current=$BUFFER
+#    zle push-input
+#    BUFFER="time "${current}
+#    zle end-of-line
+#}
+#zle -N command-time
+#bindkey "::" command-time
 
 
 
-######## エイリアス ########
+
+######## Aliases ########
 
 #alias ls='ls -F --color=auto'
 alias ls='ls --color=auto'
@@ -305,6 +368,8 @@ alias -g W='| wc -l'
 # to abbreviations alias -g X='| xargs'
 # to abbreviations alias -g Y='| wc'
 # EIKMOPZ
+alias GS='git status'
+alias gsh='git status | head -n 20'
 
 alias g='cd'
 alias e='echo'
@@ -315,13 +380,8 @@ alias v='vg'
 alias vg='gvim'
 alias af='awk -f'
 
-#alias gt='git'
-#alias mk='make'
-
-#alias o='awk'
-
-#alias search='apt-cache search'
-#alias install='sudo apt-get install'
+alias gt='git'
+alias mk='make'
 
 alias can='cat -n'
 alias dog='cat -n'
@@ -330,34 +390,76 @@ alias psg='ps ax | grep'
 
 alias cc='gcc'
 case `uname` in
-    *CYGWIN* ) #Cygwin
+    *CYGWIN* )	# Cygwin
 	alias a='./a.exe'
 	;;
-    * ) #other UNIX or UNIX-like
+    * )		# Other Unix or Unix-like
 	alias a='./a.out'
 	;;
 esac
 
 
 
-######## 数学演算 ########
+
+######## Abbreviations ########
+
+setopt extended_glob
+
+typeset -A abbreviations
+
+abbreviations=(
+    "A"    "| awk '"
+#   "B"    "| bc -l"
+    "C"    "cat"
+    "CN"   "| cat -n"
+    "LC"   "LANG=C"
+#   "D"    "| disp"
+# alias -g C='| cut'
+    "E"    "2>&1 > /dev/null"
+# alias -g F='| s2t | cut -f'	#field
+    "G"    "| grep"
+    "H"    "| head -n 20"
+    "I"    "< /dev/null"
+#   "J"    "| japan_numerical"
+#   "L"    "| less"
+    "N"    "> /dev/null"
+    "P"    "|"
+# alias -g Q='| sort'	# Quick Sort
+# alias -g R='| tr'
+    "S"    "| sed '"
+    "T"    "| tail"
+    "U"    "| iconv -f cp932 -t utf-8"
+    "V"    "| vim -R -"
+    "W"    "| wc -l"
+    "X"    "| xargs"
+    "XI"    "| xargs -i"
+# alias -g Y='| wc'
+)
+
+magic-abbrev-expand() {
+    local MATCH
+    LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
+    LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
+    zle self-insert
+}
+zle -N magic-abbrev-expand
+bindkey " " magic-abbrev-expand
+
+
+
+
+######## Math ########
 
 ## 数学ライブラリをload
 zmodload -i zsh/mathfunc
 
+## PIをシェル変数として定義
 PI=`awk 'BEGIN{ printf "%.12f", atan2(0,-1) }'`
 
 
 
 
-######## その他 ########
-
-## 実行したプロセスの消費時間が3秒以上かかったら
-## 自動的に消費時間の統計情報を表示する。
-#REPORTTIME=3
-
-# Zed エディタ
-autoload zed
+######## Miscellaneous ########
 
 # シェル関数やスクリプトの source 実行時に、 $0 を一時的にその関数／スクリプト名にセットする。
 setopt FUNCTION_ARGZERO
@@ -367,112 +469,6 @@ setopt FUNCTION_ARGZERO
 
 # ZMV をLoad
 autoload zmv
-
-
-
-
-######## ローカル ########
-
-PATH=~/bin:$PATH
-
-
-
-
-######## for GNU screen ########
-
-preexec () {
-  if [ "$TERM" = "screen" ]; then
-    [ ${STY} ] && echo -ne "\ek${1%% *}\e\\"
-  fi
-}
-
-precmd() {
-  chpwd
-}
-
-chpwd() {
-  if [ "$TERM" = "screen" -a "$PWD" = "$HOME" ]; then
-      echo -n "\ek[~]\e\\"
-  elif [ "$TERM" = "screen" ]; then
-      echo -n "\ek[`basename $PWD`]\e\\"
-  fi
-}
-chpwd
-
-
-
-
-######## 実験場 ########
-
-#function zcalc {
-#    zle push-input
-#    BUFFER='echo $((  ))'
-#    zle forward-word
-#    zle forward-word
-#    zle backward-char
-#}
-#zle -N zcalc
-#bindkey "\#\$" zcalc
-#
-#function zcalc-bc {
-#    zle push-input
-#    BUFFER='echo "" | bc -l'
-#    zle forward-char
-#    zle forward-char
-#    zle forward-char
-#    zle forward-char
-#    zle forward-char
-#    zle forward-char
-#}
-#zle -N zcalc-bc
-#bindkey "\#\#" zcalc-bc
-
-function zcalc-bc {
-    #echo "\n"`echo "${BUFFER}" | bc -l`"\n"
-    echo "\n"$(( ${BUFFER} ))"\n"
-    BUFFER=""
-    zle reset-prompt
-}
-alias zawk="gawk -O -e '
-    BEGIN{ OFMT = \"%.8g\"; pi = atan2(0, -1) }
-    # deg2rad
-    function d2r(deg) { return deg * pi / 180 }
-    # rad2deg
-    function r2d(rad) { return rad * 180 / pi }
-' -e"
-function zcalc-bc {
-    local current=${BUFFER}
-    #local current
-    #eval local current=${BUFFER}
-    zle push-input
-    #echo "\n"`echo "${BUFFER}" | bc -l`"\n"
-    #echo "\n"$(( ${BUFFER} ))"\n"
-    #BUFFER='echo "'${current}'" | bc -l'
-    #BUFFER='echo $(( '${current}' ))'
-    BUFFER="zgawk 'BEGIN{ print "${current}" }'"
-    zle accept-line
-}
-zle -N zcalc-bc
-bindkey "^j" zcalc-bc
-
-bindkey "^j" self-insert
-
-#alias zgawk="gawk -O -e '
-#    BEGIN{ OFMT = \"%.8g\"; pi = atan2(0, -1) }
-#    # deg2rad
-#    function d2r(deg) { return deg * pi / 180 }
-#    # rad2deg
-#    function r2d(rad) { return rad * 180 / pi }
-#' -e"
-function q() {
-gawk -e '
-    BEGIN{ OFMT = "%.8g"; pi = atan2(0, -1) }
-    # deg2rad
-    function d2r(deg) { return deg * pi / 180 }
-    # rad2deg
-    function r2d(rad) { return rad * 180 / pi }
-    ' -e "BEGIN{ print $* }"
-}
 
 function xawk {
     local current=${BUFFER}
@@ -502,76 +498,90 @@ function xawk-f {
 zle -N xawk-f
 bindkey "^a" xawk-f
 
-#function zvim {
+alias AWK="gawk -O -e '
+    BEGIN{ OFMT = \"%.8g\"; pi = atan2(0, -1) }
+    # deg2rad
+    function d2r(deg) { return deg * pi / 180 }
+    # rad2deg
+    function r2d(rad) { return rad * 180 / pi }
+' -e"
+function aawk {
+    local current=${BUFFER}
+    if [ "${current}" = "" ] ; then
+	BUFFER="AWK 'BEGIN{ print  }'"
+	zle forward-word
+	zle forward-word
+	zle forward-word
+	zle backward-char
+    else
+	zle end-of-line
+    fi
+}
+zle -N aawk
+bindkey "^b" aawk
+
+#function AWK() {
+#gawk -e '
+#    BEGIN{ OFMT = "%.8g"; pi = atan2(0, -1) }
+#    # deg2rad
+#    function d2r(deg) { return deg * pi / 180 }
+#    # rad2deg
+#    function r2d(rad) { return rad * 180 / pi }
+#    ' -e "BEGIN{ print $* }"
+#}
+#
+#function aawk {
 #    local current=${BUFFER}
 #    if [ "${current}" = "" ] ; then
-#	BUFFER="vim "
-#	#zle accept-line
+#	BUFFER="AWK '  '"
+#	zle forward-word
+#	zle backward-char
+#	zle backward-char
+#    else
+#	zle delete-char-or-list
 #    fi
-#    zle end-of-line
 #}
-#zle -N zvim
-#bindkey "^e" zvim
+#zle -N aawk
+#bindkey "^b" aawk
 
-## 行頭の , で "cat" 入力
-function beg-cat {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="cat "
-	zle end-of-line
-    else
-	zle self-insert
-    fi
-}
-zle -N beg-cat
-bindkey "," beg-cat
+#function zcalc {
+#    zle push-input
+#    BUFFER='echo $((  ))'
+#    zle forward-word
+#    zle forward-word
+#    zle backward-char
+#}
+#zle -N zcalc
+#bindkey "\#\$" zcalc
 
-## jjで "$_" 入力
-function input-dollar-underbar {
-    BUFFER=${LBUFFER}'$_'${RBUFFER}
-    zle forward-char
-    zle forward-char
-}
-zle -N input-dollar-underbar
-bindkey "jj" input-dollar-underbar
 
-## kkで "$" 入力
-function input-dollar {
-    BUFFER=${LBUFFER}'$'${RBUFFER}
-    zle forward-char
-}
-zle -N input-dollar
-bindkey "kk" input-dollar
 
-## hhで "*" 入力
-function input-asterisk {
-    BUFFER=${LBUFFER}'*'${RBUFFER}
-    zle forward-char
-}
-zle -N input-asterisk
-bindkey "hh" input-asterisk
 
-## 行頭の . で "./" 入力
-function input-dotsla {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="./"
-	zle end-of-line
-    else
-	zle self-insert
-    fi
-}
-zle -N input-dotsla
-bindkey "." input-dotsla
+######## for GNU Screen ########
 
-## ~で "~/" 入力
-function input-homedir {
-    BUFFER=${LBUFFER}'~/'${RBUFFER}
-    zle forward-char
-    zle forward-char
+preexec () {
+  if [ "$TERM" = "screen" ]; then
+    [ ${STY} ] && echo -ne "\ek${1%% *}\e\\"
+  fi
 }
-zle -N input-homedir
-bindkey "~" input-homedir
+
+precmd() {
+  chpwd
+}
+
+chpwd() {
+  if [ "$TERM" = "screen" -a "$PWD" = "$HOME" ]; then
+      echo -n "\ek[~]\e\\"
+  elif [ "$TERM" = "screen" ]; then
+      echo -n "\ek[`basename $PWD`]\e\\"
+  fi
+}
+chpwd
+
+
+
+
+######## 実験場 ########
 
 #function xawk {
 #    zle push-input
@@ -582,6 +592,21 @@ bindkey "~" input-homedir
 #}
 #zle -N xawk
 #bindkey "\@\@" xawk
+
+#function zcalc-bc {
+#    local current=${BUFFER}
+#    #local current
+#    #eval local current=${BUFFER}
+#    zle push-input
+#    #echo "\n"`echo "${BUFFER}" | bc -l`"\n"
+#    #echo "\n"$(( ${BUFFER} ))"\n"
+#    #BUFFER='echo "'${current}'" | bc -l'
+#    #BUFFER='echo $(( '${current}' ))'
+#    BUFFER="zgawk 'BEGIN{ print "${current}" }'"
+#    zle accept-line
+#}
+#zle -N zcalc-bc
+#bindkey "##" zcalc-bc
 
 ### ^^で "cd -" 実行
 #function next-dir {
@@ -611,40 +636,6 @@ bindkey "~" input-homedir
 #}
 #zle -N top-dir
 #bindkey "\^\^" top-dir
-
-
-#if [ `uname` =~ "CYGWIN" ] ; then
-#    echo "CYG"
-#    key[Home]="[H"
-#else
-#    key[Home]=${terminfo[khome]}
-#    key[End]=${terminfo[kend]}
-#    key[Insert]=${terminfo[kich1]}
-#    key[Delete]=${terminfo[kdch1]}
-#    key[Up]=${terminfo[kcuu1]}
-#    key[Down]=${terminfo[kcud1]}
-#    key[Left]=${terminfo[kcub1]}
-#    key[Right]=${terminfo[kcuf1]}
-#    key[PageUp]=${terminfo[kpp]}
-#    key[PageDown]=${terminfo[knp]}
-#fi
-
-#PROMPT="%{${fg[magenta]}%}%h %{${fg[red]}%}%n@%~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] --%D{%Y/%m/%d %H:%M:%S}-- %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %{${fg[cyan]}%}-%D{%y/%m/%d %H:%M:%S}-%{${fg[magenta]}%} %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h%{${fg[cyan]}%}[%j] %?%{${fg[magenta]}%} -%D{%y/%m/%d %H:%M:%S}- %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%w> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%D{%y-%m-%d %H:%M:%S}> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-
-
-
-
-
-
-
 
 ### 行頭の ] で "ls" 実行
 #function beg-ls {
@@ -659,80 +650,6 @@ bindkey "~" input-homedir
 #zle -N beg-ls
 #bindkey "]" beg-ls
 
-#alias c='cc'
-
-
-
-
-
-
-### 行頭の , で "cat" 入力
-#function beg-cat {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="cat "
-#	zle end-of-line
-#    else
-#	BUFFER=${LBUFFER}" | "${RBUFFER}
-#	zle forward-word
-#	#zle self-insert
-#    fi
-#}
-#zle -N beg-cat
-#bindkey "," beg-cat
-
-### で "./" 入力
-#function a-dot-out {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="./a.out "
-#	zle end-of-line
-#    else
-#	zle self-insert
-#    fi
-#}
-#zle -N a-dot-out
-#bindkey "&" a-dot-out
-
-
-
-
-#function h2b()
-#{
-#	echo "ibase=16; obase=2; $@ " | bc
-#}
-#function b2h()
-#{
-#	echo "ibase=2; obase=16; $@ " | bc
-#}
-#function h2d()
-#{
-#	echo "ibase=16; obase=10; $@ " | bc
-#}
-#function d2h()
-#{
-#	echo "ibase=10; obase=16; $@ " | bc
-#}
-#
-#function radcon()
-#{
-#}
-
-
-### \tで "cd -" 実行
-#function prev-dir2 {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	zle push-input
-#	BUFFER="cd -"
-#	zle accept-line
-#    else
-#	zle expand-or-complete
-#    fi
-#}
-#zle -N prev-dir2
-#bindkey "\t" prev-dir2
-
 ### [で "popd" 実行
 #function beg-popd {
 #    local current=${BUFFER}
@@ -745,288 +662,3 @@ bindkey "~" input-homedir
 #}
 #zle -N beg-popd
 #bindkey "[" beg-popd
-
-#function command-time {
-#    local current=$BUFFER
-#    zle push-input
-#    BUFFER="time "${current}
-#    zle end-of-line
-#}
-#zle -N command-time
-#bindkey "::" command-time
-
-#function xawk {
-#    zle push-input
-#    BUFFER="awk 'BEGIN{  }'"
-#    zle forward-word
-#    zle forward-word
-#    zle backward-char
-#}
-#zle -N xawk
-#bindkey "\@\@" xawk
-
-### ^^で "cd -" 実行
-#function next-dir {
-#    zle push-input
-#    BUFFER="cd -"
-#    zle accept-line
-#}
-#zle -N next-dir
-#bindkey "^\^" next-dir
-
-#function input-cd2 {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	zle push-input
-#	BUFFER="cd  - "
-#	zle end-of-line
-#    else
-#	zle self-insert
-#    fi
-#}
-
-### ^^で "cd .." 実行
-#function top-dir {
-#    zle push-input
-#    BUFFER="cd .."
-#    zle accept-line
-#}
-#zle -N top-dir
-#bindkey "\^\^" top-dir
-
-
-#if [ `uname` =~ "CYGWIN" ] ; then
-#    echo "CYG"
-#    key[Home]="[H"
-#else
-#    key[Home]=${terminfo[khome]}
-#    key[End]=${terminfo[kend]}
-#    key[Insert]=${terminfo[kich1]}
-#    key[Delete]=${terminfo[kdch1]}
-#    key[Up]=${terminfo[kcuu1]}
-#    key[Down]=${terminfo[kcud1]}
-#    key[Left]=${terminfo[kcub1]}
-#    key[Right]=${terminfo[kcuf1]}
-#    key[PageUp]=${terminfo[kpp]}
-#    key[PageDown]=${terminfo[knp]}
-#fi
-
-#PROMPT="%{${fg[magenta]}%}%h %{${fg[red]}%}%n@%~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] --%D{%Y/%m/%d %H:%M:%S}-- %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %{${fg[cyan]}%}-%D{%y/%m/%d %H:%M:%S}-%{${fg[magenta]}%} %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h%{${fg[cyan]}%}[%j] %?%{${fg[magenta]}%} -%D{%y/%m/%d %H:%M:%S}- %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%w> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%D{%y-%m-%d %H:%M:%S}> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-### 行頭の , で "cat" 入力
-#function beg-cat {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="cat "
-#	zle end-of-line
-#    else
-#	BUFFER=${LBUFFER}" | "${RBUFFER}
-#	zle forward-word
-#	#zle self-insert
-#    fi
-#}
-#zle -N beg-cat
-#bindkey "," beg-cat
-
-### で "./" 入力
-#function a-dot-out {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="./a.out "
-#	zle end-of-line
-#    else
-#	zle self-insert
-#    fi
-#}
-#zle -N a-dot-out
-#bindkey "&" a-dot-out
-
-
-
-
-#function h2b()
-#{
-#	echo "ibase=16; obase=2; $@ " | bc
-#}
-#function b2h()
-#{
-#	echo "ibase=2; obase=16; $@ " | bc
-#}
-#function h2d()
-#{
-#	echo "ibase=16; obase=10; $@ " | bc
-#}
-#function d2h()
-#{
-#	echo "ibase=10; obase=16; $@ " | bc
-#}
-#
-#function radcon()
-#{
-#}
-
-
-### \tで "cd -" 実行
-#function prev-dir2 {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	zle push-input
-#	BUFFER="cd -"
-#	zle accept-line
-#    else
-#	zle expand-or-complete
-#    fi
-#}
-#zle -N prev-dir2
-#bindkey "\t" prev-dir2
-
-### [で "popd" 実行
-#function beg-popd {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="popd"
-#	zle accept-line
-#    else
-#	zle self-insert
-#    fi
-#}
-#zle -N beg-popd
-#bindkey "[" beg-popd
-
-#function command-time {
-#    local current=$BUFFER
-#    zle push-input
-#    BUFFER="time "${current}
-#    zle end-of-line
-#}
-#zle -N command-time
-#bindkey "::" command-time
-
-#function xawk {
-#    zle push-input
-#    BUFFER="awk 'BEGIN{  }'"
-#    zle forward-word
-#    zle forward-word
-#    zle backward-char
-#}
-#zle -N xawk
-#bindkey "\@\@" xawk
-
-#function zawk {
-#    zle push-input
-#    BUFFER="awk 'BEGIN{  }'"
-#    zle forward-word
-#    zle forward-word
-#    zle backward-char
-#}
-#zle -N zawk
-#bindkey "\@\@" zawk
-
-### ^^で "cd -" 実行
-#function next-dir {
-#    zle push-input
-#    BUFFER="cd -"
-#    zle accept-line
-#}
-#zle -N next-dir
-#bindkey "^\^" next-dir
-
-#function input-cd2 {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	zle push-input
-#	BUFFER="cd  - "
-#	zle end-of-line
-#    else
-#	zle self-insert
-#    fi
-#}
-
-### ^^で "cd .." 実行
-#function top-dir {
-#    zle push-input
-#    BUFFER="cd .."
-#    zle accept-line
-#}
-#zle -N top-dir
-#bindkey "\^\^" top-dir
-
-
-#if [ `uname` =~ "CYGWIN" ] ; then
-#    echo "CYG"
-#    key[Home]="[H"
-#else
-#    key[Home]=${terminfo[khome]}
-#    key[End]=${terminfo[kend]}
-#    key[Insert]=${terminfo[kich1]}
-#    key[Delete]=${terminfo[kdch1]}
-#    key[Up]=${terminfo[kcuu1]}
-#    key[Down]=${terminfo[kcud1]}
-#    key[Left]=${terminfo[kcub1]}
-#    key[Right]=${terminfo[kcuf1]}
-#    key[PageUp]=${terminfo[kpp]}
-#    key[PageDown]=${terminfo[knp]}
-#fi
-
-#PROMPT="%{${fg[magenta]}%}%h %{${fg[red]}%}%n@%~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] --%D{%Y/%m/%d %H:%M:%S}-- %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %{${fg[cyan]}%}-%D{%y/%m/%d %H:%M:%S}-%{${fg[magenta]}%} %n (%?) %~
-#PROMPT="%U%{${fg[magenta]}%}%h%{${fg[cyan]}%}[%j] %?%{${fg[magenta]}%} -%D{%y/%m/%d %H:%M:%S}- %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[cyan]}%}%h[%j] %? <%D{%y/%m/%d %H:%M:%S}> %n%u %{${fg[yellow]}%}%~%{${fg[cyan]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%w> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%D{%y-%m-%d %H:%M:%S}> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-#PROMPT="%U%{${fg[magenta]}%}%h[%j] %? - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
-
-
-setopt extended_glob
-
-typeset -A abbreviations
-abbreviations=(
-    "A"    "| awk '"
-#   "B"    "| bc -l"
-    "C"    "cat"
-    "CN"   "| cat -n"
-    "LC"   "LANG=C"
-#   "D"    "| disp"
-# alias -g C='| cut'
-    "E"    "2>&1 > /dev/null"
-# alias -g F='| s2t | cut -f'	#field
-    "G"    "| grep"
-    "H"    "| head -n 20"
-#   "J"    "| japan_numerical"
-#   "L"    "| less"
-    "N"    "> /dev/null"
-# alias -g Q='| sort'	# Quick Sort
-# alias -g R='| tr'
-    "S"    "| sed '"
-    "T"    "| tail"
-    "U"    "| iconv -f cp932 -t utf-8"
-    "V"    "| vim -R -"
-    "W"    "| wc -l"
-    "X"    "| xargs"
-# alias -g Y='| wc'
-)
-
-magic-abbrev-expand() {
-    local MATCH
-    LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
-    LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
-    zle self-insert
-}
-
-#no-magic-abbrev-expand() {
-    #LBUFFER+=' '
-#}
-
-zle -N magic-abbrev-expand
-#zle -N no-magic-abbrev-expand
-bindkey " " magic-abbrev-expand
-#bindkey "^x " no-magic-abbrev-expand
