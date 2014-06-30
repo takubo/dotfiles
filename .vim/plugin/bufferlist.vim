@@ -103,9 +103,10 @@ function! BufferList(current)
   endwhile
   
   " now, create the buffer & set it up
-  "			+1しているの余分な行があると、全バッファを表示できたのか、途中で切れたのかの判断ができるため。
+  "			+1しているのは、余分な行があると、全バッファを表示できたのか、途中で切れたのかの判断ができるため。
   let l:win_height = min([float2nr(winheight(winnr())*0.4), max([l:displayedbufs+1, float2nr(winheight(winnr())*0.1+1)])])
   exec 'silent! below ' . l:win_height . 'new [__BUFFERLIST__]'
+  "exec 'silent! left ' . l:win_height . 'new [__BUFFERLIST__]'
   setlocal noshowcmd
   setlocal noswapfile
   setlocal buftype=nofile
@@ -154,7 +155,7 @@ function! BufferList(current)
   map <silent> <buffer> <Esc> :bwipeout<CR>
   map <silent> <buffer> j :call BufferListMove("down")<CR>
   map <silent> <buffer> k :call BufferListMove("up")<CR>
-  map <silent> <buffer> d :call BufferListDeleteBuffer()<CR>
+  """""""""""""""""""""""""""map <silent> <buffer> d :call BufferListDeleteBuffer()<CR>
 "?map <silent> <buffer> <MouseDown> :call BufferListMove("up")<CR>
 "?map <silent> <buffer> <MouseUp> :call BufferListMove("down")<CR>
 "?map <silent> <buffer> <LeftDrag> <Nop>
@@ -286,4 +287,4 @@ function! BufferListGetSelectedBuffer()
   return l:str
 endfunction
 
-nnoremap <silent> <leader>b :call BufferList(-1)<CR>
+"nnoremap <silent> <leader>b :call BufferList(-1)<CR>

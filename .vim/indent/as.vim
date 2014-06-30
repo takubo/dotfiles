@@ -6,7 +6,6 @@
 set isk+=\.
 
 
-so $VIM/plugins/smartchr.vim
 inoremap <expr> &     smartchr#loop(' BAND ', ' AND ', '&')
 inoremap <expr> <bar> smartchr#loop(' BOR ' , ' OR ' , '<bar>')
 inoremap <expr> !     smartchr#one_of(' NOT ' , '!')
@@ -131,7 +130,9 @@ fun! ASGetIndent(lnum)
     " Subtract
     if this_line =~? '^\s*\<\(end\|else\|elseif\)\>'
 	if previous_line =~? '^\s*\<\(value\|svalue\|any\)\>'
-	    let ind = ind - &sw / 2
+	    if this_line =~? '^\s*\<end\>'
+		let ind = ind - &sw
+	    endif
 	elseif previous_line =~? STRACT_STA && previous_line !~? '^\s*\<if\>.*\<\(goto\|return\)\>'
 	    "è„Ç≈AddÇ≥ÇÍÇƒÇ¢ÇÈÇÃÇ≈ÅB
 	    let ind = ind - &sw

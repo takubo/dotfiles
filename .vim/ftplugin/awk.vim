@@ -22,7 +22,7 @@ function! s:in_str()
       while i < col
 	let chr = strpart(lin, i, 1)
 	let i += 1
-	if chr == '\\'
+	if chr == '\'
 	  if i < col
 	    let chr = strpart(lin, i, 1)
 	    let i += 1
@@ -38,7 +38,7 @@ function! s:in_str()
       while i < col
 	let chr = strpart(lin, i, 1)
 	let i += 1
-	if chr == '\\'
+	if chr == '\'
 	  if i < col
 	    let chr = strpart(lin, i, 1)
 	    let i += 1
@@ -72,4 +72,7 @@ inoremap <buffer><expr> & (<SID>in_str() > 0) ? '&' : smartchr#loop(' && ', ' <b
 
 inoremap <buffer><expr> { ((<SID>in_str() > 0) <bar><bar> search('^\s*\%#', 'bcn')) ? '{' : smartchr#loop(' {', '{')
 
-inoremap <buffer><expr> = (<SID>in_str() != 0) ? '=' : Imap_eq()
+inoremap <buffer><expr> = (<SID>in_str() != 0) ? '=' : Imap_eq('=')
+
+" 補完
+so $HOME/.vim/macros/complete.vim

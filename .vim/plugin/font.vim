@@ -34,7 +34,7 @@ endfun
 function! FontMode()
   while 1
     echo "Font Mode        "
-    "‰Ÿ‰º‚³‚ê‚½ƒL[‚ğæ“¾
+    "æŠ¼ä¸‹ã•ã‚ŒãŸã‚­ãƒ¼ã‚’å–å¾—
     let k = nr2char(getchar())
     if k == '-'
       call SetFontSize("-")
@@ -49,8 +49,8 @@ function! FontMode()
 endfunc
 
 nnoremap <silent> <leader>f :call FontMode()<cr>
-nnoremap <silent> <F9>  <esc>:call SetFontSize("-")<cr>
-nnoremap <silent> <F10> <esc>:call SetFontSize("+")<cr>
+nnoremap <silent> <F9>  <esc>:call SetFontSize("-")<CR>
+nnoremap <silent> <F10> <esc>:call SetFontSize("+")<CR>
 
 nnoremap <silent> <F5>   <esc>:sp<cr>
 nnoremap <silent> <s-F5> <esc>:new<cr>

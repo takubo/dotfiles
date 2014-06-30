@@ -67,14 +67,8 @@ unlet s:cpo_save
 
 
 
-"morio add
 
-
-
-noremap <leader>r :vimgrep 
-noremap <leader>g :vimgrep //j *c *.h
-noremap <leader>G :grep  *c *.h
-noremap <leader>w :vimgrep 
+" morio add
 
 
 
@@ -91,7 +85,7 @@ inoremap <buffer><expr> <Bar> (<SID>in_str() != 0) ? '<Bar>' : smartchr#one_of('
 inoremap <buffer><expr> < (<SID>in_str() != 0) ? '<' : search('^#include\%#', 'bcn') ? ' <' : smartchr#one_of(' < ', ' << ', '<')
 inoremap <buffer><expr> > (<SID>in_str() != 0) ? '>' : search('^#include <.*\%#', 'bcn') ? '>' : smartchr#one_of(' > ', ' >> ', '>')
 
-inoremap <buffer><expr> = (<SID>in_str() != 0) ? '=' : Imap_eq()
+inoremap <buffer><expr> = (<SID>in_str() != 0) ? '=' : Imap_eq('=')
 
 " 「->」は入力しづらいので、..で置換え
 inoremap <buffer><expr> . (<SID>in_str() != 0) ? '.' : smartchr#one_of('.', '->', '..')
@@ -117,58 +111,18 @@ inoremap <buffer><expr> / search('\(^\<bar>;\<bar>{\<bar>}\<bar>,\)\s*/\?/\?\s\?
 " /* */コメントを楽に入れる
 inoremap <buffer><expr> @ (<SID>in_str() != 0) ? '@' : '/*  */<left><left><left>'
 
-
-
 " 文字列
-"inoremap <buffer><expr> $ (<SID>in_str() != 0) ? '@' : '""<left>'
+"inoremap <buffer><expr> $ (<SID>in_str() != 0) ? '$' : '""<left>'
 
 
 
-  "inoremap <buffer><expr> ; smartchr#one_of(';<CR>', ';')
-  "inoremap <buffer> ;; ;
-  "inoremap <buffer> ; ;<CR>
-  "inoremap <buffer><expr> <CR> pumvisible() ? '<C-y>' :
-"	\ search('\(\k\<bar>)\<bar>]\)\%#', 'bcn') ? search('^\k.*\%#', 'bcn') ? '<CR>' : ';<CR>' : '<CR>'
-  "inoremap <buffer><expr> <s-CR> search('^\s*\%#', 'bcn') ? '<ESC>kA' : '<CR>'
-  "inoremap <buffer><expr> ; smartchr#one_of(';', ';<cr>')
-  "
-
-
-"function! s:semicolon()
-"  if search("^#.*\\%#", 'bcn')
-"    "全てのプリプロセッサ命令行
-"    return ''
-"  elseif search("\\%#;", 'cn')
-"    "カーソル位置には既に;がある
-"    return ''
-"  elseif search("\\(\\i\\\<bar>)\\\<bar>]\\\<bar>\"\\\<bar>'\\)\\%#", 'bcn') || search("^\\s*\\i.*=\\s\\?{.*}\\%#", 'bcn')
-"    "カーソル前が、イデンティファー文字、)、]、"、' のいずれか。	または、初期化付き配列宣言。
-"    "TODO 関数定義の終了以外の行頭の}
-"    if search("^\\i.*\\%#", 'bcn')
-"      "行頭がイデンティファー文字
-"      "関数定義、ラベルなのでセミコロンはなし
-"      "TODO グローバル変数の定義
-"      return ''
-"    else
-"      if search("^\\s*\\(if\\\<bar>switch\\\<bar>while\\\<bar>for\\).*\\%#", 'bcn')
-"	return ''
-"      "elseif search("$\\\<bar>\\(\\s*/\\*\\\<bar>//\\)", 'cn')
-"      elseif (search("\\%#.\\s*$", 'cn') || search("\\%#.\\s*\\(/\\*\\\<bar>//\\)", 'cn') || !search("\\%#..\\+", 'cn'))
-"	"カーソル後には空白しかないか、カーソル後には空白+コメントしかないか、カーソル後に文字がない
-"	"TODO 行末のセミコロンでEscしたとき
-"	return ';'
-"      "else
-"	"return ';'
-"      endif
-"    endif
-"  endif
-"  return ''
-"endfunction
 function! s:semicolon()
   if search("^#.*\\%#", 'bcn')
     "全てのプリプロセッサ命令行
   elseif search("\\%#;", 'cn')
     "カーソル位置には既に;がある (これがないと、行末のセミコロンでEscしたとき、また;が付く。)
+  elseif search("\\%#,", 'cn')
+    "カーソル位置には既に,がある (これがないと、TODO でEscしたとき、また;が付く。)
   elseif search("\\(\\i\\\<bar>)\\\<bar>]\\\<bar>\"\\\<bar>'\\)\\%#", 'bcn') || search("^\\s*\\i.*=\\s\\?{.*}\\%#", 'bcn')
     "カーソル前が、イデンティファー文字、)、]、"、' のいずれか。	または、初期化付き配列宣言。
     "TODO 関数定義の終了以外の行頭の}
@@ -188,17 +142,13 @@ function! s:semicolon()
   return ''
 endfunction
 
-inoremap <buffer><expr>	<CR>	pumvisible() ? '<C-y>' : <SID>semicolon() . '<CR>'
-inoremap <buffer><expr>	<ESC>	pumvisible() ? '<C-e>' : <SID>semicolon() . '<ESC>'
-inoremap <buffer><expr>	<S-CR>	pumvisible() ? '<C-y>' : <CR>'
-inoremap <buffer><expr>	<S-ESC>	pumvisible() ? '<C-e>' : '<ESC>'
-"inoremap <buffer><expr>	jj	<SID>semicolon() . '<ESC>:w<CR>'
-inoremap <buffer><expr>	JJ	'<ESC>'
-
-"if search("\\(\\k\\\<bar>)\\\<bar>]\)\%#", 'bcn') ? search('^\k.*\%#', 'bcn') ? '<CR>' : ';<CR>' : '<CR>'
+inoremap <buffer><expr>	<CR>	pumvisible() ? '<C-y>' : (<SID>in_str() != 0) ? '<CR>' : <SID>semicolon() . '<CR>'
+inoremap <buffer><expr>	<ESC>	pumvisible() ? '<C-e>' : (<SID>in_str() != 0) ? '<ESC>' : <SID>semicolon() . '<ESC>'
+"inoremap <buffer><expr>	<S-CR>	pumvisible() ? '<C-y>' : <CR>'
+"inoremap <buffer><expr>	<S-ESC>	pumvisible() ? '<C-e>' : '<ESC>'
+"inoremap <buffer><expr> ; (<SID>in_str() != 0) ? ';' : ;<CR>
 
 
-vnoremap af ][<ESC>V[[kk
 
 function! s:Tab()
     if pumvisible()
@@ -208,92 +158,18 @@ function! s:Tab()
 	return TriggerSnippet()
     endif
 endfunction
-inoremap <buffer>	<Tab>	<C-R>=<SID>Tab()<CR>
+
+"inoremap <buffer>	<Tab>	<C-R>=<SID>Tab()<CR>
+"iunmap <Tab>
+inoremap <buffer>	<Tab>	<C-R>=TriggerSnippet()<CR>
 inoremap <buffer><expr>	<S-Tab>	pumvisible() ? '<C-p>' : '<C-p><C-n>'
-"function! s:jj()
-""    if pumvisible()
-""	call feedkeys("\<C-n>")
-""	return ''
-""    else
-"	let c = nr2char(getchar())
-"	if c == 'j'
-"	    "call feedkeys("\<Esc>:w\<CR>")
-"	    return <SID>semicolon()."\<Esc>:w\<CR>"
-"	endif
-"	return 'j' . c
-""    endif
-"endfunction
-let s:jjj_old_t = 0
-let s:kkk_old_t = 0
-function! s:jjj()
-    if pumvisible()
-	call feedkeys("\<C-n>")
-	return ''
-    else
-      "echo reltimestr(reltime())
-      "echo reltime()
-      let t = str2float(reltimestr(reltime()))
-      let diff = t - s:jjj_old_t
-      echo diff
-      let s:jjj_old_t = t
-      if diff < 0.3
-	call feedkeys("\<ESC>:w\<CR>")
-	"echo <SID>semicolon()
-	"return "\<BS>" . <SID>semicolon()
-	return "\<BS>"
-      else
-	return 'j'
-      endif
-"      let c = getchar(0)
-"	if c == 0
-"	  return 'j'
-"	elseif c == char2nr('j')
-"	  echo io
-"	  return <Esc>
-"	else
-"	  call feedkeys(c)
-"	  return 'j' . nr2char(c)
-"	endif
-    endif
-endfunction
-function! s:kkk()
-    if pumvisible()
-	call feedkeys("\<C-p>")
-	return ''
-    else
-      let t = str2float(reltimestr(reltime()))
-      let diff = t - s:kkk_old_t
-      echo diff
-      let s:kkk_old_t = t
-      if diff < 0.3
-	call feedkeys("\<C-p>")
-	return "\<BS>"
-      else
-	return 'k'
-      endif
-    endif
-endfunction
-"inoremap <buffer><expr>	j	pumvisible() ? '<C-n>' : 'j'
-"inoremap <buffer><expr>	jj	pumvisible() ? '<C-n><C-n>' : <SID>semicolon() . '<ESC>:w<CR>'
-"inoremap <buffer><expr>	j	<SID>jjj()
-inoremap <buffer>	j	<C-R>=<SID>jjj()<CR>
-inoremap <buffer>	k	<C-R>=<SID>kkk()<CR>
-inoremap <buffer><expr>	l	pumvisible() ? '<C-y>' : 'l'
-"inoremap <buffer><expr>	k	pumvisible() ? '<C-p>' : 'k'
-"inoremap <buffer>	kk	<C-p>
-iunmap jj
-iunmap <buffer> jj
-"iunmap jj
-"inoremap <buffer><expr> j pumvisible() ? '<C-n>' : <SID>jj()
-
-"inoremap <buffer><expr> <Tab> pumvisible() ? '<C-n>' : '<C-R>=Tab()<CR>'
 
 
-func! Test()
-  "echo search("^\\s*\\(\<\\(const\\\<bar>enum\\\<bar>static\\\<bar>struct\\\<bar>typedef\\\<bar>union\\)\\>\\s\\+\\)*\\i\\+\\*\\?\\s\\+\\*\\?\\i\\+.*\\%#", 'bcn')
-  let ret = search("^\\s*\\(\<\\(const\\\<bar>enum\\\<bar>static\\\<bar>struct\\\<bar>typedef\\\<bar>union\\)\\>\\s\\+\\)*\\i\\+\\s\\+\\i\\+.*\\%#", 'bcn')
-  return ret
-endfunc
+
+" 補完
+so $HOME/.vim/macros/complete.vim
+inoremap <buffer><expr> . pumvisible() ? "\<C-E>.\<C-X>\<C-O>\<C-N>" : ".\<C-X>\<C-O>\<C-N>"
+"inoremap <buffer><expr>	\	(<SID>in_str() != 0) ? '\' : '<C-p><C-n>'
 
 
 
@@ -382,3 +258,20 @@ function! s:in_str()
   "echo chr
   return mode
 endfunction
+
+
+
+noremap <buffer> <leader>r :vimgrep 
+noremap <buffer> <leader>g :set nocursorline<CR>:vimgrep /\C\<<C-r><C-w>\>/j *c *.h *.s *.S<CR>:set cursorline<CR>
+noremap <buffer> <leader>G :set nocursorline<CR>:grep "\C\<<C-r><C-w>\>" *c *.h *.s *.S<CR>:set cursorline<CR>
+noremap <buffer> <leader>w :vimgrep <C-r><C-w>
+noremap <buffer> <leader>i :vimgrep /<S-Insert>/j *c *.h *.s *.S<CR>
+
+
+nnoremap [[ [[k
+vnoremap [[ [[k
+
+vnoremap af ][<ESC>V[[kk
+
+
+" TODO アドレスの & を打ちやすくする

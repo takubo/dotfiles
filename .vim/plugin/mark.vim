@@ -1,6 +1,6 @@
 "let g:DUM_ID = 1
 "hi SignDummyHi					guibg=darkgrey
-"sign define SignDummy	texthl=SignDummyHi	text=Å@
+"sign define SignDummy	texthl=SignDummyHi	text=„ÄÄ
 "exe "sign place " . g:DUM_ID . " line=1 name=SignDummy file=" . expand('%:p')
 
 "hi mkhi	guifg=#dd2000	guibg=darkgrey

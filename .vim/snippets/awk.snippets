@@ -169,7 +169,14 @@ snippet sys
 #snippet slp
 #	system("sleep ${1:1}")${2}
 snippet slp
-	"sleep ${1:1}" | getline dummy
+	"sleep ${1:1}" | getline dummy; close("sleep $1")
+snippet slf
+	# sleep
+	function sleep(time) {
+		"sleep " time | getline dummy; close("sleep " time)
+	}
+snippet slc
+	"sleep(${1:1})
 #
 snippet .
 	[${1}]${2}
