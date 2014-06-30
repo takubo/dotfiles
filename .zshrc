@@ -278,32 +278,32 @@ alias lh='ls -lh'
 alias lt='ls -t'
 alias lrt='ls -rt'
 alias df='df -h'
-alias md='mkdir'
+alias md='source $HOME/bin/md'
 
 #alias awk='gawk'
 #alias v='vim'
 #alias c='gcc'
 #alias d='gdb'
 #alias m='make'
-alias -g A='| awk'
-alias -g B='| bc -l'
-alias -g C='| cut'
+# to abbreviations alias -g A='| awk'
+# to abbreviations alias -g B='| bc -l'
+# to abbreviations alias -g C='| cut'
 alias -g D='| disp'
-alias -g F='| s2t | cut -f'	#field
-alias -g G='| grep'
-alias -g H='| head'
+# to abbreviations alias -g F='| s2t | cut -f'	#field
+# to abbreviations alias -g G='| grep'
+alias -g H='| head -n 20'
 alias -g J='| japan_numerical'
 alias -g L='| less'
-alias -g N='| cat -n'
-alias -g Q='| sort'
-alias -g R='| tr'
-alias -g S='| sed'
+# to abbreviations alias -g N='| cat -n'
+# to abbreviations alias -g Q='| sort'
+# to abbreviations alias -g R='| tr'
+# to abbreviations alias -g S='| sed'
 alias -g T='| tail'
 alias -g U='| iconv -f cp932 -t utf-8'
-alias -g V='| vim -R -'
+# to abbreviations alias -g V='| vim -R -'
 alias -g W='| wc -l'
-alias -g X='| xargs'
-alias -g Y='| wc'
+# to abbreviations alias -g X='| xargs'
+# to abbreviations alias -g Y='| wc'
 # EIKMOPZ
 
 alias g='cd'
@@ -344,6 +344,8 @@ esac
 
 ## 数学ライブラリをload
 zmodload -i zsh/mathfunc
+
+PI=`awk 'BEGIN{ printf "%.12f", atan2(0,-1) }'`
 
 
 
@@ -453,6 +455,8 @@ function zcalc-bc {
 zle -N zcalc-bc
 bindkey "^j" zcalc-bc
 
+bindkey "^j" self-insert
+
 #alias zgawk="gawk -O -e '
 #    BEGIN{ OFMT = \"%.8g\"; pi = atan2(0, -1) }
 #    # deg2rad
@@ -539,6 +543,14 @@ function input-dollar {
 zle -N input-dollar
 bindkey "kk" input-dollar
 
+## hhで "*" 入力
+function input-asterisk {
+    BUFFER=${LBUFFER}'*'${RBUFFER}
+    zle forward-char
+}
+zle -N input-asterisk
+bindkey "hh" input-asterisk
+
 ## 行頭の . で "./" 入力
 function input-dotsla {
     local current=${BUFFER}
@@ -552,6 +564,14 @@ function input-dotsla {
 zle -N input-dotsla
 bindkey "." input-dotsla
 
+## ~で "~/" 入力
+function input-homedir {
+    BUFFER=${LBUFFER}'~/'${RBUFFER}
+    zle forward-char
+    zle forward-char
+}
+zle -N input-homedir
+bindkey "~" input-homedir
 
 #function xawk {
 #    zle push-input
@@ -964,3 +984,49 @@ bindkey "." input-dotsla
 #PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%w> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
 #PROMPT="%U%{${fg[magenta]}%}%h[%j] %? <%D{%y-%m-%d %H:%M:%S}> %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
 #PROMPT="%U%{${fg[magenta]}%}%h[%j] %? - %w %D{%H:%M} - %n%u %{${fg[cyan]}%}%~%{${fg[magenta]}%}
+
+
+setopt extended_glob
+
+typeset -A abbreviations
+abbreviations=(
+    "A"    "| awk '"
+#   "B"    "| bc -l"
+    "C"    "cat"
+    "CN"   "| cat -n"
+    "LC"   "LANG=C"
+#   "D"    "| disp"
+# alias -g C='| cut'
+    "E"    "2>&1 > /dev/null"
+# alias -g F='| s2t | cut -f'	#field
+    "G"    "| grep"
+    "H"    "| head -n 20"
+#   "J"    "| japan_numerical"
+#   "L"    "| less"
+    "N"    "> /dev/null"
+# alias -g Q='| sort'	# Quick Sort
+# alias -g R='| tr'
+    "S"    "| sed '"
+    "T"    "| tail"
+    "U"    "| iconv -f cp932 -t utf-8"
+    "V"    "| vim -R -"
+    "W"    "| wc -l"
+    "X"    "| xargs"
+# alias -g Y='| wc'
+)
+
+magic-abbrev-expand() {
+    local MATCH
+    LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
+    LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
+    zle self-insert
+}
+
+#no-magic-abbrev-expand() {
+    #LBUFFER+=' '
+#}
+
+zle -N magic-abbrev-expand
+#zle -N no-magic-abbrev-expand
+bindkey " " magic-abbrev-expand
+#bindkey "^x " no-magic-abbrev-expand
