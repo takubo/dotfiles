@@ -329,8 +329,7 @@ REPORTTIME=5
 
 ######## Aliases ########
 
-#alias ls='ls -F --color=auto'
-alias ls='ls --color=auto'
+alias ls='ls -F --color=auto'
 alias ll='ls -l'
 alias la='ls -a'
 alias l1='ls -1'
@@ -368,7 +367,8 @@ alias -g W='| wc -l'
 # to abbreviations alias -g X='| xargs'
 # to abbreviations alias -g Y='| wc'
 # EIKMOPZ
-alias GS='git status'
+alias GD='git diff'
+alias GS='git status .'
 alias gsh='git status | head -n 20'
 
 alias g='cd'
@@ -426,13 +426,14 @@ abbreviations=(
     "P"    "|"
 # alias -g Q='| sort'	# Quick Sort
 # alias -g R='| tr'
+    "sen"  "sed -n"
     "S"    "| sed '"
     "T"    "| tail"
     "U"    "| iconv -f cp932 -t utf-8"
     "V"    "| vim -R -"
     "W"    "| wc -l"
     "X"    "| xargs"
-    "XI"    "| xargs -i"
+    "XI"   "| xargs -i"
 # alias -g Y='| wc'
 )
 

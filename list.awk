@@ -7,6 +7,7 @@
 ## .gitconfig
 ## .vimperatorrc
 ## .vim
+## .w3m
 
 
 
