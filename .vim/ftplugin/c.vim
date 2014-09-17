@@ -283,3 +283,4 @@ func! Test()
 endfunc
 
 "TODO case行でコロンの自動付加
+"TODO 単独elseの後に；を付加しないようにする。
