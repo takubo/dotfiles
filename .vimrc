@@ -91,6 +91,7 @@ filetype on
 
 syntax enable
 
+set tags+=tags;
 
 au QuickfixCmdPost make,grep,grepadd,vimgrep copen
 
