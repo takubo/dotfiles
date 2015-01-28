@@ -406,31 +406,50 @@ typeset -A abbreviations
 
 abbreviations=(
     "A"    "| awk '"
-#   "B"    "| bc -l"
+    "B"    "| bc -l"
     "C"    "cat"
-    "CN"   "| cat -n"
+    "Cn"   "| cat -n"
     "LC"   "LANG=C"
+    "LJ"   "LANG=ja_JP.UTF-8"
+    "LF"   "LANG=fr_FR.UTF-8"
 #   "D"    "| disp"
 # alias -g C='| cut'
-    "E"    "2>&1 > /dev/null"
+#   "E"    "2>&1 > /dev/null"
 # alias -g F='| s2t | cut -f'	#field
     "G"    "| grep"
     "H"    "| head -n 20"
-    "I"    "< /dev/null"
+    "Hn"   "| head -n"
+    "HN"   "| head"
+    "I"    "|"
+#   "I"    "< /dev/null"
 #   "J"    "| japan_numerical"
 #   "L"    "| less"
     "N"    "> /dev/null"
-    "P"    "|"
+    "Ni"   "< /dev/null"
+    "Na"    "2>&1 > /dev/null"
+    "Nn"    "2>&1 > /dev/null"
+    "N2"    "2> /dev/null"
+    "Ne"    "2> /dev/null"
+    "O"    "| sort"     # `O'rder
 # alias -g Q='| sort'	# Quick Sort
 # alias -g R='| tr'
-    "sen"  "sed -n"
     "S"    "| sed '"
+    "Sn"   "| sed -n '"
     "T"    "| tail"
+    "Tn"   "| tail -n"
+    "TN"   "| tail -n 20"
     "U"    "| iconv -f cp932 -t utf-8"
+    "Ucu"  "| iconv -f cp932 -t utf-8"
+    "Ueu"  "| iconv -f euc-jp -t utf-8"
+    "Uuc"  "| iconv -f utf-8 -t cp932"
+    "Uec"  "| iconv -f euc-jp -t cp932"
+    "Uce"  "| iconv -f cp932 -t euc-jp"
+    "Uue"  "| iconv -f utf-8 -t euc-jp"
     "V"    "| vim -R -"
     "W"    "| wc -l"
-    "X"    "| xargs"
-    "XI"   "| xargs -i"
+    "X"    "| xargs -i"
+    "Xi"   "| xargs"
+    "Xn"   "| xargs -n"
 # alias -g Y='| wc'
 )
 
@@ -438,7 +457,10 @@ magic-abbrev-expand() {
     local MATCH
     LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
     LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
-    zle self-insert
+    LBUFFER=${LBUFFER##| }      # 行頭で展開するときはパイプを消す
+    if [ "`echo -n ${abbreviations[$MATCH]} | tail -c1`" != "'" ]; then
+        zle self-insert
+    fi
 }
 zle -N magic-abbrev-expand
 bindkey " " magic-abbrev-expand
