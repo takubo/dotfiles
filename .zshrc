@@ -258,55 +258,36 @@ bindkey -s "^[^m" "\n"
 
 ## jjで "$_" 入力
 function input-dollar-underbar {
-    BUFFER=${LBUFFER}'$_'${RBUFFER}
-    zle forward-char
-    zle forward-char
+    LBUFFER=${LBUFFER}'$_'
 }
 zle -N input-dollar-underbar
 bindkey "jj" input-dollar-underbar
 
 ## kkで "$" 入力
 function input-dollar {
-    BUFFER=${LBUFFER}'$'${RBUFFER}
-    zle forward-char
+    LBUFFER=${LBUFFER}'$'
 }
 zle -N input-dollar
 bindkey "kk" input-dollar
 
 ## 行頭/パイプ後/セミコロン後の . で './' 入力
 function input-curdir {
-	local last_char
-	last_char=`echo -n ${LBUFFER} | sed 's/[ \t]*$//' | tail -c1`
-	# 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-	case "${last_char}" in
-		'|' | ';' | '' )
-			BUFFER=${LBUFFER}'./'${RBUFFER}
-			zle forward-char
-			zle forward-char
-			;;
-		* )
-			zle self-insert
-			;;
-	esac
+    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+    case `echo -n ${LBUFFER%%(#)[ 	]#} | tail -c1` in
+        '|' | ';' | '' ) LBUFFER=${LBUFFER}'./' ;;
+        * )              zle self-insert ;;
+    esac
 }
 zle -N input-curdir
 bindkey "." input-curdir
 
 ## ~で '~/' 入力
 function input-homedir {
-	local last_char
-	last_char=`echo -n ${LBUFFER} | tail -c1`
-	# 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-	case "${last_char}" in
-		' ' | '	' | '|' | ';' | '' )
-			BUFFER=${LBUFFER}'~/'${RBUFFER}
-			zle forward-char
-			zle forward-char
-			;;
-		* )
-			zle self-insert
-			;;
-	esac
+    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+    case `echo -n ${LBUFFER} | tail -c1` in
+        ' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'~/' ;;
+        * )                          zle self-insert ;;
+    esac
 }
 zle -N input-homedir
 bindkey "~" input-homedir
