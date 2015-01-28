@@ -7,8 +7,8 @@ set hintchars=;asdfghjkl
 set complete=S
 
 autocmd PageLoad .* <silent> set toolbars=tabs
-autocmd PageLoad .* <silent> hi CmdLine font-size: 12px;
-autocmd LocationChange .* <silent> hi CmdLine font-size: 12px;
+autocmd PageLoad .* <silent> hi CmdLine font-size: 1px;
+autocmd LocationChange .* <silent> hi CmdLine font-size: 1px;
 
 "nnoremap j 3j "<down>
 "nnoremap k 3k "<up>
@@ -50,10 +50,11 @@ nnoremap / :hi CmdLine font-size: 25px<CR>/
 nnoremap f <Esc>:hi CmdLine font-size: 25px<CR>f
 nnoremap F <Esc>:hi CmdLine font-size: 25px<CR>F
 
-"cnoremap <CR> <CR>:hi CmdLine font-size: 12px<CR>
-"cnoremap <c-m> <c-m>:hi CmdLine font-size: 12px<CR>
-cnoremap <Esc> <Esc>:hi CmdLine font-size: 12px<CR>
-nnoremap <Esc> <Esc>:hi CmdLine font-size: 12px<CR>
+cnoremap <CR> <CR>:hi CmdLine font-size: 1px<CR>
+"cnoremap <c-m> <c-m>:hi CmdLine font-size: 1px<CR>
+"cnoremap <c-j> <c-j>:hi CmdLine font-size: 1px<CR>
+cnoremap <Esc> <Esc>:hi CmdLine font-size: 1px<CR>
+nnoremap <Esc><Esc> <Esc>:hi CmdLine font-size: 12px<CR>
 "nnoremap j <Esc>:hi CmdLine font-size: 12px<CR>3j "<down>
 "nnoremap k <Esc>:hi CmdLine font-size: 12px<CR>3k "<up>
 nnoremap j 3<c-e>
@@ -66,3 +67,4 @@ nnoremap k 3<c-y>
 hi Hint z-index:5000; font-family:Menlo; font-size:14px; color:white; background-color:gray; border-color:ButtonShadow; border-width:0px; border-style:solid; padding:2px 2px 2px 2px; position:absolute;
 
 hi HintElem background-color: cyan; color: black;
+hi CmdLine font-size: 1px
