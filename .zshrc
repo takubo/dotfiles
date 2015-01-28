@@ -195,7 +195,7 @@ zle -N ghq2
 bindkey "\*" ghq2
 
 ## 行頭の^で "cd .." 実行
-function top-dir2 {
+function up-dir {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
 	zle push-input
@@ -205,8 +205,8 @@ function top-dir2 {
 	zle self-insert
     fi
 }
-zle -N top-dir2
-bindkey "\^" top-dir2
+zle -N up-dir
+bindkey "\^" up-dir
 
 ## ^]で "popd" 実行
 function prev-dir {
@@ -320,18 +320,26 @@ REPORTTIME=5
 
 ######## Aliases ########
 
-alias ls='ls -F --color=auto'
+alias ls='ls --color=auto'
 alias ll='ls -l'
 alias la='ls -a'
-alias l1='ls -1'
-alias lF='ls -F'
 alias lla='ls -la'
-alias la1='ls -l1'
-alias lh='ls -lh'
-alias lt='ls -t'
-alias lrt='ls -rt'
+alias llh='ls -lh'
+alias lah='ls -lah'
+alias lo='ls -1'    # one
+alias l1='ls -1'
+alias lh='ls -1sh'
+
+alias lt='ls -1ht'
+alias lT='ls -1hrt'
+alias lr='ls -1hrt'
+alias llt='ls -lht'
+alias llT='ls -lhrt'
+alias llr='ls -lhrt'
+
 alias df='df -h'
-alias md='source $HOME/bin/md'
+alias md='mkdir'
+#alias md='source $HOME/bin/md'
 
 #alias awk='gawk'
 #alias v='vim'
@@ -442,8 +450,8 @@ abbreviations=(
     "V"    "| vim -R -"
     "W"    "| wc -l"
     "X"    "| xargs -i"
-    "Xi"   "| xargs"
     "Xn"   "| xargs -n"
+    "XX"   "| xargs"
 # alias -g Y='| wc'
 )
 
