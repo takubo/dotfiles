@@ -469,13 +469,9 @@ setopt FUNCTION_ARGZERO
 autoload zmv
 
 function xawk {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="awk 'BEGIN{ print  }'"
-	zle forward-word
-	zle forward-word
-	zle forward-word
-	zle backward-char
+    if [ "${BUFFER}" = "" ] ; then
+	LBUFFER="awk 'BEGIN{ print "
+	RBUFFER=" }'"
     else
 	zle end-of-line
     fi
@@ -484,11 +480,8 @@ zle -N xawk
 bindkey "^e" xawk
 
 function xawk-f {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="awk -f "
-	zle forward-word
-	zle forward-word
+    if [ "${BUFFER}" = "" ] ; then
+	LBUFFER="awk -f "
     else
 	zle beginning-of-line
     fi
@@ -504,13 +497,9 @@ alias AWK="gawk -O -e '
     function r2d(rad) { return rad * 180 / pi }
 ' -e"
 function aawk {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="AWK 'BEGIN{ print  }'"
-	zle forward-word
-	zle forward-word
-	zle forward-word
-	zle backward-char
+    if [ "${BUFFER}" = "" ] ; then
+	LBUFFER="AWK 'BEGIN{ print "
+	RBUFFER=" }'"
     else
 	zle end-of-line
     fi
