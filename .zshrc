@@ -219,32 +219,26 @@ bindkey "^\]" prev-dir
 
 ## \tで "cd " 入力
 function input-cd {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	zle push-input
-	BUFFER="cd "
-	zle end-of-line
+    if [ "${BUFFER}" = "" ] ; then
+        zle push-input
+        LBUFFER="cd "
     else
-	zle expand-or-complete
-	#zle self-insert
+        echo zle expand-or-complete
     fi
 }
 zle -N input-cd
 bindkey "\t" input-cd
 
-## 行頭の ; で "cd -" 実行
-function prev-dir2 {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	zle push-input
-	BUFFER="cd -"
-	zle accept-line
+## 行頭の ; で "ls" を入力
+function input-ls {
+    if [ "${BUFFER}" = "" ] ; then
+        LBUFFER="ls "
     else
-	zle self-insert
+        zle self-insert
     fi
 }
-zle -N prev-dir2
-bindkey ";" prev-dir2
+zle -N input-ls
+bindkey ";" input-ls
 
 
 
@@ -425,11 +419,11 @@ abbreviations=(
 #   "J"    "| japan_numerical"
 #   "L"    "| less"
     "N"    "> /dev/null"
+    "Ne"   "2> /dev/null"
+    "N2"   "2> /dev/null"
+    "Na"   "> /dev/null 2>&1"
+    "Nn"   "> /dev/null 2>&1"
     "Ni"   "< /dev/null"
-    "Na"    "2>&1 > /dev/null"
-    "Nn"    "2>&1 > /dev/null"
-    "N2"    "2> /dev/null"
-    "Ne"    "2> /dev/null"
     "O"    "| sort"     # `O'rder
 # alias -g Q='| sort'	# Quick Sort
 # alias -g R='| tr'
