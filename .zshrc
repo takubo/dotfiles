@@ -223,7 +223,7 @@ function input-cd {
         zle push-input
         LBUFFER="cd "
     else
-        echo zle expand-or-complete
+        zle expand-or-complete
     fi
 }
 zle -N input-cd
