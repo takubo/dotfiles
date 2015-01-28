@@ -273,24 +273,40 @@ function input-dollar {
 zle -N input-dollar
 bindkey "kk" input-dollar
 
-## 行頭の . で "./" 入力    (TODO パイプの後も)
-function input-dotsla {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="./"
-	zle end-of-line
-    else
-	zle self-insert
-    fi
+## 行頭/パイプ後/セミコロン後の . で './' 入力
+function input-curdir {
+	local last_char
+	last_char=`echo -n ${LBUFFER} | sed 's/[ \t]*$//' | tail -c1`
+	# 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+	case "${last_char}" in
+		'|' | ';' | '' )
+			BUFFER=${LBUFFER}'./'${RBUFFER}
+			zle forward-char
+			zle forward-char
+			;;
+		* )
+			zle self-insert
+			;;
+	esac
 }
-zle -N input-dotsla
-bindkey "." input-dotsla
+zle -N input-curdir
+bindkey "." input-curdir
 
-## ~で "~/" 入力    (TODO パイプの後も)
+## ~で '~/' 入力
 function input-homedir {
-    BUFFER=${LBUFFER}'~/'${RBUFFER}
-    zle forward-char
-    zle forward-char
+	local last_char
+	last_char=`echo -n ${LBUFFER} | tail -c1`
+	# 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+	case "${last_char}" in
+		' ' | '	' | '|' | ';' | '' )
+			BUFFER=${LBUFFER}'~/'${RBUFFER}
+			zle forward-char
+			zle forward-char
+			;;
+		* )
+			zle self-insert
+			;;
+	esac
 }
 zle -N input-homedir
 bindkey "~" input-homedir
