@@ -342,6 +342,7 @@ alias lt='ls -t'
 alias lrt='ls -rt'
 alias df='df -h'
 alias md='source $HOME/bin/md'
+alias kakasi='kakasi -iutf8 -outf8'
 
 #alias awk='gawk'
 #alias v='vim'
@@ -392,6 +393,7 @@ alias cc='gcc'
 case `uname` in
     *CYGWIN* )	# Cygwin
 	alias a='./a.exe'
+	alias vim='gvim'
 	;;
     * )		# Other Unix or Unix-like
 	alias a='./a.out'
