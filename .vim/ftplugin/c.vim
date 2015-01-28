@@ -281,3 +281,6 @@ endfunction
 func! Test()
     echo <SID>in_str()
 endfunc
+
+"TODO case行でコロンの自動付加
+"TODO 単独elseの後に；を付加しないようにする。

@@ -6,7 +6,11 @@
 ## tmux
 ## .gitconfig
 ## .vimperatorrc
+## .exrc
+## .vimrc
+## .gvimrc
 ## .vim
+## .w3m
 
 
 

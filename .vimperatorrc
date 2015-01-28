@@ -31,6 +31,7 @@ nnoremap gi i
 "nnoremap o :set toolbars=navigation<CR><c-k>
 "nnoremap <f2> <expr> &toolbars =~ "navi" ? ':set toolbars=<CR>' : ':set toolbars=navigation<CR>'
 nnoremap <F2> :set toolbars=tabs,navigation<CR>
+"nnoremap <F3> :set toolbars=none<CR>
 nnoremap <F3> :set toolbars=tabs,nonavigation<CR>
 
 inoremap <c-f> <right>

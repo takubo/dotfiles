@@ -195,7 +195,7 @@ zle -N ghq2
 bindkey "\*" ghq2
 
 ## 行頭の^で "cd .." 実行
-function top-dir2 {
+function up-dir {
     local current=${BUFFER}
     if [ "${current}" = "" ] ; then
 	zle push-input
@@ -205,8 +205,8 @@ function top-dir2 {
 	zle self-insert
     fi
 }
-zle -N top-dir2
-bindkey "\^" top-dir2
+zle -N up-dir
+bindkey "\^" up-dir
 
 ## ^]で "popd" 実行
 function prev-dir {
@@ -219,32 +219,26 @@ bindkey "^\]" prev-dir
 
 ## \tで "cd " 入力
 function input-cd {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	zle push-input
-	BUFFER="cd "
-	zle end-of-line
+    if [ "${BUFFER}" = "" ] ; then
+        zle push-input
+        LBUFFER="cd "
     else
-	zle expand-or-complete
-	#zle self-insert
+        zle expand-or-complete
     fi
 }
 zle -N input-cd
 bindkey "\t" input-cd
 
-## 行頭の ; で "cd -" 実行
-function prev-dir2 {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	zle push-input
-	BUFFER="cd -"
-	zle accept-line
+## 行頭の ; で "ls" を入力
+function input-ls {
+    if [ "${BUFFER}" = "" ] ; then
+        LBUFFER="ls "
     else
-	zle self-insert
+        zle self-insert
     fi
 }
-zle -N prev-dir2
-bindkey ";" prev-dir2
+zle -N input-ls
+bindkey ";" input-ls
 
 
 
@@ -258,39 +252,36 @@ bindkey -s "^[^m" "\n"
 
 ## jjで "$_" 入力
 function input-dollar-underbar {
-    BUFFER=${LBUFFER}'$_'${RBUFFER}
-    zle forward-char
-    zle forward-char
+    LBUFFER=${LBUFFER}'$_'
 }
 zle -N input-dollar-underbar
 bindkey "jj" input-dollar-underbar
 
 ## kkで "$" 入力
 function input-dollar {
-    BUFFER=${LBUFFER}'$'${RBUFFER}
-    zle forward-char
+    LBUFFER=${LBUFFER}'$'
 }
 zle -N input-dollar
 bindkey "kk" input-dollar
 
-## 行頭の . で "./" 入力    (TODO パイプの後も)
-function input-dotsla {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="./"
-	zle end-of-line
-    else
-	zle self-insert
-    fi
+## 行頭/パイプ後/セミコロン後の . で './' 入力
+function input-curdir {
+    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+    case `echo -n ${LBUFFER%%(#)[ 	]#} | tail -c1` in
+        '|' | ';' | '' ) LBUFFER=${LBUFFER}'./' ;;
+        * )              zle self-insert ;;
+    esac
 }
-zle -N input-dotsla
-bindkey "." input-dotsla
+zle -N input-curdir
+bindkey "." input-curdir
 
-## ~で "~/" 入力    (TODO パイプの後も)
+## ~で '~/' 入力
 function input-homedir {
-    BUFFER=${LBUFFER}'~/'${RBUFFER}
-    zle forward-char
-    zle forward-char
+    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+    case `echo -n ${LBUFFER} | tail -c1` in
+        ' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'~/' ;;
+        * )                          zle self-insert ;;
+    esac
 }
 zle -N input-homedir
 bindkey "~" input-homedir
@@ -329,20 +320,26 @@ REPORTTIME=5
 
 ######## Aliases ########
 
-#alias ls='ls -F --color=auto'
 alias ls='ls --color=auto'
 alias ll='ls -l'
 alias la='ls -a'
-alias l1='ls -1'
-alias lF='ls -F'
 alias lla='ls -la'
-alias la1='ls -l1'
-alias lh='ls -lh'
-alias lt='ls -t'
-alias lrt='ls -rt'
+alias llh='ls -lh'
+alias lah='ls -lah'
+alias lo='ls -1'    # one
+alias l1='ls -1'
+alias lh='ls -1sh'
+
+alias lt='ls -1ht'
+alias lT='ls -1hrt'
+alias lr='ls -1hrt'
+alias llt='ls -lht'
+alias llT='ls -lhrt'
+alias llr='ls -lhrt'
+
 alias df='df -h'
-alias md='source $HOME/bin/md'
-alias kakasi='kakasi -iutf8 -outf8'
+alias md='mkdir'
+#alias md='source $HOME/bin/md'
 
 #alias awk='gawk'
 #alias v='vim'
@@ -369,8 +366,10 @@ alias -g W='| wc -l'
 # to abbreviations alias -g X='| xargs'
 # to abbreviations alias -g Y='| wc'
 # EIKMOPZ
-alias GS='git status'
+alias GD='git diff'
+alias GS='git status .'
 alias gsh='git status | head -n 20'
+alias kakasi='kakasi -iutf8 -outf8'
 
 alias g='cd'
 alias e='echo'
@@ -411,30 +410,50 @@ typeset -A abbreviations
 
 abbreviations=(
     "A"    "| awk '"
-#   "B"    "| bc -l"
+    "B"    "| bc -l"
     "C"    "cat"
-    "CN"   "| cat -n"
+    "Cn"   "| cat -n"
     "LC"   "LANG=C"
+    "LJ"   "LANG=ja_JP.UTF-8"
+    "LF"   "LANG=fr_FR.UTF-8"
 #   "D"    "| disp"
 # alias -g C='| cut'
-    "E"    "2>&1 > /dev/null"
+#   "E"    "2>&1 > /dev/null"
 # alias -g F='| s2t | cut -f'	#field
     "G"    "| grep"
     "H"    "| head -n 20"
-    "I"    "< /dev/null"
+    "Hn"   "| head -n"
+    "HN"   "| head"
+    "I"    "|"
+#   "I"    "< /dev/null"
 #   "J"    "| japan_numerical"
 #   "L"    "| less"
     "N"    "> /dev/null"
-    "P"    "|"
+    "Ne"   "2> /dev/null"
+    "N2"   "2> /dev/null"
+    "Na"   "> /dev/null 2>&1"
+    "Nn"   "> /dev/null 2>&1"
+    "Ni"   "< /dev/null"
+    "O"    "| sort"     # `O'rder
 # alias -g Q='| sort'	# Quick Sort
 # alias -g R='| tr'
     "S"    "| sed '"
+    "Sn"   "| sed -n '"
     "T"    "| tail"
+    "Tn"   "| tail -n"
+    "TN"   "| tail -n 20"
     "U"    "| iconv -f cp932 -t utf-8"
+    "Ucu"  "| iconv -f cp932 -t utf-8"
+    "Ueu"  "| iconv -f euc-jp -t utf-8"
+    "Uuc"  "| iconv -f utf-8 -t cp932"
+    "Uec"  "| iconv -f euc-jp -t cp932"
+    "Uce"  "| iconv -f cp932 -t euc-jp"
+    "Uue"  "| iconv -f utf-8 -t euc-jp"
     "V"    "| vim -R -"
     "W"    "| wc -l"
-    "X"    "| xargs"
-    "XI"    "| xargs -i"
+    "X"    "| xargs -i"
+    "Xn"   "| xargs -n"
+    "XX"   "| xargs"
 # alias -g Y='| wc'
 )
 
@@ -442,7 +461,10 @@ magic-abbrev-expand() {
     local MATCH
     LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
     LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
-    zle self-insert
+    LBUFFER=${LBUFFER##| }      # 行頭で展開するときはパイプを消す
+    if [ "`echo -n ${abbreviations[$MATCH]} | tail -c1`" != "'" ]; then
+        zle self-insert
+    fi
 }
 zle -N magic-abbrev-expand
 bindkey " " magic-abbrev-expand
@@ -473,13 +495,9 @@ setopt FUNCTION_ARGZERO
 autoload zmv
 
 function xawk {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="awk 'BEGIN{ print  }'"
-	zle forward-word
-	zle forward-word
-	zle forward-word
-	zle backward-char
+    if [ "${BUFFER}" = "" ] ; then
+	LBUFFER="awk 'BEGIN{ print "
+	RBUFFER=" }'"
     else
 	zle end-of-line
     fi
@@ -488,11 +506,8 @@ zle -N xawk
 bindkey "^e" xawk
 
 function xawk-f {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="awk -f "
-	zle forward-word
-	zle forward-word
+    if [ "${BUFFER}" = "" ] ; then
+	LBUFFER="awk -f "
     else
 	zle beginning-of-line
     fi
@@ -508,13 +523,9 @@ alias AWK="gawk -O -e '
     function r2d(rad) { return rad * 180 / pi }
 ' -e"
 function aawk {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	BUFFER="AWK 'BEGIN{ print  }'"
-	zle forward-word
-	zle forward-word
-	zle forward-word
-	zle backward-char
+    if [ "${BUFFER}" = "" ] ; then
+	LBUFFER="AWK 'BEGIN{ print "
+	RBUFFER=" }'"
     else
 	zle end-of-line
     fi
