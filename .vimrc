@@ -13,7 +13,7 @@ if has('win32') || has('win64') " || has('win32unix')
   "set sh=C:\cygwin\cygwin.bat
   set sh=C:\cygwin\bin\zsh
   let $PATH.=':/cygdrive/c/cygwin/bin'
-  "set shcf=-c
+  "set shcf=-c
   set shcf=-c\	
   "set shellquote=\"
   "set shellxquote=\"\ 
@@ -132,10 +132,11 @@ let $PATH = $PATH . 'C:\Oracle\Ora11R2\bin;%SystemRoot%\system32;%SystemRoot%;%S
 "??so $vim/awk.vim
 
 
-"nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:SearchReset<CR>:SearchBuffersReset<CR>
-nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
 nnoremap Y y$
 nnoremap <silent> <C-s> :w<cr>
+
+"nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:SearchReset<CR>:SearchBuffersReset<CR>
+nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
 
 nnoremap <silent> <Space> <C-f>
 nnoremap <silent> <S-Space> <C-b>
@@ -177,32 +178,10 @@ noremap <C-S-Tab> gT
 
 nnoremap <silent> <C-n> :bnext<CR>
 nnoremap <silent> <C-p> :bprev<CR>
-function! BuffScroll()
-  while 1
-    let c = nr2char(getchar())
-    if c == 'j'
-      bnext
-      redraw
-    elseif c == 'k'
-      bprev
-      redraw
-    else
-      return
-    endif
-  endwhile
-endfunction
-"nnoremap <silent> <C-j> :call BuffScroll()<CR>
-"nnoremap <silent> <C-k> :bprev<CR>
-"nnoremap <silent> <C-j> <C-w>
 
 
 noremap <Tab> <C-w>w
 noremap <S-Tab> <C-w>W
-
-""""nnoremap + <C-w>+
-""""nnoremap - <C-w>-
-""""nnoremap ) <C-w>>
-""""nnoremap ( <C-w><
 
 nnoremap <silent> + <esc>10<c-w>+
 nnoremap <silent> - <esc>10<c-w>-
@@ -234,41 +213,12 @@ nnoremap <silent> <s-F5> <esc>:new<cr>
 nnoremap <silent> <F6>   <esc>:vs<cr>
 nnoremap <silent> <s-F6> <esc>:vnew<cr>
 
-" nnoremap <silent> + <esc><c-w>+
-" nnoremap <silent> - <esc><c-w>-
-" nnoremap <silent> ) <esc><c-w>>
-" nnoremap <silent> ( <esc><c-w><
-" 
-" nnoremap <s-up> 20<C-w>+
-" nnoremap <s-down> 20<C-w>-
-" nnoremap <s-left> 20<C-w><
-" nnoremap <s-right> 20<C-w>>
-
 "nnoremap <c-up> <C-w>K
 "nnoremap <c-down> <C-w>J
 "nnoremap <c-left> <C-w>H
 "nnoremap <c-right> <C-w>L
 
-"nnoremap <up> <C-w>s
-"nnoremap <down> :new<cr>
-"nnoremap <left> <C-w>v
-"nnoremap <right> <esc>:vnew<cr>
-
-""" M noremap <Tab> <C-w>w
-""" M noremap <S-Tab> <C-w>W
-""" M 
-""" M nnoremap + <C-w>+
-""" M nnoremap - <C-w>-
-""" M nnoremap ) <C-w>>
-""" M nnoremap ( <C-w><
-""" M nnoremap <up> <C-w>+
-""" M nnoremap <down> <C-w>-
-""" M nnoremap <left> <C-w><
-""" M nnoremap <right> <C-w>>
-""" M 
-""" M "nnoremap <BS> <C-w>v
 """ M nnoremap <M-v> <C-w>v
-""" M nnoremap <s-BS> :vnew<cr>
 """ M nnoremap <M-s> <C-w>s
 """ M nnoremap <s-F5> :new<cr>
 
@@ -294,22 +244,26 @@ nnoremap <silent><expr> <leader>n SetNumber()
 
 
 function! CountFunctionLines()
+  " 現在位置を保存
+  let cur = line('.')
   normal! H
-  let top = line('.')
-  normal! <C-o>
+  let cur_top = line('.')
+  execute 'normal ' . cur . 'G'
+  " 関数先頭へ移動
   normal! [[
   let s = line('.')
-  normal! <C-o>
+  " 関数末尾へ移動
   normal! ][
   let e = line('.')
-  normal! <C-o>
-  execute 'normal ' . top . 'G'
+  " 結果表示
+  echo e - s + 1
+  " 保存していた位置に戻る
+  execute 'normal ' . cur_top . 'G'
   normal! z<CR>
-  normal! <C-o>
-  echo e - s + 2
+  execute 'normal ' . cur . 'G'
 endfunction
-command! FuncLines <silent> call CountFunctionLines()
-"nnoremap <silent> <leader>l :FuncLines<CR>
+command! FuncLines call CountFunctionLines()
+nnoremap <silent> <leader>l :FuncLines<CR>
 
 
 nnoremap <C-j><C-a> :cscope add cscope.out<CR>
@@ -333,6 +287,10 @@ nnoremap <C-j>T     :cscope find t <C-r><C-w><CR>
 
 
 vnoremap af ][<ESC>V[[
+vnoremap if ][k<ESC>V[[j
+
+
+cnoremap <C-a> <Home>
 
 
 " 検索時に/, ?を楽に入力する
@@ -343,200 +301,73 @@ cnoremap <expr> ? getcmdtype() == '?' ? '\?' : '?'
 inoremap <silent> jj <Esc>:w <cr>
 inoremap <silent> ff <Esc>:w <cr>
 
-function! s:Tab()
-    if pumvisible()
-	call feedkeys("\<C-n>")
-	return ''
-    else
-	let ret = TriggerSnippet()
-	if ret == "\t" && search('\W\I\i*\%#', 'bcn')
-	    "call feedkeys("\<C-n>\<C-n>", 'n')
-	    "call feedkeys("\<S-Tab>", 'm')
-	    return "\<C-n>"
-	endif
-	return ret
-    endif
-endfunction
-inoremap <silent> <Tab>   <C-R>=<SID>Tab()<CR>
-inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<Tab>'
-"inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<C-p><C-n>'
-
 inoremap <expr> <CR>  pumvisible() ? '<C-y>' : '<CR>'
 inoremap <expr> <Esc> pumvisible() ? '<C-e>' : '<Esc>'
 
-"TODO 行末
-inoremap <expr> , smartchr#one_of(', ', ',')
-
-" 演算子の間に空白を入れる
-inoremap <expr> + smartchr#one_of(' = ', '==', '=')
-inoremap <expr> + smartchr#one_of(' + ', '++', '+')
-inoremap <expr> - smartchr#one_of(' - ', '--', '-')
-inoremap <expr> * smartchr#one_of(' * ', '*')
-inoremap <expr> / smartchr#one_of(' / ', '/')
-inoremap <expr> % smartchr#one_of(' % ', '%')
-inoremap <expr> & smartchr#one_of(' & ', ' && ', '&')
-inoremap <expr> <Bar> smartchr#one_of(' <Bar> ', ' <Bar><Bar> ', '<Bar>')
-"inoremap <expr> < smartchr#one_of(' < ', '<')
-"inoremap <expr> > smartchr#one_of(' > ', '>')
-
-"inoremap <expr> < search('^#include\%#', 'bcn') ? ' <' : smartchr#one_of(' < ', ' << ', '<')
-"inoremap <expr> > search('^#include <.*\%#', 'bcn') ? '>' : smartchr#one_of(' > ', ' >> ', '>')
-"
-"function! Imap_eq()
-"  if     search('\(&\||\|+\|-\|\*\|/\|%\|\^\|>\|<\|\.\|!\|=\) \%#', 'bcn')
-"    let ret = "\<bs>="
-"  elseif search('\(&\||\|+\|-\|\*\|/\|%\|\^\|>\|<\|\.\|!\|=\| \)\%#', 'bcn')
-"    let ret = '='
-"  else
-"    "let ret = smartchr#one_of(' =', ' ==', '=')
-"    let ret = smartchr#loop(' =', ' ==', '=')
-"    if ret == '='
-"      return ret
-"    endif
-"  endif
-"  if !search('\%# ', 'cn')
-"    let ret .= ' '
-"  endif
-"  return ret
-"endfunction
-"inoremap <expr> = Imap_eq()
-
-
+" function! s:Tab()
+"   if pumvisible()
+"     call feedkeys("\<C-n>")
+"     return ''
+"   else
+"     let ret = TriggerSnippet()
+"     if ret == "\t" && search('\W\I\i*\%#', 'bcn')
+"       "call feedkeys("\<C-n>\<C-n>", 'n')
+"       "call feedkeys("\<S-Tab>", 'm')
+"       return "\<C-n>"
+"     endif
+"     return ret
+"   endif
+" endfunction
+function! s:Tab()
+  if pumvisible()
+    call feedkeys("\<C-n>")
+    return ''
+  else
+    let ret = TriggerSnippet()
+    "if ret == "\t" && search('\W\I\i*\%#', 'bcn')
+    "  "call feedkeys("\<C-n>\<C-n>", 'n')
+    "  "call feedkeys("\<S-Tab>", 'm')
+    "  return "\<C-n>"
+    "endif
+    return ret
+  endif
+endfunction
+if exists('*TriggerSnippet')
+  inoremap <silent> <Tab>   <C-R>=<SID>Tab()<CR>
+else
+  inoremap <expr> <Tab> pumvisible() ? '<C-n>' : '<Tab>'
+endif
+inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<C-n>'
+"inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<C-p><C-n>'
+"inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<Tab>'
 
 
+if exists('*smartchr#one_of')
 
-"inoremap <buffer><expr> = search('\(&\||\|+\|-\|/\|>\|<\) \%#', 'bcn')? '<bs>= '
-"				\ : search('\(*\|!\)\%#', 'bcn') ? '= '
-"				\ : smartchr#one_of(' = ', ' == ', '=')
+  "TODO 行末
+  inoremap <expr> , smartchr#one_of(', ', ',')
 
-
-"inoremap <expr> = search('\(\(\k\<bar>)\<bar>\]\)\s*\<bar>= \)\%#', 'bcn') ?
-      \ smartchr#loop(' = ', ' == ', '=') : search(' \%#', 'bcn') ? '<bs>= ' : '= '
-"inoremap <expr> = search('\(\k\<bar>)\<bar>\]\<bar>=\)\%#', 'bcn') ?
-"      \ smartchr#loop(' = ', ' == ', '=') : search(' \%#', 'bcn') ? '<bs><bs>= ' : '= '
-"inoremap <expr> = search(
-"      \ '\(+\<bar>-\<bar>*\<bar>/\<bar>%\<bar>&\<bar><bar>\<bar><\<bar>>\<bar>=\<bar>)\<bar>=\)\%#',
-"      \ 'bcn') ? '= ' : smartchr#loop(' = ', ' == ', '=')
-"inoremap <expr> = smartchr#loop(' = ', ' == ', '=')
-
-
-"      \ '\(+\<bar>-\<bar>*\<bar>/\<bar>%\<bar>&\<bar><bar>\<bar><\<bar>>\<bar>=\<bar>^\<bar>~\<bar>.\<bar>:\<bar>!\<bar>=\)\%#',
-"inoremap <expr> + smartchr#loop(' + ', '++', '+')
-"inoremap <expr> ! smartchr#one_of('!', ' != ', '!!')
-"inoremap <expr> & smartchr#loop(' & ', ' && ', '&')
-"inoremap <expr> <bar> smartchr#loop(' <bar> ', ' <bar><bar> ', '<bar>')
+  " 演算子の間に空白を入れる
+  inoremap <expr> + smartchr#one_of(' = ', '==', '=')
+  inoremap <expr> + smartchr#one_of(' + ', '++', '+')
+  inoremap <expr> - smartchr#one_of(' - ', '--', '-')
+  inoremap <expr> * smartchr#one_of(' * ', '*')
+  inoremap <expr> / smartchr#one_of(' / ', '/')
+  inoremap <expr> % smartchr#one_of(' % ', '%')
+  inoremap <expr> & smartchr#one_of(' & ', ' && ', '&')
+  inoremap <expr> <Bar> smartchr#one_of(' <Bar> ', ' <Bar><Bar> ', '<Bar>')
+endif
 
 
-"inoremap <expr> < search('^#include\%#', 'bcn') ?  ' <' : smartchr#loop(' < ', ' << ', '<')
-"inoremap <expr> >  search('^#include <.*\%#', 'bcn') ? '>' :
-"      \ search('< \%#', 'bcn') ? '<bs>> ' : smartchr#loop(' > ', ' >> ', '>')
-"inoremap <expr> , smartchr#one_of(', ', ',')
-"inoremap <expr> <cr> search(' \%#', 'bcn') ? '<bs><cr>' : '<cr>'
-"inoremap <expr> . smartchr#one_of('.', '->',  '..')
-
-"inoremap <expr> , smartchr#one_of(', ', ',')
-"inoremap <expr> . smartchr#one_of('.', '->', '..')
-""inoremap <expr> & smartchr#loop('&', ' && ')
-""inoremap <expr> <bar> smartchr#loop('<bar>', ' <bar><bar> ')
-"inoremap <buffer><expr> + smartchr#one_of(' + ', '++', '+')
-"inoremap <buffer><expr> - smartchr#one_of(' - ', '--', '-')
-"inoremap <buffer><expr> = search('\(&\<bar><bar>\<bar>+\<bar>-\<bar>/\<bar>>\<bar><\) \%#', 'bcn')? '<bs>= '
-"				\ : search('\(*\<bar>!\)\%#', 'bcn') ? '= '
-"				\ : smartchr#one_of(' = ', ' == ', '=')
 
 "if &filetype == "c"
-"  " 「->」は入力しづらいので、..で置換え
-"  inoremap <buffer><expr> . smartchr#one_of('.', '->', '..')
-"
-"  " 行先頭での#入力で、プリプロセス命令文を入力
-"  inoremap <buffer><expr> # search('^\(#.*\)\?\%#','bcn')? smartchr#loop('#define ', '#include', '#ifdef ', '#elif', '#endif', '#'): '#'
-"  inoremap <buffer><expr> " search('^#include\%#', 'bcn')? ' "': '"'
-"
-"  " *はポインタで使う
-"  "inoremap <buffer><expr> * search('^/\?\%#','bcn') ? smartchr#one_of(' * ', '*')
-"  "inoremap <buffer><expr> * search('^/\?\%#','bcn') ? smartchr#one_of(' *', '*')
-"  inoremap <buffer><expr> *
-"	\ ( search('\(&\<bar><bar>\<bar>+\<bar>-\<bar>\*\<bar>/\<bar>>%<bar>>\<bar><\<bar>=\<bar>?\<bar>:\<bar>,\) \?\%#', 'bcn')
-"	\ <bar><bar> search('\(^\<bar>{\)\s*\%#', 'bcn') ) ? '*' : search('\(^\<bar>,\<bar>(\<bar>{\)\s*\k\+\s\?\%#', 'bcn') ? ' *' : smartchr#one_of(' * ', '*', '* ')
-"  " //コメントを楽に入れる
-"  inoremap <buffer><expr> / search('^\s*/\?/\?\s\?\%#','bcn') ? smartchr#one_of('// ', '//', '\<bs>/') : smartchr#one_of(' / ', '/')
-"
-"  " 3項演算子
-"  inoremap <buffer><expr> ? smartchr#one_of(' ? ', '?')
-"  inoremap <buffer><expr> : smartchr#one_of(' : ', ':')
-"endif
-
 " 下記の文字は連続して現れることがまれなので、二回続けて入力したら改行する
 "?inoremap <buffer><expr> } smartchr#one_of('}', '}<cr>')
 "?inoremap <buffer><expr> ; smartchr#one_of(';', ';<cr>')
+"endif
 
-" if文直後の(は自動で間に空白を入れる
-"?inoremap <buffer><expr> ( search('\<\if\%#', 'bcn')? ' (': '('
-
-
-" =の場合、単純な代入や比較演算子として入力する場合は前後にスペースをいれる。
-" 複合演算代入としての入力の場合は、直前のスペースを削除して=を入力
-"inoremap <buffer><expr> = search('\(&\<bar><bar>\<bar>+\<bar>-\<bar>/\<bar>>%<bar>>\<bar><\) \%#', 'bcn')? '<bs>= '
-"				\ : search('\(*\<bar>!\)\%#', 'bcn') ? '= '
-"				\ : smartchr#one_of(' = ', ' == ', '=')
-
-
-
-
-
-
-
-
-
-
-
-"so $VIM\plugins\*.vim
-
-"so $VIM/plugins/toggle_words.vim
-"
-"so $VIM/plugins/smartchr.vim
-"so $VIM/plugins/font.vim
-
-
-"so $VIM/plugins/smooth_scroll.vim
-"so $VIM/plugins/quickrun.vim
-
-"so $vim/plugins/font.vim
-
-"so $HOME/asvimrc
-
-
-
-
-
-
-
-
-
-
-"??? func! Eatchar(pat)
-"???     let c = nr2char(getchar(0))
-"???     return (c =~ a:pat) ? '' : c
-"??? endfunc
-"??? "iabbr <silent> if if () {<Left><Left><Left><C-R>=Eatchar('\s')<CR>
-"??? "iabbr <silent> switch switch () {<Left><Left><Left><C-R>=Eatchar('\s')<CR>
-"??? "iabbr <silent> while while () {<Left><Left><Left><C-R>=Eatchar('\s')<CR>
-"??? "iabbr <silent> for for () {<Left><Left><Left><C-R>=Eatchar('\s')<CR>
-"??? "iabbr <silent> do do {<Left><Left><Left><C-R>=Eatchar('\s')<CR>
-
-
-
-
-"function! AwkBegin()
-"  setlocal ft=awk
-"  call setline(1, 'BEGIN {')
-"  call setline(2, '}')
-"  call setline(3, '')
-"  call setline(4, 'END {')
-"  call setline(5, '}')
-"  return
-"endfunc
 
 
 "TODO
-"バッファ切り替えイベントでも、かーそーラインをセットする。
+"バッファ切り替えイベントでも、カーソルラインをセットする。
+"ftpluginのCとAWKを統合する。
