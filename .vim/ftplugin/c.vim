@@ -131,6 +131,12 @@ inoremap <buffer><expr> @ (<SID>in_str() != 0) ? '@' : '/*  */<left><left><left>
 " 文字列を楽に入れる
 inoremap <buffer><expr> $ (<SID>in_str() != 0) ? '$' : '""<left>'
 
+" if/switch/while/for文直後の(は自動で間に空白を入れる
+inoremap <buffer><expr> ( search('\<\if\%#', 'bcn')? ' (': '('
+inoremap <buffer><expr> ( search('\<\switch\%#', 'bcn')? ' (': '('
+inoremap <buffer><expr> ( search('\<\while\%#', 'bcn')? ' (': '('
+inoremap <buffer><expr> ( search('\<\for\%#', 'bcn')? ' (': '('
+
 
 
 """"" セミコロンの自動挿入
