@@ -72,5 +72,12 @@ inoremap <buffer><expr> { ((<SID>in_str() > 0) <bar><bar> search('^\s*\%#', 'bcn
 
 inoremap <buffer><expr> = (<SID>in_str() != 0) ? '=' : Imap_eq('=')
 
+" if/switch/while/for文直後の(は自動で間に空白を入れる
+inoremap <buffer><expr> ( search('\<\if\%#', 'bcn')? ' (': '('
+inoremap <buffer><expr> ( search('\<\switch\%#', 'bcn')? ' (': '('
+inoremap <buffer><expr> ( search('\<\while\%#', 'bcn')? ' (': '('
+inoremap <buffer><expr> ( search('\<\for\%#', 'bcn')? ' (': '('
+
+
 " 補完
 so $HOME/.vim/macros/complete.vim
