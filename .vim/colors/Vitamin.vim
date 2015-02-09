@@ -14,7 +14,7 @@ let colors_name = "Vitamin"
 
 " Vim >= 7.0 specific colors
 if version >= 700
-  hi CursorLineNr guibg=#000000 guifg=#ffff00 gui=underline ctermbg=NONE ctermfg=yellow cterm=underline
+  hi CursorLineNr guibg=#000000 guifg=#ffff00 gui=bold ctermbg=bold ctermfg=yellow cterm=underline
   "hi CursorLine guibg=#2d2d2d ctermbg=236
   hi CursorLine guibg=NONE gui=underline ctermbg=NONE cterm=underline
   hi CursorColumn guibg=#2d2d2d ctermbg=236
