@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim7用試作
 "
-" Last Change: 18-Mar-2016.
+" Last Change: 17-Jun-2016.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -355,7 +355,8 @@ colorscheme Vitamin
 augroup MyVimrc
   au!
 
-  au QuickfixCmdPost make,grep,grepadd,vimgrep botright copen
+  au QuickfixCmdPost make,grep,grepadd,vimgrep,cbuffer,cfile botright copen
+  au QuickfixCmdPost lmake,lgrep,lgrepadd,lvimgrep,lcbuffer,lcfile botright lopen
  "au BufNewFile,BufRead,FileType qf set modifiable
 
   " grepする際に'|cw'を付けなくても、Quickfixに結果を表示する
@@ -416,6 +417,12 @@ nnoremap <C-o> O<Esc>
 nnoremap <A-o> o<Esc>
 nnoremap <silent><expr> <leader>n &relativenumber ?  ':set number norelativenumber<CR>' : ':set relativenumber<CR>'
 nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
+nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
+nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
+
+nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
+nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
+
 nnoremap <silent> <leader>p :disp<CR>
 nnoremap <silent> <Leader>m :marks<CR>
 nnoremap <silent> <Leader>" :disp<CR>
@@ -465,28 +472,67 @@ cnoremap )) \)
 
 
 
-" Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-"
-" hi SLWinNr guifg=#000000 guibg=#e6e3c8 gui=bold cterm=bold ctermfg=yellow cterm=underline
-" hi SLWinNr guibg=#ffffff guifg=#a63318 gui=bold
-" hi SLFileName guifg=#ede39e guibg=#000000
+" Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+nnoremap # g*
+"? nnoremap g* #
 
-set statusline=\ %{winnr()}\ (%n)%m\ %##%r%h%w\ %<%#SLFileName#\ %F\ %##%m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'-':'.'}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
-augroup MyVimrc_Statusline
-  au!
-  "au BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
-  " M$ Windowsの不具合対策 他のドライブのファイルを読み込んだときにバグがある?
-  au BufNewFile,BufRead,BufFilePost,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
-augroup end
-"function! Buf_name_len_set()
-"  try
-"    return max([len(fnamemodify(bufname('.'),':p'))+60, 120])
-"  endtry
-"endfunction
-"au BufNewFile,BufRead * let b:buf_name_len = max([len(fnamemodify('.',':p') . bufname('.'))+30, 120])
-"echo max([len(fnamemodify(".", ":p") . bufname(".")) + 40, 120]
-" Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+"? nnoremap <leader>/ /<Up>\<Bar>
 
+"? nnoremap ? /\<\><Left><Left>
+"? nnoremap <Bar> /<C-p>\<Bar>
+
+nnoremap & /<C-p>\\|\<<C-r><C-w>\><CR>
+"nnoremap ! /<C-p>\\|<C-r><C-w><CR>
+"nnoremap ! /<C-R>*<CR>
+nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
+nnoremap <expr> ! '/<C-p>\\|\<' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '\><CR>'
+"? __nnoremap _ /\<<C-R>*\><CR>
+
+"nnoremap <leader>* /\<_\?<C-r><C-w>\><CR>
+nnoremap <expr> <leader>* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+nnoremap <expr>        g* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+nnoremap <expr> <leader># (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+nnoremap <expr>        g# (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+
+cnoremap <C-g> \<\><Left><Left>
+"? cnoremap <C-t> \\|
+
+" /			/				o
+" /\<\>			?				 
+" *			*				o
+" g*			#				o
+" / 追加		/ <C-p> <C-t>			 
+" /\<\> 追加		/ <C-p> <C-g> <C-t>		 
+" * 追加		&				o
+" g* 追加		!				 
+
+" _ ! ?
+" / ? * # & _ ! @
+
+" 新規 追加
+" 通常 単語囲み
+" 入力 カーソル下の単語 クリップボード
+" Enter要 不要
+
+" Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Substitute {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+nnoremap <C-s>           :<C-u>g#.#s    /
+nnoremap <leader><C-s>   :<C-u>g#.#s    /<C-R>//<C-R><C-W>/
+nnoremap <A-s>           :<C-u>g#.#s    /<C-R>//
+vnoremap <C-s>           :s    /
+vnoremap <leader><C-s>   :s    /<C-R>//<C-R><C-W>/
+" Substitute }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Grep {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+"nnoremap <C-g> :vim "\<<C-R><C-W>\>" *.c *.h<CR>
+nnoremap <C-g> :vim "" <Left><Left>
+nnoremap <leader>g :vim "\<<C-R><C-W>\>" 
+"nnoremap <leader>G :vim "<C-R><C-W>" *.c *.h<CR>
+nnoremap <leader>G :vim "<C-R><C-W>" 
+" Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Tag {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -509,7 +555,45 @@ function! MyTag(www)
   exe 'normal! ' . 'z<CR>' . (winheight(0)/4) . '<C-y>'
 endfunction
 
-nnoremap <expr> <CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
+"nnoremap <expr> <CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
+
+function! PostTagJumpCursor_C()
+	if search('\%##define\s\+\k\+(', 'bcn')
+		normal! ww
+	elseif search('\%##define\s\+\k\+\s\+', 'bcn')
+		normal! ww
+	elseif search('\%#.\+;', 'bcn')
+		normal! f;b
+	else
+		"関数
+		normal! $F(b
+	endif
+endfunction
+function! CR()
+	"let w = a:w
+	let w = expand("<cword>")
+	let g:tacubo = w
+	if &ft == 'qf'
+		exe "normal! \<CR>"
+	elseif !v:prevcount
+		try
+			"exe "normal! \<C-]>z\<CR>" . (winheight(0)/4) . "\<C-y>"
+			exe "tag " . w
+			exe "normal! z\<CR>" . (winheight(0)/4) . "\<C-y>"
+			call PostTagJumpCursor_C()
+		catch
+			"echo "タグが見つかりません。"
+			"echohl ErrorMsg
+			echo v:exception
+			echohl None
+		endtry
+	else
+		"exe v:prevcount
+		call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 't')
+	endif
+endfunction
+nnoremap <silent> <CR> <Esc>:call CR()<CR>
+"
 "nnoremap <expr> <CR>   (&ft != 'qf') ? (':<C-u>tjump <C-r><C-w><CR>') : ('<CR>')
 "? nnoremap <silent><expr> <CR>   (&ft != 'qf') ? (':call MyTag("' . "\<C-r>\<C-w>" . '")<CR>') : ('<CR>')
 "nnoremap <expr> <S-CR> (&ft != 'qf') ? (':tselect<CR>') : ('<CR>')
@@ -536,28 +620,18 @@ nnoremap <silent> gf :aboveleft sp<CR>gF
 " Tag }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Tab {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <C-t> :tabnew 
-"nnoremap <silent> <C-t> :tabnew  | "%<CR>
-"nnoremap <C-t> :tabnew %<CR> :e 
+" Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+"" diff
+nnoremap <expr> <leader>d &diff ? ':diffoff<CR>' : ':diffthis<CR>'
+"" diffup (diffthisを実行)
+nnoremap <expr> <leader>D &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
 
-noremap <C-Tab> gt
-noremap <C-S-Tab> gT
+nnoremap <expr> <leader><C-d> match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
-nnoremap <C-f> gt
-nnoremap <C-b> gT
-" Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+nnoremap <silent> <leader>o :%foldopen<CR>
+nnoremap <silent> <leader>O :%foldclose<CR>
+" Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
-
-" Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap K :<C-u>ls!<CR>:b 
-nnoremap K :<C-u>ls<CR>:b 
-
-nnoremap <silent> <C-n> :bnext<CR>
-nnoremap <silent> <C-p> :bprev<CR>
-
-nnoremap <leader>z :<C-u>bdel
-" Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -598,22 +672,25 @@ vnoremap <s-down>  <C-w>-
 vnoremap <s-left>  <C-w><
 vnoremap <s-right> <C-w>>
 
-nnoremap <silent> <up> <esc>3<C-w>+:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <down> <esc>3<C-w>-:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <left> <esc>5<C-w><:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <right> <esc>5<C-w>>:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <s-up> <esc><C-w>+:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <s-down> <esc><C-w>-:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <s-left> <esc><C-w><:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <s-right> <esc><C-w>>:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <c-up> <C-w>_:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <c-down> 1<C-w>_:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <c-left> 1<C-w><bar>:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <c-right> <C-w><bar>:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <a-up> <C-w>K:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <a-down> <C-w>J:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <a-left> <C-w>H:call <SID>best_scrolloff()<CR>
-nnoremap <silent> <a-right> <C-w>L:call <SID>best_scrolloff()<CR>
+nnoremap <silent> <up>	    <esc>3<C-w>+:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <down>    <esc>3<C-w>-:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <left>    <esc>5<C-w><:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <right>   <esc>5<C-w>>:call	<SID>best_scrolloff()<CR>
+
+nnoremap <silent> <S-up>    <esc><C-w>+:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-down>  <esc><C-w>-:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-left>  <esc><C-w><:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-right> <esc><C-w>>:call	<SID>best_scrolloff()<CR>
+
+nnoremap <silent> <C-up>    <C-w>_:call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <C-down> 1<C-w>_:call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <C-left> 1<C-w><bar>:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <C-right> <C-w><bar>:call	<SID>best_scrolloff()<CR>
+
+nnoremap <silent> <A-up>    <C-w>K:call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-down>  <C-w>J:call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-left>  <C-w>H:call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-right> <C-w>L:call		<SID>best_scrolloff()<CR>
 
 nnoremap <silent> q <C-w><C-c>
 nnoremap <silent> <C-q>: q:
@@ -628,6 +705,30 @@ nnoremap <C-Up>		<C-w>k
 
 nnoremap <C-w><C-t> <C-w>T
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Tab {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+nnoremap <C-t> :tabnew 
+"nnoremap <silent> <C-t> :tabnew  | "%<CR>
+"nnoremap <C-t> :tabnew %<CR> :e 
+
+noremap <C-Tab> gt
+noremap <C-S-Tab> gT
+
+nnoremap <C-f> gt
+nnoremap <C-b> gT
+" Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+nnoremap K :<C-u>ls!<CR>:b 
+nnoremap K :<C-u>ls<CR>:b 
+
+nnoremap <silent> <C-n> :bnext<CR>
+nnoremap <silent> <C-p> :bprev<CR>
+
+nnoremap <leader>z :<C-u>bdel
+" Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Transparency {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -650,69 +751,30 @@ nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency ==
 " Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap # g*
-nnoremap g* #
 
-nnoremap <leader>/ /<Up>\<Bar>
+" Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+"
+" hi SLWinNr guifg=#000000 guibg=#e6e3c8 gui=bold cterm=bold ctermfg=yellow cterm=underline
+" hi SLWinNr guibg=#ffffff guifg=#a63318 gui=bold
+" hi SLFileName guifg=#ede39e guibg=#000000
 
-nnoremap ? /\<\><Left><Left>
-nnoremap & /<C-p>\\|\<<C-r><C-w>\><CR>
-"nnoremap ! /<C-p>\\|<C-r><C-w><CR>
-nnoremap ! /<C-R>*<CR>
-nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
-nnoremap _ /\<<C-R>*\><CR>
-
-cnoremap <C-g> \<\><Left><Left>
-cnoremap <C-t> \\|
-
-" /			/				o
-" /\<\>			?				 
-" *			*				o
-" g*			#				o
-" / 追加		/ <C-p> <C-t>			 
-" /\<\> 追加		/ <C-p> <C-g> <C-t>		 
-" * 追加		&				o
-" g* 追加		!				 
-
-" _ ! ?
-" / ? * # & _ ! @
-
-" 沙羅 追加
-" 通常 単語
-" 通常 カーソル下の単語 コピペ
-" Enter要　不要
-
-" Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
-" Grep {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-"nnoremap <C-g> :vim "\<<C-R><C-W>\>" *.c *.h<CR>
-nnoremap <C-g> :vim "" <Left><Left>
-nnoremap <leader>g :vim "\<<C-R><C-W>\>" 
-"nnoremap <leader>G :vim "<C-R><C-W>" *.c *.h<CR>
-nnoremap <leader>G :vim "<C-R><C-W>" 
-" Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
-" Substitute {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <C-s>           :<C-u>g#.#s    /
-nnoremap <leader><C-s>   :<C-u>g#.#s    /<C-R>//<C-R><C-W>/
-nnoremap <A-s>           :<C-u>g#.#s    /<C-R>//
-vnoremap <C-s>           :s    /
-vnoremap <leader><C-s>   :s    /<C-R>//<C-R><C-W>/
-" Substitute }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
-" Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-"" diff
-nnoremap <expr> <leader>d &diff ? ':diffoff<CR>' : ':diffthis<CR>'
-"" diffup (diffthisを実行)
-nnoremap <expr> <leader>D &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
-
-nnoremap <silent> <leader>o :%foldopen<CR>
-nnoremap <silent> <leader>O :%foldclose<CR>
-" Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+"set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )%m\ %##%r%h%w\ %<%#SLFileName#\ %F\ %##%m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
+"set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %##%h%w\ %<%#SLFileName#\ %F\ %r\ %##%m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
+set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %##%h%w\ %<%#SLFileName#\ %F\ %##\ %r\ %m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
+augroup MyVimrc_Statusline
+  au!
+  "au BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
+  " M$ Windowsの不具合対策 他のドライブのファイルを読み込んだときにバグがある?
+  au BufNewFile,BufRead,BufFilePost,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
+augroup end
+"function! Buf_name_len_set()
+"  try
+"    return max([len(fnamemodify(bufname('.'),':p'))+60, 120])
+"  endtry
+"endfunction
+"au BufNewFile,BufRead * let b:buf_name_len = max([len(fnamemodify('.',':p') . bufname('.'))+30, 120])
+"echo max([len(fnamemodify(".", ":p") . bufname(".")) + 40, 120]
+" Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 
@@ -720,9 +782,6 @@ nnoremap <silent> <leader>O :%foldclose<CR>
 "バッファ切り替えイベントでも、カーソルラインをセットする。
 "ftpluginのCとAWKを統合する。
 "無名バッファで、カレントディレクトリを設定できるようにする。
-" diffのカラーリングを見やすくする
-"Enterで 行番号 タグ GoFile
-"Misra, Build Report
 "Split + 戻る, Split + 進む
 
 
@@ -916,7 +975,7 @@ endfunc
 
 
 
-" print ------------------------------------------------------------------------------------------
+" Hardcopy ------------------------------------------------------------------------------------------
 
 " 縦方向に印刷
 set printoptions=portrait:y
@@ -974,7 +1033,7 @@ set printoptions+=paper:A4
 " tabloid
 ":set printoptions+=paper:tabloid
 
-" -----------------------------------------------------------------------------------------------------
+" ---------------------------------------------------------------------------------------------------
 
 
 
@@ -1111,11 +1170,12 @@ nnoremap <del> ]c^
 
 nnoremap <C-Tab> <C-w>p
 
-inoremap <leader>w <Esc>:w<CR>
+nnoremap <leader>w <Esc>:w<CR>
 
 "
 "set foldmethod=syntax
 set foldcolumn=2
+set foldcolumn=0
 
 
 function! Hat()
@@ -1130,3 +1190,95 @@ function! Hat()
 	"echo "$" v:count v:prevcount
 endfunction
 nnoremap ^ <Esc>:call Hat()<CR>
+
+
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+set autochdir
+
+let s:root_file = "prj.root"
+
+set grepprg=/usr/bin/grep\ -an
+set grepprg=/home/PK65278/ag\ --line-numbers
+set grepprg=/home/PK65278/bin/ag
+set grepprg=$HOME/bin/ag
+function! CS(str)
+	"? echo a:str
+
+	let str = a:str
+	let pwd = getcwd()
+	for i in range(6)
+		"pwd
+		if filereadable(s:root_file)
+			augroup MyVimrc_Grep
+				au!
+				"au! WinEnter qf
+				exe "au WinEnter * if (&buftype == 'quickfix') | cd " . getcwd() . " | endif"
+			augroup end
+			"exe 'vim !' . str . '!j **/src_*/**/*.c' . " **/src_*/**/*.h" . " **/inc*/**/*.h"
+			try
+				"exe "silent grep! '" . str . "' **/src_*/**/*.c" . " **/src_*/**/*.h" . " **/inc*/**/*.h"
+				exe "silent grep! '" . str . "' **/src_*/**/*.c" . " **/src_*/**/*.h" . " **/src_*/**/*.xms" . " **/src_*/**/*.inc" . " **/inc*/**/*.h"
+				"exe "grep! '" . str . "' **/src_*/**/*.c" . " **/src_*/**/*.h" . " **/inc*/**/*.h" . " data/**/*.c" . " data/**/*.xms"
+				"set grepprg=ggg
+				"exe "grep! -a '" . str . "' " "**/src_*/**/*.c"  "**/src_*/**/*.h"
+				"exe "!$HOME/bin/fff " . str
+				call feedkeys("\<CR>:\<Esc>\<C-o>", "tn")
+			finally
+			endtry
+			break
+		endif
+		cd ..
+	endfor
+	exe "cd " . pwd
+endfunction
+
+com! CS call CS("\<C-r>\<C-w>")
+
+nnoremap          <leader>g     :call CS("\\<<C-r><C-w>\\>")<CR>
+nnoremap <silent> <C-g>         :call CS("\\<<C-r><C-w>\\>")<CR>
+nnoremap          <leader>G     :call CS("<C-r><C-w>")<CR>
+nnoremap          <leader><C-g> :call CS('')<Left><Left>
+nnoremap <silent> <C-g>         :call CS("\\b<C-r><C-w>\\b")<CR>
+nnoremap <silent> <leader>g     :call CS("\\b<C-r><C-w>\\b")<CR>
+nnoremap          <leader>g     :call CS('')<Left><Left>
+
+let c_jk_local = 0
+"バッファ化すべき
+nnoremap <expr><silent> <C-k> (c_jk_local ? ":lprev" : ":cprev") . "\<CR>"
+nnoremap <expr><silent> <C-j> (c_jk_local ? ":lnext" : ":cnext") . "\<CR>"
+"nnoremap <silent> <leader> :let c_jk_local = !c_jk_local<CR>
+
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+"nnoremap s f_l
+"nnoremap S F_h
+"nnoremap ci s
+"nnoremap cI S
+
+nnoremap S           :<C-u>g#.#s    /<C-R>//
+
+set showtabline=0
+nnoremap <C-h> :<C-u>tabs<CR>
+
+function! TabReopen()
+  let b0 = bufnr("%")
+  tabnew
+  let b1 = bufnr("%")
+  execute 'buf  ' b0
+  execute 'bdel ' b1
+  echo b0 b1
+endfunction
+nnoremap <C-w>T :<C-u>call TabReopen()<CR>
+
+
+"Misra Excel
+set errorformat+=,%f\ %l\	%m
+"cbuf
+
+nnoremap <silent><expr> <leader>r &readonly ? ':<C-u>set noreadonly<CR>' : ':<C-u>set readonly<CR>'
+
+
+
