@@ -66,6 +66,10 @@ case `uname` in
     *CYGWIN* )
 	PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[green]}%}%m%u %{${fg[cyan]}%}%~%{${fg[red]}%}
 %%%{${reset_color}%} "
+	PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
+%%%{${reset_color}%} "
+	PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
+%%%{${reset_color}%} "
 	;;
     * )
 	PROMPT="%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[green]}%}%m%u %{${fg[cyan]}%}%~%{${fg[red]}%}
@@ -145,7 +149,7 @@ zstyle ':completion:sudo:*' environ PATH="$SUDO_PATH:$PATH"
 HISTFILE=~/.zsh_history
 ## メモリ上のヒストリ数。
 ## 大きな数を指定してすべてのヒストリを保存するようにしている。
-HISTSIZE=10000000
+HISTSIZE=4294967295
 ## 保存するヒストリ数
 SAVEHIST=$HISTSIZE
 ## ヒストリファイルにコマンドラインだけではなく実行時刻と実行時間も保存する。
@@ -194,19 +198,19 @@ function ghq2 {
 zle -N ghq2
 bindkey "\*" ghq2
 
-## 行頭の^で "cd .." 実行
-function up-dir {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	zle push-input
-	BUFFER="cd .."
-	zle accept-line
-    else
-	zle self-insert
-    fi
-}
-zle -N up-dir
-bindkey "\^" up-dir
+#? ## 行頭の^で "cd .." 実行
+#? function up-dir {
+#?     local current=${BUFFER}
+#?     if [ "${current}" = "" ] ; then
+#? 	zle push-input
+#? 	BUFFER="cd .."
+#? 	zle accept-line
+#?     else
+#? 	zle self-insert
+#?     fi
+#? }
+#? zle -N up-dir
+#? bindkey "\^" up-dir
 
 ## ^]で "popd" 実行
 function prev-dir {
@@ -233,6 +237,7 @@ bindkey "\t" input-cd
 function input-ls {
     if [ "${BUFFER}" = "" ] ; then
         LBUFFER="ls "
+	zle accept-line
     else
         zle self-insert
     fi
@@ -286,6 +291,28 @@ function input-homedir {
 zle -N input-homedir
 bindkey "~" input-homedir
 
+## ^で '../' 入力
+function input-updir {
+    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+    case `echo -n ${LBUFFER} | tail -c1` in
+        ' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'../' ;;
+        * )                          zle self-insert ;;
+    esac
+}
+zle -N input-updir
+bindkey "\^" input-updir
+
+## -で 'cd -' 入力
+function go-prev-dir {
+    if [ "${BUFFER}" = "" ] ; then
+	LBUFFER="cd -"
+    else
+	zle self-insert
+    fi
+}
+zle -N go-prev-dir
+bindkey "\-" go-prev-dir
+
 
 
 
@@ -320,7 +347,7 @@ REPORTTIME=5
 
 ######## Aliases ########
 
-alias ls='ls --color=auto'
+alias ls='ls --color=auto -v'
 alias ll='ls -l'
 alias la='ls -a'
 alias lla='ls -la'
@@ -341,6 +368,8 @@ alias df='df -h'
 alias md='mkdir'
 #alias md='source $HOME/bin/md'
 
+alias grep='grep --color=auto'
+
 #alias awk='gawk'
 #alias v='vim'
 #alias c='gcc'
@@ -349,6 +378,7 @@ alias md='mkdir'
 # to abbreviations alias -g A='| awk'
 # to abbreviations alias -g B='| bc -l'
 # to abbreviations alias -g C='| cut'
+alias -g C='| clip'
 alias -g D='| disp'
 # to abbreviations alias -g F='| s2t | cut -f'	#field
 # to abbreviations alias -g G='| grep'
@@ -376,8 +406,8 @@ alias e='echo'
 alias l='ls'
 alias t='cat'
 alias m='man'
-alias v='vg'
-alias vg='gvim'
+#alias v='vg'
+#alias vg='gvim'
 alias af='awk -f'
 
 alias gt='git'
@@ -411,8 +441,9 @@ typeset -A abbreviations
 abbreviations=(
     "A"    "| awk '"
     "B"    "| bc -l"
-    "C"    "cat"
-    "Cn"   "| cat -n"
+    "C"    "| cat -n"
+#   "CN"   "| cat -n"
+    "DX"   "| d2x -s"
     "LC"   "LANG=C"
     "LJ"   "LANG=ja_JP.UTF-8"
     "LF"   "LANG=fr_FR.UTF-8"
@@ -421,6 +452,7 @@ abbreviations=(
 #   "E"    "2>&1 > /dev/null"
 # alias -g F='| s2t | cut -f'	#field
     "G"    "| grep"
+    "GV"   "| grep -v"
     "H"    "| head -n 20"
     "Hn"   "| head -n"
     "HN"   "| head"
@@ -428,13 +460,14 @@ abbreviations=(
 #   "I"    "< /dev/null"
 #   "J"    "| japan_numerical"
 #   "L"    "| less"
+    "L"    "| clip"
     "N"    "> /dev/null"
     "Ne"   "2> /dev/null"
     "N2"   "2> /dev/null"
     "Na"   "> /dev/null 2>&1"
     "Nn"   "> /dev/null 2>&1"
     "Ni"   "< /dev/null"
-    "O"    "| sort"     # `O'rder
+    "Q"    "| sort"     # `O'rder
 # alias -g Q='| sort'	# Quick Sort
 # alias -g R='| tr'
     "S"    "| sed '"
@@ -443,17 +476,25 @@ abbreviations=(
     "Tn"   "| tail -n"
     "TN"   "| tail -n 20"
     "U"    "| iconv -f cp932 -t utf-8"
+    "UU"   "| iconv -f utf-8 -t cp932"
     "Ucu"  "| iconv -f cp932 -t utf-8"
     "Ueu"  "| iconv -f euc-jp -t utf-8"
     "Uuc"  "| iconv -f utf-8 -t cp932"
     "Uec"  "| iconv -f euc-jp -t cp932"
     "Uce"  "| iconv -f cp932 -t euc-jp"
     "Uue"  "| iconv -f utf-8 -t euc-jp"
+    "UN"   "| sort | uniq"
     "V"    "| vim -R -"
     "W"    "| wc -l"
-    "X"    "| xargs -i"
+    "X"    "| xargs"
+    "F"    "| xargs -i"		# For each
+    "XI"   "| xargs -i"
     "Xn"   "| xargs -n"
     "XX"   "| xargs"
+
+    "TU"   "| tr 'a-f' 'A-F'"
+    "M"    "| mc '"
+    "B"    "| xc '"
 # alias -g Y='| wc'
 )
 
@@ -675,3 +716,25 @@ chpwd
 #}
 #zle -N beg-popd
 #bindkey "[" beg-popd
+
+
+# MELCO
+
+# コマンドラインでもコメントを使う
+setopt interactivecomments
+
+# MELCO
+cdd()
+{
+	cd //pc7982/510ptseisetu_Conf/PTCOM/SWCOM/自主開発プログラム管理/プログラム変更書/IDC-`echo 00"$1" | sed 's/.*\(....\)$/\1/'`
+}
+
+cds()
+{
+	cd //10.166.3.166/nx2/hp9000/swcom/PF01.00"$1"
+}
+
+
+alias awk='awk -M'
+
+export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36'
