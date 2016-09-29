@@ -1,11 +1,11 @@
 " Vim filetype plugin file
 " Language:	C
 " Maintainer:	Bram Moolenaar <Bram@vim.org>
-" Last Change:	2011 Aug 04
+" Last Change:	2012 Jul 10
 
 " Only do this when not done yet for this buffer
 if exists("b:did_ftplugin")
-"?finish
+  "finish
 endif
 
 " Don't load another plugin for this buffer
@@ -40,7 +40,7 @@ let b:match_words = &matchpairs . ',^\s*#\s*if\(\|def\|ndef\)\>:^\s*#\s*elif\>:^
 let b:match_skip = 's:comment\|string\|character'
 
 " Win32 can filter files in the browse dialog
-if has("gui_win32") && !exists("b:browsefilter")
+if (has("gui_win32") || has("gui_gtk")) && !exists("b:browsefilter")
   if &ft == "cpp"
     let b:browsefilter = "C++ Source Files (*.cpp *.c++)\t*.cpp;*.c++\n" .
 	  \ "C Header Files (*.h)\t*.h\n" .
@@ -65,8 +65,27 @@ unlet s:cpo_save
 
 
 
+"""""""""" Takubo Add
 
-"""""""""" Morio Add
+ab CS /*
+if exists("*Eatchar")
+	iab <silent> CE */<C-R>=Eatchar('\s')<CR>
+else
+	iab          CE */
+endif
+
+nnoremap [[  [[kf(bzt
+nnoremap g[[ [[kf(b
+nnoremap ]]  :call <SID>jump_to_next_func()<CR>zt
+nnoremap g]] :call <SID>jump_to_next_func()<CR>
+function! s:jump_to_next_func()
+	let fline = line('.')
+	normal! ]]kf(b
+	if fline == line('.')
+		normal! j]]kf(b
+	end
+endfunc
+
 
 
 
@@ -77,7 +96,7 @@ noremap <buffer> <leader>G :set nocursorline<CR>:grep "\C\<<C-r><C-w>\>" *c *.h 
 noremap <buffer> <leader>w :vimgrep <C-r><C-w>
 noremap <buffer> <leader>i :vimgrep /<S-Insert>/j *c *.h *.s *.S<CR>
 
-nnoremap [[ [[k
+finish
 vnoremap [[ [[k
 
 vnoremap af ][<ESC>V[[kk
