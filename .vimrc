@@ -1023,68 +1023,6 @@ endfunc
 
 
 
-" Hardcopy ------------------------------------------------------------------------------------------
-
-" 縦方向に印刷
-set printoptions=portrait:y
-
-" 横方向に印刷
-":set printoptions=portrait:n
-
-" 部単位で印刷する
-":set printoptions=collate:y
-" （1ページ目、1ページ目、1ページ目、2ページ目、2ページ目、2ページ目、3ページ目、、、）
-
-" ページごとに印刷する
-":set printoptions=collate:n
-" （1ページ目、1ページ目、1ページ目、2ページ目、2ページ目、2ページ目、3ページ目、、、）
-
-" 片面印刷(デフォルト)
-":set printoptions=duplex:off
-"
-" 両面印刷、長辺綴じ。長辺綴じは用紙の長い辺を基点とする綴じ方。
-" 両面印刷 綴じ位置が紙の長い辺
-:set printoptions=duplex:long
-"
-" 両面印刷、短辺綴じ。短辺綴じは用紙の短い辺を基点とする綴じ方。
-" 両面印刷 綴じ位置が紙の短い辺
-":set printoptions=duplex:short
-
-" 用紙サイズ
-
-" 10x14
-":set printoptions+=paper:10x14
-" A3
-":set printoptions+=paper:A3
-" A4
-set printoptions+=paper:A4
-" A5
-":set printoptions+=paper:A5
-" B4
-":set printoptions+=paper:B4
-" B5
-":set printoptions+=paper:B5
-" executive
-":set printoptions+=paper:executive
-" folio
-":set printoptions+=paper:folio
-" ledger
-":set printoptions+=paper:ledger
-" legal
-":set printoptions+=paper:legal
-" letter
-":set printoptions+=paper:letter
-" quarto
-":set printoptions+=paper:quarto
-" statement
-":set printoptions+=paper:statement
-" tabloid
-":set printoptions+=paper:tabloid
-
-" ---------------------------------------------------------------------------------------------------
-
-
-
 " Cscope
 " nnoremap <C-j><C-a> :cscope add cscope.out<CR>
 " nnoremap <C-j><C-j> :cscope find 
@@ -1227,13 +1165,10 @@ set foldcolumn=0
 
 
 function! s:Hat()
-	if !v:prevcount
-		normal! ^
-	else
-		exe "normal!" v:prevcount . "|"
-	endif
+	exe v:prevcount ? ('normal! ' . v:prevcount . '|') : 'normal! ^'
 endfunction
 nnoremap <silent> ^ <Esc>:call <SID>Hat()<CR>
+"nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
 
 
 
