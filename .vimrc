@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim7用試作
 "
-" Last Change: 17-Jun-2016.
+" Last Change: 05-Oct-2016.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -412,13 +412,14 @@ nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
 "nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:SearchReset<CR>:SearchBuffersReset<CR> TODO multiplesearch
 nnoremap cp cw<C-r>0
 nnoremap da 0d$
-nnoremap <silent> ZZ :w<CR>
+nnoremap <silent> ZZ :<CR>
+nnoremap <silent> ZQ :<CR>
 nnoremap <C-o> O<Esc>
 nnoremap <A-o> o<Esc>
 nnoremap <silent><expr> <leader>n &relativenumber ?  ':set number norelativenumber<CR>' : ':set relativenumber<CR>'
-nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
-nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
-nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
+nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':setl isk-=.<CR>'
+nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':setl isk-=_<CR>'
+nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':setl isk-=_<CR>'
 
 nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
 nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
@@ -433,10 +434,14 @@ nnoremap <leader>; :<C-u>setl<Space>
 nnoremap <C-z> nop
 nnoremap <silent><expr> <leader>j &cursorcolumn ? ':setlocal nocursorcolumn<CR>' : ':setlocal cursorcolumn<CR>'
 
-nnoremap ]] ]]zt
-nnoremap [[ [[zt
-nnoremap ][ ][zb
-nnoremap [] []zb
+nnoremap  ]]  ]]f(bzt
+nnoremap g]]  ]]f(b
+nnoremap  [[  [[f(bzt
+nnoremap g[[  [[f(b
+nnoremap  ][  ][zb
+nnoremap g][  ][
+nnoremap  []  []zb
+nnoremap g[]  []
 
 vnoremap af ][<ESC>V[[
 vnoremap if ][k<ESC>V[[j
@@ -470,32 +475,50 @@ cnoremap <expr> ? getcmdtype() == '?' ? '\?' : '?'
 cnoremap (( \(
 cnoremap )) \)
 
+cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
+			\ (getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\\|' :
+			\ '<C-t>'
 
 
 " Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap # g*
-"? nnoremap g* #
-
 "? nnoremap <leader>/ /<Up>\<Bar>
 
 "? nnoremap ? /\<\><Left><Left>
 "? nnoremap <Bar> /<C-p>\<Bar>
 
-nnoremap & /<C-p>\\|\<<C-r><C-w>\><CR>
 "nnoremap ! /<C-p>\\|<C-r><C-w><CR>
 "nnoremap ! /<C-R>*<CR>
-nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
-nnoremap <expr> ! '/<C-p>\\|\<' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '\><CR>'
+
 "? __nnoremap _ /\<<C-R>*\><CR>
 
 "nnoremap <leader>* /\<_\?<C-r><C-w>\><CR>
-nnoremap <expr> <leader>* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
-nnoremap <expr>        g* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
-nnoremap <expr> <leader># (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
-nnoremap <expr>        g# (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+"nnoremap <expr> <leader>* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+"nnoremap <expr> <leader># (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+
+"nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
+
+nnoremap <expr> * (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+nnoremap <expr> # (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+
+nnoremap        g# g*
+nnoremap        g* *
+
+nnoremap <expr> ! '/<C-p>\\|\<' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '\><CR>'
+nnoremap <expr> & '/<C-p>\\|' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '<CR>'
+
+nnoremap        g! /<C-p>\\|\<<C-r><C-w>\><CR>
+nnoremap        g& /<C-p>\\|<C-r><C-w><CR>
+
+nnoremap     ? /<C-p>\<Bar>
+nnoremap     ? /\M
+nnoremap <Bar> /<C-p>\<Bar>\<\><Left><Left>
 
 cnoremap <C-g> \<\><Left><Left>
-"? cnoremap <C-t> \\|
+
+if has('migemo')
+  nnoremap / g/
+  nnoremap g/ /
+endif
 
 " /			/				o
 " /\<\>			?				 
@@ -518,9 +541,11 @@ cnoremap <C-g> \<\><Left><Left>
 
 
 " Substitute {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <C-s>           :<C-u>g#.#s    /
-nnoremap <leader><C-s>   :<C-u>g#.#s    /<C-R>//<C-R><C-W>/
-nnoremap <A-s>           :<C-u>g#.#s    /<C-R>//
+nnoremap <C-s>           :<C-u>g%.%s    /
+nnoremap <C-s>           :<C-u>g%.%s    %%<Left>
+nnoremap <leader><C-s>   :<C-u>g%.%s    %
+nnoremap g<C-s>   :<C-u>g%.%s    /<C-R>//<C-R><C-W>/
+nnoremap <A-s>           :<C-u>g%.%s    /<C-R>//
 vnoremap <C-s>           :s    /
 vnoremap <leader><C-s>   :s    /<C-R>//<C-R><C-W>/
 " Substitute }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -569,7 +594,7 @@ function! PostTagJumpCursor_C()
 		normal! $F(b
 	endif
 endfunction
-function! CR()
+function! CR(arg)
 	"let w = a:w
 	let w = expand("<cword>")
 	let g:tacubo = w
@@ -578,7 +603,11 @@ function! CR()
 	elseif !v:prevcount
 		try
 			"exe "normal! \<C-]>z\<CR>" . (winheight(0)/4) . "\<C-y>"
-			exe "tag " . w
+			if a:arg == ''
+				exe "tag " . w
+			else
+				exe "tselect " . w
+			endif
 			exe "normal! z\<CR>" . (winheight(0)/4) . "\<C-y>"
 			call PostTagJumpCursor_C()
 		catch
@@ -592,7 +621,8 @@ function! CR()
 		call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 't')
 	endif
 endfunction
-nnoremap <silent> <CR> <Esc>:call CR()<CR>
+nnoremap <silent> <CR> <Esc>:call CR('')<CR>
+nnoremap <silent> g<CR> <Esc>:call CR('g')<CR>
 "
 "nnoremap <expr> <CR>   (&ft != 'qf') ? (':<C-u>tjump <C-r><C-w><CR>') : ('<CR>')
 "? nnoremap <silent><expr> <CR>   (&ft != 'qf') ? (':call MyTag("' . "\<C-r>\<C-w>" . '")<CR>') : ('<CR>')
@@ -698,8 +728,8 @@ nnoremap <silent> <C-q>/ q/
 nnoremap <silent> <C-q>? q?
 nnoremap <silent> <leader>q :<C-u>q<CR>
 
-nnoremap <C-Left>	<C-w>l
-nnoremap <C-Right>	<C-w>h
+nnoremap <C-Left>	<C-w>h
+nnoremap <C-Right>	<C-w>l
 nnoremap <C-Down>	<C-w>j
 nnoremap <C-Up>		<C-w>k
 
@@ -708,11 +738,10 @@ nnoremap <C-w><C-t> <C-w>T
 
 
 " Tab {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <C-t> :tabnew 
-"nnoremap <silent> <C-t> :tabnew  | "%<CR>
+nnoremap <C-t> :tabnew<Space>
 "nnoremap <C-t> :tabnew %<CR> :e 
 
-noremap <C-Tab> gt
+noremap <C-Tab>   gt
 noremap <C-S-Tab> gT
 
 nnoremap <C-f> gt
@@ -765,7 +794,7 @@ augroup MyVimrc_Statusline
   au!
   "au BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
   " M$ Windowsの不具合対策 他のドライブのファイルを読み込んだときにバグがある?
-  au BufNewFile,BufRead,BufFilePost,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
+  au BufAdd,BufNewFile,BufRead,BufFilePost,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
 augroup end
 "function! Buf_name_len_set()
 "  try
@@ -812,6 +841,7 @@ augroup end
 inoremap <expr> <CR>  pumvisible() ? '<C-y>' : '<C-]><C-G>u<CR>'
 inoremap <expr> <Esc> pumvisible() ? '<C-e>' : '<Esc>'
 
+"source D:/bin/vim74-kaoriya-win32/vim74/plugin/snipMate.vim
 " function! s:Tab()
 "   if pumvisible()
 "     call feedkeys("\<C-n>")
@@ -850,7 +880,6 @@ endif
 "inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<Tab>'
 
 
-"inoremap <silent> jj <Esc>
 inoremap <silent> <C-j> <Esc>
 
 
@@ -873,12 +902,18 @@ function! TrigCompl(key)
   try
     iunmap jj
   catch
-  "inoremap ff <C-Y><Esc>:w<CR>
+  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:w<CR>' : 'ff'
   finally
   endtry
   call feedkeys("\<C-n>\<C-p>")
+  "call feedkeys("\<C-x>\<C-o>")
   return a:key
 endfunc
+
+function! SetJJFF()
+  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+  au CompleteDone * try | iunmap ff | catch | finally
+endfunction
 
 function! SetCpmplKey(str)
   for k in split(a:str, '\zs')
@@ -910,7 +945,23 @@ call SetCpmplKey('_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY
 augroup MyComplete
   au!
   "au CompleteDone * set timeoutlen=200
+  "au CompleteDone * iunmap ff
+
+  au CompleteDone * try | iunmap ff | catch | finally
   au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+
+  au InsertCharPre * try | iunmap ff | catch | finally
+  " au InsertCharPre * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+
+  au TextChangedI * exe pumvisible() ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'"
+  au TextChangedI * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
+
+  au InsertLeave * try | iunmap ff | catch | finally
+  au InsertLeave * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+
+  au InsertCharPre * exe pumvisible() || v:char != "j" ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'"
+  au InsertCharPre * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
+
   "au CompleteDone * try | iunmap ff | catch | finally
   "au CompleteDone * set ttimeoutlen=-1
 augroup end
@@ -924,7 +975,7 @@ function! Cmpl_j()
     iunmap jj
   catch
   finally
-  "inoremap ff <C-Y><Esc>:w<CR>
+  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:w<CR>' : 'ff'
   endtry
   call feedkeys("\<C-n>")
   return ''
@@ -935,7 +986,7 @@ function! Cmpl_k()
     iunmap jj
   catch
   finally
-  "inoremap ff <C-Y><Esc>:w<CR>
+  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:w<CR>' : 'ff'
   endtry
   call feedkeys("\<C-p>")
   return ''
@@ -947,13 +998,10 @@ inoremap <expr> j pumvisible() ? Cmpl_j() : TrigCompl('j')
 inoremap <expr> k pumvisible() ? Cmpl_k() : TrigCompl('k')
 "inoremap <expr> j pumvisible() ? '<C-N>' : TrigCompl('j')
 "inoremap <expr> k pumvisible() ? '<C-P>' : TrigCompl('k')
-inoremap <expr> <C-J> pumvisible() ? 'j' : '<C-J>'
-inoremap <expr> <C-K> pumvisible() ? 'k' : '<C-K>'
-
-inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:w<CR>' : 'ff'
+imap <expr> <C-J> pumvisible() ? 'j' : '<C-J>'
+imap <expr> <C-K> pumvisible() ? 'k' : '<C-K>'
 
 
-"inoremap <buffer><expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
 "inoremap <buffer><expr> j pumvisible() ? '<C-N>' : TrigCompl('j')
 "inoremap <buffer><expr> k pumvisible() ? '<C-P>' : TrigCompl('k')
 "inoremap <buffer><expr> <C-J> pumvisible() ? 'j' : '<C-J>'
@@ -1111,17 +1159,17 @@ nnoremap <silent> <leader>l :FuncLines<CR>
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 function! s:tab2space()
-  let org_et = &expandtab
   setlocal expandtab
 
   try
-    normal! gg/<Tab><CR>
+    normal! gg/	
+
     while 1
-      normal! r<Tab>n
+      normal! r	n
     endwhile
   catch
   finally
-    "let &expandtab = org_et
+    setlocal expandtab&
   endtry
 endfunction
 command! Tab2space :call s:tab2space()
@@ -1178,18 +1226,14 @@ set foldcolumn=2
 set foldcolumn=0
 
 
-function! Hat()
-	"echo "^" v:count v:prevcount
+function! s:Hat()
 	if !v:prevcount
-		"echo "!"
 		normal! ^
 	else
-		"echo "#"
 		exe "normal!" v:prevcount . "|"
 	endif
-	"echo "$" v:count v:prevcount
 endfunction
-nnoremap ^ <Esc>:call Hat()<CR>
+nnoremap <silent> ^ <Esc>:call <SID>Hat()<CR>
 
 
 
@@ -1274,11 +1318,15 @@ endfunction
 nnoremap <C-w>T :<C-u>call TabReopen()<CR>
 
 
-"Misra Excel
-set errorformat+=,%f\ %l\	%m
 "cbuf
 
 nnoremap <silent><expr> <leader>r &readonly ? ':<C-u>set noreadonly<CR>' : ':<C-u>set readonly<CR>'
 
 
+set nowildmenu
+set wildmode=longest,full
+inoremap <C-f> <C-p>
+
+"set whichwrap+=h,l
+"source $VIMRUNTIME/macros/matchit.vim
 
