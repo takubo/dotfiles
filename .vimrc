@@ -2,9 +2,9 @@ scriptencoding utf-8
 " vim:set ts=8 sts=2 sw=2 tw=0: (この行に関しては:help modelineを参照)
 "
 " An example for a Japanese version vimrc file.
-" 日本語版のデフォルト設定ファイル(vimrc) - Vim7用試作
+" 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 05-Oct-2016.
+" Last Change: 19-Jul-2017.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -239,8 +239,12 @@ if kaoriya#switch#enabled('disable-vimproc')
   let &rtp = join(filter(split(&rtp, ','), 'v:val !~ "[/\\\\]plugins[/\\\\]vimproc$"'), ',')
 endif
 
-" Copyright (C) 2009-2013 KaoriYa/MURAOKA Taro
+" go-extra: 同梱の vim-go-extra を無効化する
+if kaoriya#switch#enabled('disable-go-extra')
+  let &rtp = join(filter(split(&rtp, ','), 'v:val !~ "[/\\\\]plugins[/\\\\]golang$"'), ',')
+endif
 
+" Copyright (C) 2009-2016 KaoriYa/MURAOKA Taro
 
 
 "takubo
@@ -379,9 +383,15 @@ augroup MyVimrc
   au BufNewFile,BufRead *.c inoremap @ /*  */<Left><Left><Left>
 augroup end
 
+let g:TypewriterScroll = 0
+nnoremap <Leader>H <Esc>:<C-u>let g:TypewriterScroll = !g:TypewriterScroll <Bar> call <SID>best_scrolloff()<CR>
 
 function! s:best_scrolloff()
-  exe "setlocal  scrolloff=" . (winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5)
+  if g:TypewriterScroll
+    setlocal  scrolloff=9999
+  else
+    exe "setlocal  scrolloff=" . (winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5)
+  endif
 endfunction
 augroup MyVimrc_ScrollOff
   au!
@@ -404,11 +414,16 @@ nnoremap j gj
 nnoremap k gk
 nnoremap gj j
 nnoremap gk k
+vnoremap j gj
+vnoremap k gk
+vnoremap gj j
+vnoremap gk k
 nnoremap Y y$
 nnoremap <expr> y} '0y}' . col('.') . "\<Bar>"
 nnoremap y{ $y{
 nnoremap <expr> yp '0y$' . col('.') . "\<Bar>"
-nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
+"nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
+nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:call clever_f#reset()<CR>
 "nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:SearchReset<CR>:SearchBuffersReset<CR> TODO multiplesearch
 nnoremap cp cw<C-r>0
 nnoremap da 0d$
@@ -416,10 +431,19 @@ nnoremap <silent> ZZ :<CR>
 nnoremap <silent> ZQ :<CR>
 nnoremap <C-o> O<Esc>
 nnoremap <A-o> o<Esc>
-nnoremap <silent><expr> <leader>n &relativenumber ?  ':set number norelativenumber<CR>' : ':set relativenumber<CR>'
+
+nnoremap <silent><expr> <leader>n !&number <Bar><Bar> &relativenumber ?  ':set   number norelativenumber<CR>' : ':set relativenumber<CR>'
+nnoremap <silent><expr> <leader>N  &number <Bar><Bar> &relativenumber ?  ':set nonumber norelativenumber<CR>' : ':set number<CR>'
+
+" コメント行後の新規行の自動コメント化のON/OFF
+nnoremap <silent><expr> <leader># &formatoptions =~# 'o' ?  ':set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':set formatoptions+=o<CR>:set formatoptions+=r<CR>'
+
 nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':setl isk-=.<CR>'
 nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':setl isk-=_<CR>'
 nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':setl isk-=_<CR>'
+
+" ^に、|の機能を重畳
+nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
 
 nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
 nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
@@ -430,6 +454,9 @@ nnoremap <silent> <Leader>" :disp<CR>
 nnoremap <silent> <Leader>k :make<CR>
 nnoremap <silent> <leader>t :ToggleWord<CR>
 nnoremap <leader>: :<C-u>set<Space>
+nnoremap <leader>; :<C-u>setl<Space>
+
+nnoremap g; :<C-u>set<Space>
 nnoremap <leader>; :<C-u>setl<Space>
 nnoremap <C-z> nop
 nnoremap <silent><expr> <leader>j &cursorcolumn ? ':setlocal nocursorcolumn<CR>' : ':setlocal cursorcolumn<CR>'
@@ -515,9 +542,24 @@ nnoremap <Bar> /<C-p>\<Bar>\<\><Left><Left>
 
 cnoremap <C-g> \<\><Left><Left>
 
+let g:MigemoIsSlash = 0
 if has('migemo')
-  nnoremap / g/
-  nnoremap g/ /
+  function! s:toggle_migemo_search()
+    let g:MigemoIsSlash = !g:MigemoIsSlash
+    if g:MigemoIsSlash
+      nnoremap / g/
+      nnoremap ? /
+      let g:clever_f_use_migemo=1
+    else
+      nnoremap / /
+      nnoremap ? g/
+      let g:clever_f_use_migemo=0
+    endif
+  endfunction
+
+ "nnoremap / /
+  nnoremap ? g/
+  nnoremap <silent> <leader>/ :<C-u>call <SID>toggle_migemo_search()<CR>
 endif
 
 " /			/				o
@@ -561,6 +603,14 @@ nnoremap <leader>G :vim "<C-R><C-W>"
 
 
 " Tag {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+"   TODO
+"     先頭のアンダーバー
+"     関数のみf(b
+"     ラベルならf:b
+"     変数なら、スクロールしない
+"     引数のタグ
+"     asmのタグ
+"
 noremap H <C-o>
 noremap L <C-i>
 "補償
@@ -596,29 +646,64 @@ function! PostTagJumpCursor_C()
 endfunction
 function! CR(arg)
 	"let w = a:w
-	let w = expand("<cword>")
+	let w0 = expand("<cword>")
+	let w = w0
 	let g:tacubo = w
-	if &ft == 'qf'
-		exe "normal! \<CR>"
-	elseif !v:prevcount
-		try
-			"exe "normal! \<C-]>z\<CR>" . (winheight(0)/4) . "\<C-y>"
-			if a:arg == ''
-				exe "tag " . w
-			else
-				exe "tselect " . w
-			endif
-			exe "normal! z\<CR>" . (winheight(0)/4) . "\<C-y>"
-			call PostTagJumpCursor_C()
-		catch
-			"echo "タグが見つかりません。"
-			"echohl ErrorMsg
-			echo v:exception
-			echohl None
-		endtry
-	else
+
+	if v:prevcount
 		"exe v:prevcount
+		"この方法(feedkeys)なら、移動行が履歴に残る。 exeだと、残らない。
 		call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 't')
+	elseif &ft == 'qf'
+		exe "normal! \<CR>"
+	elseif &ft == 'help'
+		exe "normal! \<C-]>"
+	else
+		"for i in range(2)
+		for i in range(2 + 2)
+			try
+				"exe "normal! \<C-]>z\<CR>" . (winheight(0)/4) . "\<C-y>"
+				if a:arg == ''
+					exe "tag " . w
+				else
+					exe "tselect " . w
+				endif
+				exe "normal! z\<CR>" . (winheight(0)/4) . "\<C-y>"
+				call PostTagJumpCursor_C()
+				"
+				return
+			catch
+				if w0 =~ '^_'
+				" 元の検索語は"_"始まり
+					let w = substitute(w0, '^_', '', '')
+" Customer ++
+				elseif w0 =~ '^fix_'
+				" 元の検索語は"fix_"始まり
+					let w = substitute(w0, '^fix_', '', '')
+					let w0 = w
+				"elseif w0 =~ '^fix_'
+				"" 元の検索語は"fix_"始まりで、本体がアセンブラ。
+				"	let w = substitute(w0, '^fix', '', '')
+				elseif w0 =~ '^sub_'
+				" 元の検索語は"sub_"始まり
+					let w = substitute(w0, '^sub_', '', '')
+					let w0 = w
+				"elseif w0 =~ '^sub_'
+				"" 元の検索語は"sub_"始まりで、本体がアセンブラ。
+				"	let w = substitute(w0, '^sub', '', '')
+" Customer --
+				else
+				" 元の検索語は"_"始まりでない
+					let w = '_' . w0
+				endif
+			endtry
+		endfor
+
+		echohl ErrorMsg
+		"echo "タグが見つかりません。"
+		echo "E***: No Tag Found."
+		"echo v:exception
+		echohl None
 	endif
 endfunction
 nnoremap <silent> <CR> <Esc>:call CR('')<CR>
@@ -626,7 +711,7 @@ nnoremap <silent> g<CR> <Esc>:call CR('g')<CR>
 "
 "nnoremap <expr> <CR>   (&ft != 'qf') ? (':<C-u>tjump <C-r><C-w><CR>') : ('<CR>')
 "? nnoremap <silent><expr> <CR>   (&ft != 'qf') ? (':call MyTag("' . "\<C-r>\<C-w>" . '")<CR>') : ('<CR>')
-"nnoremap <expr> <S-CR> (&ft != 'qf') ? (':tselect<CR>') : ('<CR>')
+"? nnoremap <expr> <leader><CR> (&ft != 'qf') ? (':tselect <C-r><C-w><CR>') : ('<CR>')
 nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
 "? au BufNewFile,BufRead *.jax nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
 "nnoremap <expr> <S-CR> (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
@@ -645,6 +730,7 @@ nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-
 nnoremap <expr> <C-w><CR> (&ft != 'qf') ? ('<C-w><C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
 " TODO QuickFix
 nnoremap <BS><CR> <C-w><C-]>
+nnoremap <leader><CR> <C-w><C-]>
 
 nnoremap <silent> gf :aboveleft sp<CR>gF
 " Tag }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -658,8 +744,16 @@ nnoremap <expr> <leader>D &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
 
 nnoremap <expr> <leader><C-d> match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
-nnoremap <silent> <leader>o :%foldopen<CR>
-nnoremap <silent> <leader>O :%foldclose<CR>
+nnoremap <expr> dx &diff ? ':diffoff<CR>' : ':diffthis<CR>'
+nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
+nnoremap <expr> di match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
+nnoremap        dq :diffoff<CR>
+nnoremap        dc :diffoff<CR>
+nnoremap        dz :echo &diffopt<CR>
+
+"nnoremap <silent> <leader>o :%foldopen<CR>
+"nnoremap <silent> <leader>O :%foldclose<CR>
+" 余りキーマップ	dq, dr, ds. dg, dz, dx, dc, dv, dm
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -746,6 +840,9 @@ noremap <C-S-Tab> gT
 
 nnoremap <C-f> gt
 nnoremap <C-b> gT
+
+nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
+nnoremap <silent><expr> gt !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -757,6 +854,7 @@ nnoremap <silent> <C-n> :bnext<CR>
 nnoremap <silent> <C-p> :bprev<CR>
 
 nnoremap <leader>z :<C-u>bdel
+nnoremap <leader>Z :<C-u>bdel!
 " Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -782,19 +880,31 @@ nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency ==
 
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-"
-" hi SLWinNr guifg=#000000 guibg=#e6e3c8 gui=bold cterm=bold ctermfg=yellow cterm=underline
-" hi SLWinNr guibg=#ffffff guifg=#a63318 gui=bold
-" hi SLFileName guifg=#ede39e guibg=#000000
 
-"set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )%m\ %##%r%h%w\ %<%#SLFileName#\ %F\ %##%m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
-"set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %##%h%w\ %<%#SLFileName#\ %F\ %r\ %##%m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
-set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %##%h%w\ %<%#SLFileName#\ %F\ %##\ %r\ %m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
-augroup MyVimrc_Statusline
+"set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %##%h%w\ %<%#SLFileName#\ %F\ %##\ %r\ %m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
+
+"let stl_fn = '%t'
+"set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\ %r\ %##%h%w\ %<%#SLFileName#\ %{stl_fn}\ %##\ \ \ 
+"set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\ %r\ %##%h%w\ %<%#SLFileName#\ %t\ %##\ %F\ \ \ 
+"set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\ %r\ %##%h%w\ %<%#SLFileName#\ %F\ %##\ %r\ %m\ \ \ 
+              "\%=%#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %1{&whichwrap=~'h'?'>':'='}\ %##%4p%%\ [%4l\ %3v]\ 
+              "\%#SLFileName#\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
+set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ 
+              \%=%#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %1{&whichwrap=~'h'?'>':'='}\ %1{g:MigemoIsSlash?'\\':'/'}\ %##%4p%%\ [%4L]\ 
+              \%#SLFileName#\ %3v\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
+let set_stl = 'set statusline='
+	\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ '
+        \ . '%=%#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y\ %1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ %1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
+	\ . '%{&iminsert?''j'':''e''}\ %##%4p%%\ [%4L]\ '
+        \ . '%#SLFileName#\ %3v\ %##\ \ %{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
+exe set_stl
+
+augroup MyVimrc_StatusLine
   au!
   "au BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
   " M$ Windowsの不具合対策 他のドライブのファイルを読み込んだときにバグがある?
-  au BufAdd,BufNewFile,BufRead,BufFilePost,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
+  au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
+  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
 augroup end
 "function! Buf_name_len_set()
 "  try
@@ -921,10 +1031,6 @@ function! SetCpmplKey(str)
    "exec "inoremap <expr> " . k . " pumvisible() ? '\<C-e>" . k . "' : search('\\k\\{1\\}\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
     exec "inoremap <expr> " . k . " pumvisible() ? '" . k . "' : search('\\k\\{1\\}\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
    "exec "inoremap <expr> " . k . " pumvisible() ? '\<C-e>" . k . "\<C-n>\<C-p>' : search('\\k\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
-   "exec "inoremap <buffer><expr> " . k . " pumvisible() ? '\<C-e>" . k . "\<C-n>\<C-p>' : search('\\k\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
-   "exec "inoremap <buffer><expr> " . k . " pumvisible() ? '\<C-e>" . k . "\<C-n>\<C-p>' : search('\\k\\k\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
-   "exec "inoremap <buffer><expr> " . k . " pumvisible() ? '\<C-e>" . k . "\<C-n>\<C-p>' : search('\\k\\%#', 'bcn') ? '" . k . "\<C-N>\<C-P>'" . " : '" . k . "'"
-   "exec "inoremap <buffer><expr> " . k . " pumvisible() ? '\<C-e>" . k . "\<C-X>\<C-D>' : search('\\k\\%#', 'bcn') ? '" . k . "\<C-X>\<C-D>'" . " : '" . k . "'"
   endfor
 endfunction
 inoremap <expr> <BS> pumvisible() ? (search('\k\k\k\k\%#', 'bcn') ? '<BS>' : "\<BS>") : (search('\k\k\k\%#', 'bcn') ? TrigCompl("\<BS>") : "\<BS>")
@@ -1158,17 +1264,7 @@ nnoremap <C-Tab> <C-w>p
 
 nnoremap <leader>w <Esc>:w<CR>
 
-"
 "set foldmethod=syntax
-set foldcolumn=2
-set foldcolumn=0
-
-
-function! s:Hat()
-	exe v:prevcount ? ('normal! ' . v:prevcount . '|') : 'normal! ^'
-endfunction
-nnoremap <silent> ^ <Esc>:call <SID>Hat()<CR>
-"nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
 
 
 
@@ -1242,6 +1338,8 @@ nnoremap S           :<C-u>g#.#s    /<C-R>//
 set showtabline=0
 nnoremap <C-h> :<C-u>tabs<CR>
 
+" 現在のバッファを、別のタブでも開き直す。
+" デフォルトの<C-w>tとの違いは、元のウィンドウも残るということ。
 function! TabReopen()
   let b0 = bufnr("%")
   tabnew
@@ -1256,12 +1354,115 @@ nnoremap <C-w>T :<C-u>call TabReopen()<CR>
 "cbuf
 
 nnoremap <silent><expr> <leader>r &readonly ? ':<C-u>set noreadonly<CR>' : ':<C-u>set readonly<CR>'
+nnoremap <silent><expr> <leader>R &modifiable ? ':<C-u>set nomodifiable<CR>' : ':<C-u>set modifiable<CR>'
 
 
 set nowildmenu
 set wildmode=longest,full
 inoremap <C-f> <C-p>
 
-"set whichwrap+=h,l
 "source $VIMRUNTIME/macros/matchit.vim
 
+
+" clever-f Configure
+let g:clever_f_smart_case=1			"
+let g:clever_f_use_migemo=0			"
+"let g:clever_f_fix_key_direction=1		"
+let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
+if 0
+  let g:clever_f_mark_cursor_color = 'gui=none guifg=black guibg=yellow'
+  let g:clever_f_mark_char_color   = 'gui=none guifg=black guibg=red'
+  let g:clever_f_mark_cursor = 1
+  let g:clever_f_mark_char = 1
+endif
+
+cnoremap <C-A>	<Home>
+cnoremap <C-D>	<Del>
+inoremap <C-E>	<End>
+"if exists('loaded_mru')
+ "nnoremap <silent> <leader>o :MRU<CR>
+  nnoremap          <leader>o :MRU<CR>/
+ "nnoremap <silent> <leader><CR> :MRU<CR>
+"endif
+
+"set whichwrap+=h,l
+nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
+
+so D:/bin/vim74-kaoriya-win32/test.vim
+so D:/bin/vim74-kaoriya-win32/blockdiff.vim
+
+
+function! PushPos()
+    let s:save_cursor = getcurpos()
+    let s:save_top = getpos('w0')
+endfunction
+com! PushPos :call PushPos()
+
+function! PopPos()
+    let save_scrolloff = &scrolloff
+    let &scrolloff = 0
+    exe "normal! " . s:save_top[1] . "zt"
+    let &scrolloff = save_scrolloff
+
+    call setpos('.', s:save_cursor)
+    let g:sss = s:save_top
+endfunction
+com! PopPos :call PopPos()
+
+
+nnoremap gG G
+
+nnoremap <expr> cr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'cw'
+nnoremap <expr> dr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'dw'
+nnoremap <expr> yr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'yw'
+
+
+
+" US Keyboard
+nnoremap ; :
+inoremap ' "
+inoremap " '
+
+
+cnoremap <C-y> <C-R><C-O>*
+
+set packpath+=$VIMRUNTIME
+
+
+com! TVIMRC  :tabnew $vim/vimrc
+com! TGVIMRC :tabnew $vim/vimrc
+
+com! VVIMRC  :vsp $vim/vimrc
+com! VGVIMRC :vsp $vim/vimrc
+
+com! VIMRC  :sp $vim/vimrc
+com! Vimrc  :sp $vim/vimrc
+com! GVIMRC :sp $vim/gvimrc
+com! GVimrc :sp $vim/gvimrc
+com! Gvimrc :sp $vim/gvimrc
+
+
+"=====================================================================================================================================
+if 0
+  " diffのコマンド
+  set diffexpr=MyDiff()
+  function MyDiff()
+    let opt = ""
+    if &diffopt =~ "iwhite"
+      let opt = opt . "-b "
+    endif
+    silent execute "!git-diff-normal-format " . opt . v:fname_in . " " . v:fname_new . " > " . v:fname_out
+    redraw!
+  endfunction
+endif
+"=====================================================================================================================================
+
+
+nnoremap _    <C-w>s
+nnoremap <Bar> <C-w>v
+
+let $PATH.=';C:\cygwin\bin'
+
+
+"// Windowsでの設定例です。Mac他の場合は外部コマンド部分を読み替えてください。
+au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome/Application/chrome.exe %
