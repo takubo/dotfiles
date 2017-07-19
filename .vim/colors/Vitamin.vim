@@ -80,6 +80,7 @@ hi StatusLineNC	guifg=#5c5a4f guibg=#6f0f0a gui=none  |  "none
 hi StatusLineNC	guifg=#5c5a4f guibg=#400803 gui=none  |  "none
 hi StatusLineNC	guifg=#5c5a4f guibg=#300a03 gui=none  |  "none
 hi StatusLine	guifg=#ff2d18 guibg=#000000 gui=none  |  "none
+hi StatusLine	guifg=#ede39e guibg=#7f1f1a gui=none  | "italic
 hi StatusLine	guifg=#ffe3c8 guibg=#7f1f1a gui=none  | "italic
 hi VertSplit 	guifg=#444444 guibg=#444444 gui=none 
 hi VertSplit 	guifg=#242424 guibg=#242424 gui=none 
@@ -164,6 +165,7 @@ hi SLFileName guifg=#ede39e guibg=#000000
 hi SLFileName guifg=#a63318 guibg=#000000
 hi SLFileName guifg=red guibg=#000000
 hi SLFileName guifg=#cf302d guibg=#000000
+"hi SLFileName guifg=#ede39e guibg=#000000
 "hi SLFileName guifg=#7f1f1a guibg=#000000
 "hi SLFileName guifg=#ffffff guibg=#000000
 
@@ -176,15 +178,20 @@ set guicursor=n-v-c:block-Cursor/lCursor,ve:ver35-Cursor,o:hor50-Cursor,i-ci:ver
 
 "set guifont=MeiryoKe_Gothic:h9.5:cSHIFTJIS
 "set guifont=MeiryoKe_Console:h9.5:cSHIFTJIS
-set guifont=MeiryoKe_Console:h9:w4.4
+set guifont=MeiryoKe_Console:h9.5:w4.5
 
 let s:FontName="MeiryoKe_Console"
-let s:FontHeight=9
-let s:FontWidth=4.4
+"let s:FontHeight=9
+"let s:FontWidth=4.4
+let s:FontHeight=9.5
+let s:FontWidth=4.5
 
 let s:FontHeight=8.5
 let s:FontWidth=4.15
 let s:FontWidth=4.0
+
+let s:FontHeight=9.5
+let s:FontWidth=4.45
 
 let s:MinFontHeight=2.0
 let s:MinFontWidth=1.0
@@ -242,12 +249,30 @@ hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=DarkMagenta		guifg
 
 hi	DiffAdd		term=bold	ctermbg=1			gui=NONE	guibg=#581111		guifg=NONE
 hi	DiffAdd		term=bold	ctermbg=1			gui=NONE	guibg=#481111		guifg=NONE
+hi	DiffAdd		term=bold	ctermbg=1			gui=NONE	guibg=#381111		guifg=NONE
 hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#755332		guifg=#333333
 hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#327553		guifg=#333333
 hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#326553		guifg=#333333
+hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#124533		guifg=#232323
+hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#333333		guifg=#202020
+hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#131353		guifg=#202020
+hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#131343		guifg=#202020
+hi	DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#111138		guifg=#202020
 hi	DiffChange	term=bold	ctermbg=5			gui=NONE	guibg=#755332	guifg=NONE
 hi	DiffChange	term=bold	ctermbg=5			gui=NONE	guibg=#453020	guifg=NONE
 hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=DarkMagenta		guifg=NONE
+
+
+" !!! !!!
+hi	DiffChange	term=NONE	ctermbg=NONE			gui=NONE	guibg=NONE	guifg=NONE
+hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#850b85	guifg=NONE
+hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#FF00FF	guifg=NONE
+hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#C506C5	guifg=NONE
+hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#b505b5	guifg=NONE
+hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#850585	guifg=NONE
+hi	DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#780578	guifg=NONE
+"hi	DiffChange	guifg=NONE	guibg=#191919	gui=none	ctermfg=NONE	ctermbg=235
+" !!! !!!
 
 hi	qfFileName	guifg=#c0504d
 
@@ -258,3 +283,4 @@ hi	ErrorMsg	guifg=black	guibg=#ffd129
 hi	Search	guibg=#c0504d	guifg=white
 
 " #c0504d
+" nnoremap <buffer> @ yy:<c-r>"<BS>
