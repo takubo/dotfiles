@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 #bindkey -v
 
 function is-null {
@@ -446,16 +448,17 @@ abbreviations=(
     "DX"   "| d2x -s"
     "LC"   "LANG=C"
     "LJ"   "LANG=ja_JP.UTF-8"
-    "LF"   "LANG=fr_FR.UTF-8"
+#   "LF"   "LANG=fr_FR.UTF-8"
 #   "D"    "| disp"
 # alias -g C='| cut'
 #   "E"    "2>&1 > /dev/null"
 # alias -g F='| s2t | cut -f'	#field
     "G"    "| grep"
     "GV"   "| grep -v"
+    "HH"   '| head -n $(($LINES-4))'
     "H"    "| head -n 20"
     "Hn"   "| head -n"
-    "HN"   "| head"
+    "HN"   "| head -n"
     "I"    "|"
 #   "I"    "< /dev/null"
 #   "J"    "| japan_numerical"
@@ -464,48 +467,72 @@ abbreviations=(
     "N"    "> /dev/null"
     "Ne"   "2> /dev/null"
     "N2"   "2> /dev/null"
-    "Na"   "> /dev/null 2>&1"
-    "Nn"   "> /dev/null 2>&1"
+#   "Na"   "> /dev/null 2>&1"
+    "NN"   "> /dev/null 2>&1"
     "Ni"   "< /dev/null"
-    "Q"    "| sort"     # `O'rder
+    "ON"   "-o -name '"
+    "O"    "| sort"     # `O'rder
+    "Q"    "| sort"     # Quick sort
+    "QQ"   "--help"
 # alias -g Q='| sort'	# Quick Sort
 # alias -g R='| tr'
     "S"    "| sed '"
-    "Sn"   "| sed -n '"
-    "T"    "| tail"
+    "SN"   "| sed -n '"
+#   "T"    "| tail"
+    "T"    '| tail -n $(($LINES-4))'
     "Tn"   "| tail -n"
     "TN"   "| tail -n 20"
     "U"    "| iconv -f cp932 -t utf-8"
     "UU"   "| iconv -f utf-8 -t cp932"
-    "Ucu"  "| iconv -f cp932 -t utf-8"
-    "Ueu"  "| iconv -f euc-jp -t utf-8"
-    "Uuc"  "| iconv -f utf-8 -t cp932"
-    "Uec"  "| iconv -f euc-jp -t cp932"
-    "Uce"  "| iconv -f cp932 -t euc-jp"
-    "Uue"  "| iconv -f utf-8 -t euc-jp"
+#   "Ucu"  "| iconv -f cp932 -t utf-8"
+#   "Ueu"  "| iconv -f euc-jp -t utf-8"
+#   "Uuc"  "| iconv -f utf-8 -t cp932"
+#   "Uec"  "| iconv -f euc-jp -t cp932"
+#   "Uce"  "| iconv -f cp932 -t euc-jp"
+#   "Uue"  "| iconv -f utf-8 -t euc-jp"
     "UN"   "| sort | uniq"
     "V"    "| vim -R -"
     "W"    "| wc -l"
     "X"    "| xargs"
     "F"    "| xargs -i"		# For each
     "XI"   "| xargs -i"
-    "Xn"   "| xargs -n"
-    "XX"   "| xargs"
+#   "Xn"   "| xargs -n"
+#   "XX"   "| xargs"
 
-    "TU"   "| tr 'a-f' 'A-F'"
+    "TU"   "| tr 'a-f' 'A-F'"	# To Upper
     "M"    "| mc '"
     "B"    "| xc '"
+
+    "FN"   "| find -name '"
+    "FNS"  "| find -name '.svn' -prune -type f -o -name '"
+    "FG"   "| find | xargs grep"
+
+    "AB"   "| awk 'BEGIN{"
+    "ABF"  "| awk 'BEGIN{ printf \"%"
+    "FOR"  "for (i = 1; i <= NF; i++)"
 # alias -g Y='| wc'
 )
 
+# magic-abbrev-expand() {
+#     local MATCH
+#     OLD_LBUFFER=${LBUFFER}
+#     LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
+#     LBUFFER+=" "${abbreviations[$MATCH]:-$MATCH}
+#     LBUFFER=${LBUFFER## | }      # 行頭で展開するときはパイプを消す
+# 	if [ "${abbreviations[$MATCH][-1]}" != "'" ]; then
+# 	# 展開後の末尾が"'"でなければスぺ―ス自体を挿入
+#         zle self-insert
+#     fi
+# }
 magic-abbrev-expand() {
-    local MATCH
-    LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
-    LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
-    LBUFFER=${LBUFFER##| }      # 行頭で展開するときはパイプを消す
-    if [ "`echo -n ${abbreviations[$MATCH]} | tail -c1`" != "'" ]; then
-        zle self-insert
-    fi
+	local MATCH
+	LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
+	LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
+	LBUFFER=${LBUFFER##| }      # 行頭で展開するときはパイプを消す
+	if [ "${abbreviations[$MATCH][-1]}" != "'" ]; then
+		# 展開後の末尾が'でなければスぺ―ス自体を挿入
+		zle self-insert
+	fi
 }
 zle -N magic-abbrev-expand
 bindkey " " magic-abbrev-expand
@@ -718,23 +745,27 @@ chpwd
 #bindkey "[" beg-popd
 
 
-# MELCO
-
 # コマンドラインでもコメントを使う
 setopt interactivecomments
 
-# MELCO
-cdd()
-{
-	cd //pc7982/510ptseisetu_Conf/PTCOM/SWCOM/自主開発プログラム管理/プログラム変更書/IDC-`echo 00"$1" | sed 's/.*\(....\)$/\1/'`
-}
-
-cds()
-{
-	cd //10.166.3.166/nx2/hp9000/swcom/PF01.00"$1"
-}
-
+# {}の中に no match があってもエラーとしない。
+setopt nonomatch
 
 alias awk='awk -M'
 
 export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36'
+
+function tf {
+	unset tf
+
+	# trap '[[ "$tmpfile" ]] && rm -f $tmpfile' 1 2 3 15
+
+	tf=$(mktemp --suffix .$1 2>/dev/null||mktemp --suffix .$1 -t tmp)
+
+	vgg $tf
+}
+
+alias dog='source-highlight-esc.sh'
+
+
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
