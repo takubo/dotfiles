@@ -676,22 +676,6 @@ function! CR(arg)
 				if w0 =~ '^_'
 				" 元の検索語は"_"始まり
 					let w = substitute(w0, '^_', '', '')
-" Customer ++
-				elseif w0 =~ '^fix_'
-				" 元の検索語は"fix_"始まり
-					let w = substitute(w0, '^fix_', '', '')
-					let w0 = w
-				"elseif w0 =~ '^fix_'
-				"" 元の検索語は"fix_"始まりで、本体がアセンブラ。
-				"	let w = substitute(w0, '^fix', '', '')
-				elseif w0 =~ '^sub_'
-				" 元の検索語は"sub_"始まり
-					let w = substitute(w0, '^sub_', '', '')
-					let w0 = w
-				"elseif w0 =~ '^sub_'
-				"" 元の検索語は"sub_"始まりで、本体がアセンブラ。
-				"	let w = substitute(w0, '^sub', '', '')
-" Customer --
 				else
 				" 元の検索語は"_"始まりでない
 					let w = '_' . w0
