@@ -86,7 +86,12 @@ hi VertSplit 	guifg=#444444 guibg=#444444 gui=none
 hi VertSplit 	guifg=#242424 guibg=#242424 gui=none 
 hi VertSplit	guifg=#300a03 guibg=#300a03 gui=none  |  "none
 hi VertSplit	guifg=#5c5a4f guibg=#300a03 gui=none  |  "none
-hi VertSplit 	guifg=#000000 guibg=#000000 gui=none 
+hi VertSplit	guifg=#000000 guibg=#000000 gui=none 
+hi VertSplit	guifg=#300a03 guibg=#300a03 gui=none 
+hi VertSplit	guifg=#000000 guibg=#300a03 gui=none 
+hi VertSplit	guifg=#4c4a3f guibg=#300a03 gui=none 
+hi VertSplit	guifg=#424035 guibg=#300a03 gui=none 
+hi VertSplit	guifg=#5c5a4f guibg=#300a03 gui=none 
 
 hi Folded 	guibg=#384048 guifg=#a0a8b0 gui=none
 hi Folded 	guibg=#232323 guifg=#b0b0b0 gui=none
@@ -123,6 +128,10 @@ hi Pmenu	guifg=#dcda8f guibg=#1a1a1a gui=none ctermfg=239 ctermbg=232
 """""""""""""""""""""""""""""""挿入モード時、ステータスラインの色を変更""""""""""""""""""""""""""""""
 
 let g:hi_insert = 'highlight StatusLine guifg=darkblue guibg=darkyellow gui=none ctermfg=blue ctermbg=yellow cterm=none'
+let g:hi_insert = 'highlight StatusLine guifg=darkblue guibg=darkgrey gui=none ctermfg=blue ctermbg=yellow cterm=none'
+let g:hi_insert = 'highlight StatusLine guifg=darkgrey guibg=darkblue gui=none ctermfg=blue ctermbg=yellow cterm=none'
+let g:hi_insert = 'highlight StatusLine guifg=white guibg=darkblue gui=none ctermfg=blue ctermbg=yellow cterm=none'
+let g:hi_insert = 'highlight StatusLine guifg=white guibg=#1a1f7f gui=none ctermfg=blue ctermbg=yellow cterm=none'
 let g:hi_cmdwin = 'highlight StatusLine guifg=darkblue guibg=darkyellow gui=none ctermfg=blue ctermbg=yellow cterm=none'
 if has('syntax')
 	augroup InsertHook
@@ -284,3 +293,7 @@ hi	Search	guibg=#c0504d	guifg=white
 
 " #c0504d
 " nnoremap <buffer> @ yy:<c-r>"<BS>
+
+
+set guicursor=n-v-c:block-Cursor/lCursor,ve:ver35-Cursor,o:hor50-Cursor,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor,a:blinkon0
+set guicursor=n-v-c:ver10-Cursor/lCursor,ve:ver35-Cursor,o:hor50-Cursor,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor,a:blinkon0
