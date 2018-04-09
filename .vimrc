@@ -679,22 +679,6 @@ function! CR(arg)
 				if w0 =~ '^_'
 				" 元の検索語は"_"始まり
 					let w = substitute(w0, '^_', '', '')
-" Customer ++
-				elseif w0 =~ '^fix_'
-				" 元の検索語は"fix_"始まり
-					let w = substitute(w0, '^fix_', '', '')
-					let w0 = w
-				"elseif w0 =~ '^fix_'
-				"" 元の検索語は"fix_"始まりで、本体がアセンブラ。
-				"	let w = substitute(w0, '^fix', '', '')
-				elseif w0 =~ '^sub_'
-				" 元の検索語は"sub_"始まり
-					let w = substitute(w0, '^sub_', '', '')
-					let w0 = w
-				"elseif w0 =~ '^sub_'
-				"" 元の検索語は"sub_"始まりで、本体がアセンブラ。
-				"	let w = substitute(w0, '^sub', '', '')
-" Customer --
 				else
 				" 元の検索語は"_"始まりでない
 					let w = '_' . w0
@@ -903,8 +887,16 @@ let set_stl = 'set statusline='
 	\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ '
         \ . '%=%#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y\ %1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ %1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
 	\ . '%{&iminsert?''j'':''e''}\ %##%4p%%\ [%4L]\ '
-        \ . '%#SLFileName#\ %3v\ %##\ \ %{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
+        \ . '%#SLFileName#\ %3v\ %##\ \ '
+	\ . '%{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
+        \ . "%{strftime('%H:%M:%S')}"
+	\ . '\ %{g:bat_info}'
 exe set_stl
+function! MyRedraw(a)
+  exe g:set_stl
+endfunction
+let tempTimer = timer_start(1000, 'MyRedraw', {'repeat': -1})
+let bat_info='-%[2:36]'
 
 augroup MyVimrc_StatusLine
   au!
@@ -1381,9 +1373,9 @@ if 0
   let g:clever_f_mark_char = 1
 endif
 
-cnoremap <C-A>	<Home>
-cnoremap <C-D>	<Del>
-inoremap <C-E>	<End>
+cnoremap <C-a>	<Home>
+cnoremap <C-d>	<Del>
+inoremap <C-e>	<End>
 "if exists('loaded_mru')
  "nnoremap <silent> <leader>o :<C-u>MRU<CR>
   nnoremap          <leader>o :<C-u>MRU<CR>/
