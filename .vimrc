@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 19-Jul-2017.
+" Last Change: 09-Apr-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -367,7 +367,7 @@ augroup MyVimrc
   au QuickfixCmdPost vimgrep botright cwindow
   "au QuickfixCmdPost make,grep,grepadd,vimgrep 999wincmd w
 
-  au InsertEnter * set timeoutlen=200
+  au InsertEnter * set timeoutlen=300
   au InsertLeave * set timeoutlen=15000
 
   au WinEnter * set cursorline
@@ -382,6 +382,7 @@ augroup MyVimrc
 
   au BufNewFile,BufRead *.c inoremap @ /*  */<Left><Left><Left>
 augroup end
+
 
 let g:TypewriterScroll = 0
 nnoremap <Leader>H <Esc>:<C-u>let g:TypewriterScroll = !g:TypewriterScroll <Bar> call <SID>best_scrolloff()<CR>
@@ -427,8 +428,8 @@ nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:call clever_f#reset()<CR>
 "nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:SearchReset<CR>:SearchBuffersReset<CR> TODO multiplesearch
 nnoremap cp cw<C-r>0
 nnoremap da 0d$
-nnoremap <silent> ZZ :<CR>
-nnoremap <silent> ZQ :<CR>
+nnoremap <silent> ZZ :<C-u><CR>
+nnoremap <silent> ZQ :<C-u><CR>
 nnoremap <C-o> O<Esc>
 nnoremap <A-o> o<Esc>
 
@@ -448,18 +449,20 @@ nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>')
 nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
 nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
 
-nnoremap <silent> <leader>p :disp<CR>
-nnoremap <silent> <Leader>m :marks<CR>
-nnoremap <silent> <Leader>" :disp<CR>
-nnoremap <silent> <Leader>k :make<CR>
-nnoremap <silent> <leader>t :ToggleWord<CR>
+nnoremap <silent> <leader>p :<C-u>disp<CR>
+nnoremap <silent> <Leader>m :<C-u>marks<CR>
+nnoremap <silent> <Leader>" :<C-u>disp<CR>
+nnoremap <silent> <Leader>k :<C-u>make<CR>
+nnoremap <silent> <leader>t :<C-u>ToggleWord<CR>
 nnoremap <leader>: :<C-u>set<Space>
 nnoremap <leader>; :<C-u>setl<Space>
 
 nnoremap g; :<C-u>set<Space>
 nnoremap <leader>; :<C-u>setl<Space>
 nnoremap <C-z> nop
-nnoremap <silent><expr> <leader>j &cursorcolumn ? ':setlocal nocursorcolumn<CR>' : ':setlocal cursorcolumn<CR>'
+
+nnoremap <silent><expr> <Leader>c &cursorline ? ':set nocursorline<CR>' : ':set cursorline<CR>'
+nnoremap <silent><expr> <leader>C &cursorcolumn ? ':setlocal nocursorcolumn<CR>' : ':setlocal cursorcolumn<CR>'
 
 nnoremap  ]]  ]]f(bzt
 nnoremap g]]  ]]f(b
@@ -586,7 +589,7 @@ endif
 nnoremap <C-s>           :<C-u>g%.%s    /
 nnoremap <C-s>           :<C-u>g%.%s    %%<Left>
 nnoremap <leader><C-s>   :<C-u>g%.%s    %
-nnoremap g<C-s>   :<C-u>g%.%s    /<C-R>//<C-R><C-W>/
+nnoremap g<C-s>          :<C-u>g%.%s    /<C-R>//<C-R><C-W>/
 nnoremap <A-s>           :<C-u>g%.%s    /<C-R>//
 vnoremap <C-s>           :s    /
 vnoremap <leader><C-s>   :s    /<C-R>//<C-R><C-W>/
@@ -594,11 +597,11 @@ vnoremap <leader><C-s>   :s    /<C-R>//<C-R><C-W>/
 
 
 " Grep {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-"nnoremap <C-g> :vim "\<<C-R><C-W>\>" *.c *.h<CR>
-nnoremap <C-g> :vim "" <Left><Left>
-nnoremap <leader>g :vim "\<<C-R><C-W>\>" 
-"nnoremap <leader>G :vim "<C-R><C-W>" *.c *.h<CR>
-nnoremap <leader>G :vim "<C-R><C-W>" 
+"nnoremap <C-g> :<C-u>vim "\<<C-R><C-W>\>" *.c *.h<CR>
+nnoremap <C-g> :<C-u>vim "" <Left><Left>
+nnoremap <leader>g :<C-u>vim "\<<C-R><C-W>\>" 
+"nnoremap <leader>G :<C-u>vim "<C-R><C-W>" *.c *.h<CR>
+nnoremap <leader>G :<C-u>vim "<C-R><C-W>" 
 " Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -676,6 +679,22 @@ function! CR(arg)
 				if w0 =~ '^_'
 				" 元の検索語は"_"始まり
 					let w = substitute(w0, '^_', '', '')
+" Customer ++
+				elseif w0 =~ '^fix_'
+				" 元の検索語は"fix_"始まり
+					let w = substitute(w0, '^fix_', '', '')
+					let w0 = w
+				"elseif w0 =~ '^fix_'
+				"" 元の検索語は"fix_"始まりで、本体がアセンブラ。
+				"	let w = substitute(w0, '^fix', '', '')
+				elseif w0 =~ '^sub_'
+				" 元の検索語は"sub_"始まり
+					let w = substitute(w0, '^sub_', '', '')
+					let w0 = w
+				"elseif w0 =~ '^sub_'
+				"" 元の検索語は"sub_"始まりで、本体がアセンブラ。
+				"	let w = substitute(w0, '^sub', '', '')
+" Customer --
 				else
 				" 元の検索語は"_"始まりでない
 					let w = '_' . w0
@@ -708,15 +727,15 @@ nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-
 "    exe "normal " . a:c . "G"
 "  endif
 "endfunction
-"com! -count JUMP :call Jump(<q-count>)
-"nnoremap <CR> :JUMP<CR>
+"com! -count JUMP :<C-u>call Jump(<q-count>)
+"nnoremap <CR> :<C-u>JUMP<CR>
 " TODO Quickfix
 nnoremap <expr> <C-w><CR> (&ft != 'qf') ? ('<C-w><C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
 " TODO QuickFix
 nnoremap <BS><CR> <C-w><C-]>
 nnoremap <leader><CR> <C-w><C-]>
 
-nnoremap <silent> gf :aboveleft sp<CR>gF
+nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
 " Tag }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -726,17 +745,20 @@ nnoremap <expr> <leader>d &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 "" diffup (diffthisを実行)
 nnoremap <expr> <leader>D &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
 
+nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
+nnoremap <expr> d<Space> match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
+
+nnoremap        dq :<C-u>diffoff<CR>
+nnoremap        dc :<C-u>diffoff<CR>
+nnoremap <expr> dx &diff ? ':diffoff<CR>' : ':diffthis<CR>'
+nnoremap <expr> di match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 nnoremap <expr> <leader><C-d> match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
-nnoremap <expr> dx &diff ? ':diffoff<CR>' : ':diffthis<CR>'
-nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
-nnoremap <expr> di match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
-nnoremap        dq :diffoff<CR>
-nnoremap        dc :diffoff<CR>
-nnoremap        dz :echo &diffopt<CR>
+nnoremap        dz :<C-u>echo &diffopt<CR>
+nnoremap        dv :<C-u>echo &diffopt<CR>
 
-"nnoremap <silent> <leader>o :%foldopen<CR>
-"nnoremap <silent> <leader>O :%foldclose<CR>
+"nnoremap <silent> <leader>o :<C-u>%foldopen<CR>
+"nnoremap <silent> <leader>O :<C-u>%foldclose<CR>
 " 余りキーマップ	dq, dr, ds. dg, dz, dx, dc, dv, dm
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -747,9 +769,9 @@ nnoremap <BS> <C-w>
 
 "nnoremap <BS> <C-w>v
 nnoremap <BS><BS> <C-w>v
-nnoremap <silent> <s-BS> :vnew<cr>
+nnoremap <silent> <s-BS> :<C-u>vnew<cr>
 nnoremap <c-BS> <C-w>s
-nnoremap <silent> <s-c-BS> <esc>:new<cr>
+nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
 
 "nnoremap <c-up> <C-w>K
 "nnoremap <c-down> <C-w>J
@@ -780,25 +802,25 @@ vnoremap <s-down>  <C-w>-
 vnoremap <s-left>  <C-w><
 vnoremap <s-right> <C-w>>
 
-nnoremap <silent> <up>	    <esc>3<C-w>+:call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <down>    <esc>3<C-w>-:call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <left>    <esc>5<C-w><:call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <right>   <esc>5<C-w>>:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <up>	    <esc>3<C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <down>    <esc>3<C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <left>    <esc>5<C-w><:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <right>   <esc>5<C-w>>:<C-u>call	<SID>best_scrolloff()<CR>
 
-nnoremap <silent> <S-up>    <esc><C-w>+:call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <S-down>  <esc><C-w>-:call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <S-left>  <esc><C-w><:call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <S-right> <esc><C-w>>:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-up>    <esc><C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-left>  <esc><C-w><:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-right> <esc><C-w>>:<C-u>call	<SID>best_scrolloff()<CR>
 
-nnoremap <silent> <C-up>    <C-w>_:call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <C-down> 1<C-w>_:call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <C-left> 1<C-w><bar>:call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <C-right> <C-w><bar>:call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <C-left> 1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <C-right> <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
 
-nnoremap <silent> <A-up>    <C-w>K:call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <A-down>  <C-w>J:call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <A-left>  <C-w>H:call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <A-right> <C-w>L:call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-up>    <C-w>K:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-down>  <C-w>J:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-left>  <C-w>H:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-right> <C-w>L:<C-u>call		<SID>best_scrolloff()<CR>
 
 nnoremap <silent> q <C-w><C-c>
 nnoremap <silent> <C-q>: q:
@@ -816,8 +838,8 @@ nnoremap <C-w><C-t> <C-w>T
 
 
 " Tab {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <C-t> :tabnew<Space>
-"nnoremap <C-t> :tabnew %<CR> :e 
+nnoremap <C-t> :<C-u>tabnew<Space>
+"nnoremap <C-t> :<C-u>tabnew %<CR> :e 
 
 noremap <C-Tab>   gt
 noremap <C-S-Tab> gT
@@ -826,16 +848,17 @@ nnoremap <C-f> gt
 nnoremap <C-b> gT
 
 nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
+nnoremap <silent><expr> <leader>= !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
 nnoremap <silent><expr> gt !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap K :<C-u>ls!<CR>:b 
-nnoremap K :<C-u>ls<CR>:b 
+nnoremap K :<C-u>ls!<CR>:<C-u>b 
+nnoremap K :<C-u>ls<CR>:<C-u>b 
 
-nnoremap <silent> <C-n> :bnext<CR>
-nnoremap <silent> <C-p> :bprev<CR>
+nnoremap <silent> <C-n> :<C-u>bnext<CR>
+nnoremap <silent> <C-p> :<C-u>bprev<CR>
 
 nnoremap <leader>z :<C-u>bdel
 nnoremap <leader>Z :<C-u>bdel!
@@ -851,11 +874,11 @@ augroup MyVimrc_GUI
   exe 'au GUIEnter * set transparency=' . g:my_transparency
 augroup end
 
-nnoremap <silent>       <s-pageup> :exe 'se transparency=' . (&transparency + 1)<CR>
+nnoremap <silent>       <s-pageup> :<C-u>exe 'se transparency=' . (&transparency + 1)<CR>
 nnoremap <silent><expr> <s-pagedown> (&transparency > 1) ? (":exe 'se transparency=' . (&transparency - 1)<CR>") : ("")
 
-nnoremap <silent><expr> <pageup>   ':se transparency=' . min([&transparency + 3, 255]) . '<CR>'
-nnoremap <silent><expr> <pagedown> ':se transparency=' . max([&transparency - 3,   1]) . '<CR>'
+nnoremap <silent><expr> <pageup>   ':<C-u>se transparency=' . min([&transparency + 3, 255]) . '<CR>'
+nnoremap <silent><expr> <pagedown> ':<C-u>se transparency=' . max([&transparency - 3,   1]) . '<CR>'
 
 nnoremap <silent>       <c-pageup>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <CR>
 nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <CR>
@@ -951,7 +974,7 @@ inoremap <expr> <Esc> pumvisible() ? '<C-e>' : '<Esc>'
 "   endif
 " endfunction
 function! s:Tab()
-  if pumvisible()
+  if 0 && pumvisible()
     call feedkeys("\<C-n>")
     return ''
   else
@@ -996,7 +1019,7 @@ function! TrigCompl(key)
   try
     iunmap jj
   catch
-  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:w<CR>' : 'ff'
+  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
   finally
   endtry
   call feedkeys("\<C-n>\<C-p>")
@@ -1005,7 +1028,7 @@ function! TrigCompl(key)
 endfunc
 
 function! SetJJFF()
-  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
   au CompleteDone * try | iunmap ff | catch | finally
 endfunction
 
@@ -1038,18 +1061,18 @@ augroup MyComplete
   "au CompleteDone * iunmap ff
 
   au CompleteDone * try | iunmap ff | catch | finally
-  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
 
   au InsertCharPre * try | iunmap ff | catch | finally
-  " au InsertCharPre * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+  " au InsertCharPre * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
 
-  au TextChangedI * exe pumvisible() ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'"
+  au TextChangedI * exe pumvisible() ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
   au TextChangedI * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
 
   au InsertLeave * try | iunmap ff | catch | finally
-  au InsertLeave * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+  au InsertLeave * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
 
-  au InsertCharPre * exe pumvisible() || v:char != "j" ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'"
+  au InsertCharPre * exe pumvisible() || v:char != "j" ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
   au InsertCharPre * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
 
   "au CompleteDone * try | iunmap ff | catch | finally
@@ -1065,7 +1088,7 @@ function! Cmpl_j()
     iunmap jj
   catch
   finally
-  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:w<CR>' : 'ff'
+  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
   endtry
   call feedkeys("\<C-n>")
   return ''
@@ -1076,7 +1099,7 @@ function! Cmpl_k()
     iunmap jj
   catch
   finally
-  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:w<CR>' : 'ff'
+  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
   endtry
   call feedkeys("\<C-p>")
   return ''
@@ -1088,8 +1111,8 @@ inoremap <expr> j pumvisible() ? Cmpl_j() : TrigCompl('j')
 inoremap <expr> k pumvisible() ? Cmpl_k() : TrigCompl('k')
 "inoremap <expr> j pumvisible() ? '<C-N>' : TrigCompl('j')
 "inoremap <expr> k pumvisible() ? '<C-P>' : TrigCompl('k')
-imap <expr> <C-J> pumvisible() ? 'j' : '<C-J>'
-imap <expr> <C-K> pumvisible() ? 'k' : '<C-K>'
+imap <expr> <C-j> pumvisible() ? 'j' : '<C-j>'
+imap <expr> <C-k> pumvisible() ? 'k' : '<C-k>'
 
 
 "inoremap <buffer><expr> j pumvisible() ? '<C-N>' : TrigCompl('j')
@@ -1114,24 +1137,24 @@ endfunc
 
 
 " Cscope
-" nnoremap <C-j><C-a> :cscope add cscope.out<CR>
-" nnoremap <C-j><C-j> :cscope find 
-" nnoremap <C-j>c     :cscope find c 
-" nnoremap <C-j>d     :cscope find d 
-" nnoremap <C-j>e     :cscope find e 
-" nnoremap <C-j>f     :cscope find f 
-" nnoremap <C-j>g     :cscope find g 
-" nnoremap <C-j>i     :cscope find i 
-" nnoremap <C-j>s     :cscope find s 
-" nnoremap <C-j>t     :cscope find t 
-" nnoremap <C-j>C     :cscope find c <C-r><C-w><CR>
-" nnoremap <C-j>D     :cscope find d <C-r><C-w><CR>
-" nnoremap <C-j>E     :cscope find e <C-r><C-w><CR>
-" nnoremap <C-j>F     :cscope find f <C-r><C-w><CR>
-" nnoremap <C-j>G     :cscope find g <C-r><C-w><CR>
-" nnoremap <C-j>I     :cscope find i <C-r><C-w><CR>
-" nnoremap <C-j>S     :cscope find s <C-r><C-w><CR>
-" nnoremap <C-j>T     :cscope find t <C-r><C-w><CR>
+" nnoremap <C-j><C-a> :<C-u>cscope add cscope.out<CR>
+" nnoremap <C-j><C-j> :<C-u>cscope find 
+" nnoremap <C-j>c     :<C-u>cscope find c 
+" nnoremap <C-j>d     :<C-u>cscope find d 
+" nnoremap <C-j>e     :<C-u>cscope find e 
+" nnoremap <C-j>f     :<C-u>cscope find f 
+" nnoremap <C-j>g     :<C-u>cscope find g 
+" nnoremap <C-j>i     :<C-u>cscope find i 
+" nnoremap <C-j>s     :<C-u>cscope find s 
+" nnoremap <C-j>t     :<C-u>cscope find t 
+" nnoremap <C-j>C     :<C-u>cscope find c <C-r><C-w><CR>
+" nnoremap <C-j>D     :<C-u>cscope find d <C-r><C-w><CR>
+" nnoremap <C-j>E     :<C-u>cscope find e <C-r><C-w><CR>
+" nnoremap <C-j>F     :<C-u>cscope find f <C-r><C-w><CR>
+" nnoremap <C-j>G     :<C-u>cscope find g <C-r><C-w><CR>
+" nnoremap <C-j>I     :<C-u>cscope find i <C-r><C-w><CR>
+" nnoremap <C-j>S     :<C-u>cscope find s <C-r><C-w><CR>
+" nnoremap <C-j>T     :<C-u>cscope find t <C-r><C-w><CR>
 
 
 
@@ -1180,7 +1203,7 @@ function! CountFunctionLines()
   execute 'normal ' . cur . 'G'
 endfunction
 command! FuncLines call CountFunctionLines()
-nnoremap <silent> <leader>l :FuncLines<CR>
+nnoremap <silent> <leader>l :<C-u>FuncLines<CR>
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -1246,7 +1269,7 @@ nnoremap <del> ]c^
 
 nnoremap <C-Tab> <C-w>p
 
-nnoremap <leader>w <Esc>:w<CR>
+nnoremap <leader>w <Esc>:<C-u>w<CR>
 
 "set foldmethod=syntax
 
@@ -1263,8 +1286,6 @@ set grepprg=/home/PK65278/ag\ --line-numbers
 set grepprg=/home/PK65278/bin/ag
 set grepprg=$HOME/bin/ag
 function! CS(str)
-	"? echo a:str
-
 	let str = a:str
 	let pwd = getcwd()
 	for i in range(6)
@@ -1275,16 +1296,15 @@ function! CS(str)
 				"au! WinEnter qf
 				exe "au WinEnter * if (&buftype == 'quickfix') | cd " . getcwd() . " | endif"
 			augroup end
-			"exe 'vim !' . str . '!j **/src_*/**/*.c' . " **/src_*/**/*.h" . " **/inc*/**/*.h"
 			try
-				"exe "silent grep! '" . str . "' **/src_*/**/*.c" . " **/src_*/**/*.h" . " **/inc*/**/*.h"
-				exe "silent grep! '" . str . "' **/src_*/**/*.c" . " **/src_*/**/*.h" . " **/src_*/**/*.xms" . " **/src_*/**/*.inc" . " **/inc*/**/*.h"
-				"exe "grep! '" . str . "' **/src_*/**/*.c" . " **/src_*/**/*.h" . " **/inc*/**/*.h" . " data/**/*.c" . " data/**/*.xms"
-				"set grepprg=ggg
-				"exe "grep! -a '" . str . "' " "**/src_*/**/*.c"  "**/src_*/**/*.h"
+				if exists("*CS_Customer")
+					call CS_Customer(a:str)
+				else
+					"exe "silent grep! '" . str . "' **/*.c" . " **/*.h" . " **/*.s"
+				endif
 				"exe "!$HOME/bin/fff " . str
 				call feedkeys("\<CR>:\<Esc>\<C-o>", "tn")
-			finally
+				finally
 			endtry
 			break
 		endif
@@ -1295,22 +1315,23 @@ endfunction
 
 com! CS call CS("\<C-r>\<C-w>")
 
-nnoremap          <leader>g     :call CS("\\<<C-r><C-w>\\>")<CR>
-nnoremap <silent> <C-g>         :call CS("\\<<C-r><C-w>\\>")<CR>
-nnoremap          <leader>G     :call CS("<C-r><C-w>")<CR>
-nnoremap          <leader><C-g> :call CS('')<Left><Left>
-nnoremap <silent> <C-g>         :call CS("\\b<C-r><C-w>\\b")<CR>
-nnoremap <silent> <leader>g     :call CS("\\b<C-r><C-w>\\b")<CR>
-nnoremap          <leader>g     :call CS('')<Left><Left>
+nnoremap          <leader>g     :<C-u>call CS("\\<<C-r><C-w>\\>")<CR>
+nnoremap <silent> <C-g>         :<C-u>call CS("\\<<C-r><C-w>\\>")<CR>
+nnoremap          <leader>G     :<C-u>call CS("<C-r><C-w>")<CR>
+nnoremap          <leader><C-g> :<C-u>call CS('')<Left><Left>
+nnoremap <silent> <C-g>         :<C-u>call CS("\\b<C-r><C-w>\\b")<CR>
+nnoremap <silent> <leader>g     :<C-u>call CS("\\b<C-r><C-w>\\b")<CR>
+nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
 
 let c_jk_local = 0
-"バッファ化すべき
-nnoremap <expr><silent> <C-k> (c_jk_local ? ":lprev" : ":cprev") . "\<CR>"
-nnoremap <expr><silent> <C-j> (c_jk_local ? ":lnext" : ":cnext") . "\<CR>"
-"nnoremap <silent> <leader> :let c_jk_local = !c_jk_local<CR>
+"QuickenFixバッファOnlyとすべき
+nnoremap <expr><silent> <C-k> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <expr><silent> <C-j> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+"nnoremap <silent> <leader> :<C-u>let c_jk_local = !c_jk_local<CR>
 
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+so $vim/exp.vim
 
 "nnoremap s f_l
 "nnoremap S F_h
@@ -1352,7 +1373,7 @@ inoremap <C-f> <C-p>
 let g:clever_f_smart_case=1			"
 let g:clever_f_use_migemo=0			"
 "let g:clever_f_fix_key_direction=1		"
-let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
+let g:clever_f_chars_match_any_signs = '\\'	" 任意の記号にマッチする文字を設定する
 if 0
   let g:clever_f_mark_cursor_color = 'gui=none guifg=black guibg=yellow'
   let g:clever_f_mark_char_color   = 'gui=none guifg=black guibg=red'
@@ -1364,9 +1385,9 @@ cnoremap <C-A>	<Home>
 cnoremap <C-D>	<Del>
 inoremap <C-E>	<End>
 "if exists('loaded_mru')
- "nnoremap <silent> <leader>o :MRU<CR>
-  nnoremap          <leader>o :MRU<CR>/
- "nnoremap <silent> <leader><CR> :MRU<CR>
+ "nnoremap <silent> <leader>o :<C-u>MRU<CR>
+  nnoremap          <leader>o :<C-u>MRU<CR>/
+ "nnoremap <silent> <leader><CR> :<C-u>MRU<CR>
 "endif
 
 "set whichwrap+=h,l
@@ -1404,8 +1425,6 @@ nnoremap <expr> yr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'yw'
 
 " US Keyboard
 nnoremap ; :
-inoremap ' "
-inoremap " '
 
 
 cnoremap <C-y> <C-R><C-O>*
@@ -1450,3 +1469,8 @@ let $PATH.=';C:\cygwin\bin'
 
 "// Windowsでの設定例です。Mac他の場合は外部コマンド部分を読み替えてください。
 au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome/Application/chrome.exe %
+
+
+com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+
+
