@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 09-Apr-2018.
+" Last Change: 13-Apr-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -334,7 +334,7 @@ set wrap
 " 検索時にファイルの最後まで行ったら最初に戻る (nowrapscan:戻らない)
 set nowrapscan
 set noundofile
-set nrformats-=octal
+set nrformats=alpha,bin,hex
 set shiftround
 "set fileformats=unix,dos,mac
 set fileformats=unix,dos
@@ -342,6 +342,7 @@ set fileformats=unix,dos
 set fileformat=unix
 "set tag+=;
 set tags+=tags;
+"grepコマンドの出力を取り込んで、gfするため。
 set isfname-=:
 
 "set viminfo+='100,c
@@ -766,35 +767,15 @@ nnoremap <Tab> <C-w>w
 nnoremap <S-Tab> <C-w>W
 nnoremap <C-w><C-w> <C-w>p
 
-nnoremap <up>    <esc>5<C-w>+
-nnoremap <down>  <esc>5<C-w>-
-nnoremap <left>  <esc>5<C-w><
-nnoremap <right> <esc>5<C-w>>
-
-vnoremap <up>    5<C-w>+
-vnoremap <down>  5<C-w>-
-vnoremap <left>  5<C-w><
-vnoremap <right> 5<C-w>>
-
-nnoremap <s-up>    <C-w>+
-nnoremap <s-down>  <C-w>-
-nnoremap <s-left>  <C-w><
-nnoremap <s-right> <C-w>>
-
-vnoremap <s-up>    <C-w>+
-vnoremap <s-down>  <C-w>-
-vnoremap <s-left>  <C-w><
-vnoremap <s-right> <C-w>>
-
 nnoremap <silent> <up>	    <esc>3<C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <down>    <esc>3<C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <left>    <esc>5<C-w><:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <right>   <esc>5<C-w>>:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <left>    <esc>4<C-w><
+nnoremap <silent> <right>   <esc>4<C-w>>
 
 nnoremap <silent> <S-up>    <esc><C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <S-left>  <esc><C-w><:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <S-right> <esc><C-w>>:<C-u>call	<SID>best_scrolloff()<CR>
+nnoremap <silent> <S-left>  <esc><C-w><
+nnoremap <silent> <S-right> <esc><C-w>>
 
 nnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
@@ -872,37 +853,46 @@ nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency ==
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"set statusline=\ \ %<%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %##%h%w\ %<%#SLFileName#\ %F\ %##\ %r\ %m\ \ \ %=%#SLFileName#\ %{(&ff)},\ %{&fenc},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %##\ [%4l\ %3v]\ %#SLFileName#%3p%%\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
-
-"let stl_fn = '%t'
-"set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\ %r\ %##%h%w\ %<%#SLFileName#\ %{stl_fn}\ %##\ \ \ 
-"set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\ %r\ %##%h%w\ %<%#SLFileName#\ %t\ %##\ %F\ \ \ 
-"set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\ %r\ %##%h%w\ %<%#SLFileName#\ %F\ %##\ %r\ %m\ \ \ 
-              "\%=%#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y,\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %1{&whichwrap=~'h'?'>':'='}\ %##%4p%%\ [%4l\ %3v]\ 
-              "\%#SLFileName#\ %L\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
-set statusline=\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ 
-              \%=%#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y\ %1{stridx(&isk,'.')<0?'\ ':'.'}\ %1{stridx(&isk,'_')<0?'\ ':'_'}\ %1{c_jk_local!=0?'@':'\ '}\ %1{&whichwrap=~'h'?'>':'='}\ %1{g:MigemoIsSlash?'\\':'/'}\ %##%4p%%\ [%4L]\ 
-              \%#SLFileName#\ %3v\ %##\ \ %{repeat('\ ',winwidth(0)-b:buf_name_len)}
-let set_stl = 'set statusline='
-	\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ '
-        \ . '%=%#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y\ %1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ %1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
-	\ . '%{&iminsert?''j'':''e''}\ %##%4p%%\ [%4L]\ '
-        \ . '%#SLFileName#\ %3v\ %##\ \ '
+let s:stl = ''
+	\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#StatuslineFile#\ %t\ %<%##\ %F\ \ \ \ '
+        \ . '%=%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
+	\ . '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
+	\ . '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
+	\ . '%{&iminsert?''j'':''e''}\ %##%6l,%3v\ '
+        \ . '%#SLFileName#%3p%%\ [%4L]\ %##\ \ '
 	\ . '%{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
-        \ . "%{strftime('%H:%M:%S')}"
-	\ . '\ %{g:bat_info}'
-exe set_stl
-function! MyRedraw(a)
-  exe g:set_stl
-endfunction
-let tempTimer = timer_start(1000, 'MyRedraw', {'repeat': -1})
-let bat_info='-%[2:36]'
+        \ . '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#StatuslineFile#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
+        "\ . '\ \ \ \ ' . '%#String#\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%##\ \ %#Number#\ %{strftime(''%X'')}\ ' . '%##\ \ %#String#\ %{g:bat_str}\ %##\ \ '
+        "\ . '\ \ \ \ ' . '%#Number#\ %{strftime(''%Y/%m/%d(%a)'')}' . '%##%#Number#\ %{strftime(''%X'')}\ ' . '%##\ \ %#String#\ %{g:bat_str}\ %##\ \ '
+        "\ . '\ \ \ \ ' . '%#StatusLineDate#\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#Number#\ %{strftime(''%X'')}' . '%#String#\ %{g:bat_str}\ %##\ \ '
+        "\ . '\ \ \ \ %#Number#\ ' . '%{strftime(''%Y/%m/%d\ %H:%M:%S'')}' . '%#String#\ %{g:bat_str}\ '
+	"\ . '%{repeat(''\ '',winwidth(0)-strdisplaywidth(bufname(''''))-max([strdisplaywidth(fnamemodify(bufname(''''),'':p''))+110,150]))}'
+	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#yellow#\ %t\ %<%##\ %F\ \ \ '
+	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#yellow#\ %t\ %<%#SLFileName#\ %F\ \ \ '
+	"\ . '%{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
+	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%#StatusLine2#\ (\ %n\ )\ %m\%r%##%h%w\ %#keyword#\ %t\ %<%#Number#\ %F%#SLFileName#'
+	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%#StatusLine2#\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ '
+        "\ . '%=%##\ \ \ \ \ \ \ \ %#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y\ '
+        "\ . '%#Number#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
+        "\ . '%#Number#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %#String#\ %{g:bat_str}\ %##\ '
+        "\ . '%#Number#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
+        "\ . '%#Special#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
+        "\ . '%#SLFileName#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
+exe 'set statusline=' . s:stl
 
 augroup MyVimrc_StatusLine
   au!
   "au BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
   " M$ Windowsの不具合対策 他のドライブのファイルを読み込んだときにバグがある?
-  au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
+  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150])
+  au BufEnter,BufWinEnter                                                                 * if !exists('b:buf_name_len') | let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150]) | endif
+  "au BufEnter * echo strdisplaywidth(bufname(''))
+  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+60, 150])
+  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+120, 150])
+  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = exists('b:buf_name_len') ? b:buf_name_len : max([len(fnamemodify(bufname('.'),':p'))+120, 150])
+  "au BufEnter * let b:buf_name_len = exists('b:buf_name_len') ? b:buf_name_len : max([len(fnamemodify(bufname('.'),':p'))+150, 150])
+  "au BufNew * let b:buf_name_len = exists('b:buf_name_len') ? b:buf_name_len : max([len(fnamemodify(bufname('.'),':p'))+150, 150])
+  "au BufAdd * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+120, 150])
   "au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
 augroup end
 "function! Buf_name_len_set()
@@ -914,6 +904,40 @@ augroup end
 "echo max([len(fnamemodify(".", ":p") . bufname(".")) + 40, 120]
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
+" Statusline
+function! UpdateStatusline(dummy)
+	exe 'set statusline=' . s:stl
+endfunction
+if exists('TimerUsl')
+  call timer_stop(TimerUsl)
+endif
+let UpdateStatuslineInterval = 1000
+let TimerUsl = timer_start(UpdateStatuslineInterval, 'UpdateStatusline', {'repeat': -1})
+
+" Battery
+try
+  " bat_win.pyが存在しない環境でもエラーとさせない。
+  py3file ~/bin/bat_win.py
+
+  " Battery (Statusline)
+  function! UpdateStlBatteryInfo(dummy)
+    call py3eval('bat_win_main()')
+    let g:bat_str = g:bat_info['ACLine'] . ' ' . g:bat_info['RemainingPercent'] . ' ' . g:bat_info['RemainingTime']
+  endfunction
+  if exists('TimerUbi')
+    call timer_stop(TimerUbi)
+  endif
+  let UpdateBatteryInfoInterval = 5 * 1000
+  let TimerUbi = timer_start(UpdateBatteryInfoInterval, 'UpdateStlBatteryInfo', {'repeat': -1})
+
+  " Battery Information
+  let bat_info = {}
+  call py3eval('bat_win_ini()')
+  call UpdateStlBatteryInfo(0)
+catch
+  "let bat_str=': 100% [2:05:27]'
+  let bat_str='? ---% [-:--:--]'
+endtry
 
 
 "TODO
@@ -1464,5 +1488,3 @@ au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome
 
 
 com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
-
-
