@@ -1,3 +1,5 @@
+let s:now_disp = 0
+
 " 引数: bits : 何ビット単位で反転させるか？
 " 		8を指定すれば、エンディアン変換
 function! Changian(bits)
@@ -68,9 +70,9 @@ function! Ana_numstr(aword)
 	if rawstr =~? '^0x\x\+[lLuU]\{,3\}$'	" long long型リテラルは、0x00LLのようにLが2つ付く
 		let base = 16
 		let numstr = substitute(strpart(rawstr, 2), '[ulUL]\+', '', '')
-	elseif rawstr =~? '^[1-9]\d*'
+	elseif rawstr =~? '^\([1-9]\d*\|0\+\)[lLuU]\{,3\}$'	" 0のみから構成される数は、Cの仕様上、厳密には8進であるが、便宜上10進として扱う。
 		let base = 10
-		let numstr = rawstr
+		let numstr = substitute(rawstr, '[ulUL]\+', '', '')
 	elseif rawstr =~? '^0\o\+'
 		let base = 8
 		let numstr = rawstr
@@ -165,7 +167,7 @@ function! s:hex2bin(hex)
 	let bin = ''
 
 	for i in split(a:hex, '\zs')
-		let bin = bin . h2b[tolower(i)] . '|'
+		let bin = bin . h2b[tolower(i)] . ' '
 	endfor
 	return substitute(bin, '|$', '', '')
 endfunc
@@ -179,34 +181,47 @@ function! s:EmDisp(word)
 		"echo '[Dec]  ' printf("%u", r.rawstr)
 		"echo '[Bin]  ' s:hex2bin(r.numstr)
 		"echo '[Dec] ' printf("%u", r.rawstr) '    [Bin] ' s:hex2bin(r.numstr) '    [byt]' len(r.numstr)/2 '    [bit]' len(r.numstr)*4 '    [len]' len(r.numstr)
-		echo '[Dec]' printf("%u", r.rawstr) '    [Bin]' s:hex2bin(r.numstr) (winwidth(0) > 100 ? '    ' : "\n") '[Byt]' len(r.numstr)/2 '    [bit]' len(r.numstr)*4 '    [dig]' len(r.numstr)
+		echo '[Dec]' printf("%10u", r.rawstr) '    [Bin]' s:hex2bin(r.numstr) (winwidth(0) > 100 ? '    ' : "\n") '[Byt]' len(r.numstr)/2 '    [bit]' len(r.numstr)*4 '    [dig]' len(r.numstr)
 		"echo '[byt]' len(r.numstr)/2 '    [bit]' len(r.numstr)*4 '    [len]' len(r.numstr)
 		"echo '[Dec] ' printf("%u", r.rawstr) '    [Bin] ' s:hex2bin(r.numstr)
+		let s:now_disp = 1
 	elseif r.base == 10
-		let hex = printf("%x", r.numstr)
+		let hex = printf("%08x", r.numstr)
 		"echo '[Hex]  ' hex
 		"echo '[Bin]  ' s:hex2bin(hex)
 		echo '[Hex] 0x' . hex '    [Bin]' s:hex2bin(hex) '    [byt]' float2nr(ceil(len(hex)/2.0)) '    [bit]' len(hex)*4 '    [dig]' len(r.numstr)
+		let s:now_disp = 1
 	elseif r.base == 2
 		let hex = s:bin2hex(r.numstr)
 		"echo '[Hex]  ' hex
 		"echo '[Dec]  ' printf("%d", '0x' . hex)
-		echo '[Hex] ' hex '    [Dec] ' printf("%d", '0x' . hex) '    [byt]' float2nr(ceil(len(r.numstr)/8.0)) '    [bit]' len(hex)*4 '    [dig]' len(r.numstr)
-	else
-		"echo ""
+		echo '[Hex] 0x' . hex '    [Dec] ' printf("%d", '0x' . hex) '    [byt]' float2nr(ceil(len(r.numstr)/8.0)) '    [bit]' len(hex)*4 '    [dig]' len(r.numstr)
+		let s:now_disp = 1
+	elseif s:now_disp
+		echo ""
+		let s:now_disp = 0
 	endif
 endfun
 
 command! EmDisp :call <SID>EmDisp(expand("<cword>"))
+
+func! Ccc()
+	let v:ooo=89
+ let s:now_disp = 0<CR>
+endfunc
 
 augroup Em
 	au!
 
 	au CursorMoved * EmDisp
 	au VimResized * EmDisp
+
+	au CmdwinEnter * let <SID>now_disp = 0
+	au CmdwinEnter * call Ccc<cr>
 augroup end
 
-EmDisp
+" for develope
+"EmDisp
 
 
 " Test
@@ -235,3 +250,7 @@ EmDisp
 "ビット編集モード
 "
 "Erlang, Adaに対応する。
+
+function! X(arg)
+	return printf("0x%x", a:arg)
+endfunc
