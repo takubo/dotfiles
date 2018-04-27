@@ -1,0 +1,16 @@
+BoldAsFont=no
+Transparency=medium
+Font=MeiryoKe_Gothic
+ScrollMod=shift
+PgUpDnScroll=yes
+ClickTargetMod=ctrl
+Printer=\\pc16482\SEIICHI_Q31
+Rows=25
+CursorBlinks=no
+BellSound=yes
+BellFlash=yes
+Scrollbar=right
+MiddleClickAction=void
+BackgroundColour=27,27,27
+CursorType=underscore
+ThemeFile=Def
