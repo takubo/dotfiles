@@ -123,14 +123,15 @@ set transparency=244
 
 " Diff
 "hi DiffChange	guifg=NONE	guibg=#191919	gui=none	ctermfg=NONE	ctermbg=235
-hi DiffChange	term=bold	ctermbg=5	gui=NONE	guibg=#755332	guifg=NONE
-hi DiffChange	term=bold	ctermbg=5	gui=NONE	guibg=#453020	guifg=NONE
-hi DiffChange	term=NONE	ctermbg=NONE	gui=NONE	guibg=NONE	guifg=NONE
-hi DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#b505b5	guifg=NONE
-hi DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#850585	guifg=NONE
-hi DiffText	term=reverse	cterm=bold	ctermbg=12	gui=NONE	guibg=#780578	guifg=NONE
-hi DiffAdd	term=bold	ctermbg=1	gui=NONE	guibg=#381111	guifg=NONE
-hi DiffDelete	term=bold	ctermfg=9	ctermbg=3	gui=NONE	guibg=#111138	guifg=#2a2a2a
+hi DiffChange	guibg=#755332	guifg=NONE	gui=NONE	term=bold	ctermbg=5
+hi DiffChange	guibg=#453020	guifg=NONE	gui=NONE	term=bold	ctermbg=5
+hi DiffChange	guibg=NONE	guifg=NONE	gui=NONE	term=NONE	ctermbg=NONE
+hi DiffText	guibg=#b505b5	guifg=NONE	gui=NONE	term=reverse	ctermbg=12	cterm=bold
+hi DiffText	guibg=#850585	guifg=NONE	gui=NONE	term=reverse	ctermbg=12	cterm=bold
+hi DiffText	guibg=#780578	guifg=NONE	gui=NONE	term=reverse	ctermbg=12	cterm=bold
+hi DiffAdd	guibg=#381111	guifg=NONE	gui=NONE	term=bold	ctermbg=1
+hi DiffAdd	guibg=#111138	guifg=NONE	gui=NONE	term=bold	ctermbg=1
+hi DiffDelete	guibg=#112311	guifg=#2a2a2a	gui=NONE	term=bold	ctermbg=3	ctermfg=9
 
 
 """""""""""""""""""""""""""""""挿入モード時、ステータスラインの色を変更""""""""""""""""""""""""""""""
