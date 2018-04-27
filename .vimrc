@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 13-Apr-2018.
+" Last Change: 19-Apr-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -369,7 +369,7 @@ augroup MyVimrc
   "au QuickfixCmdPost make,grep,grepadd,vimgrep 999wincmd w
 
   au InsertEnter * set timeoutlen=300
-  au InsertLeave * set timeoutlen=15000
+  au InsertLeave * set timeoutlen=800
 
   au WinEnter * set cursorline
   au WinEnter * set cursorcolumn
@@ -455,8 +455,9 @@ nnoremap <silent> <Leader>m :<C-u>marks<CR>
 nnoremap <silent> <Leader>" :<C-u>disp<CR>
 nnoremap <silent> <Leader>k :<C-u>make<CR>
 nnoremap <silent> <leader>t :<C-u>ToggleWord<CR>
-nnoremap <leader>: :<C-u>set<Space>
-nnoremap <leader>; :<C-u>setl<Space>
+nnoremap <leader>: :<C-u>setl<Space>
+nnoremap <leader>; :<C-u>set<Space>
+nnoremap <leader>: q:
 
 nnoremap g; :<C-u>set<Space>
 nnoremap <leader>; :<C-u>setl<Space>
@@ -505,6 +506,9 @@ cnoremap <expr> ? getcmdtype() == '?' ? '\?' : '?'
 
 cnoremap (( \(
 cnoremap )) \)
+cnoremap << \<
+cnoremap >> \>
+cnoremap <Bar><Bar> \<Bar>
 
 cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
 			\ (getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\\|' :
@@ -860,8 +864,9 @@ let s:stl = ''
 	\ . '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
 	\ . '%{&iminsert?''j'':''e''}\ %##%6l,%3v\ '
         \ . '%#SLFileName#%3p%%\ [%4L]\ %##\ \ '
-	\ . '%{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
+	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6))}'
         \ . '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#StatuslineFile#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
+	"\ . '%{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
         "\ . '\ \ \ \ ' . '%#String#\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%##\ \ %#Number#\ %{strftime(''%X'')}\ ' . '%##\ \ %#String#\ %{g:bat_str}\ %##\ \ '
         "\ . '\ \ \ \ ' . '%#Number#\ %{strftime(''%Y/%m/%d(%a)'')}' . '%##%#Number#\ %{strftime(''%X'')}\ ' . '%##\ \ %#String#\ %{g:bat_str}\ %##\ \ '
         "\ . '\ \ \ \ ' . '%#StatusLineDate#\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#Number#\ %{strftime(''%X'')}' . '%#String#\ %{g:bat_str}\ %##\ \ '
@@ -884,8 +889,11 @@ augroup MyVimrc_StatusLine
   au!
   "au BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
   " M$ Windowsの不具合対策 他のドライブのファイルを読み込んだときにバグがある?
-  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150])
-  au BufEnter,BufWinEnter                                                                 * if !exists('b:buf_name_len') | let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150]) | endif
+
+  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150])
+  "au BufEnter,BufWinEnter                                                                 * if !exists('b:buf_name_len') | let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150]) | endif
+  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter * let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
+
   "au BufEnter * echo strdisplaywidth(bufname(''))
   "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+60, 150])
   "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+120, 150])
@@ -894,6 +902,31 @@ augroup MyVimrc_StatusLine
   "au BufNew * let b:buf_name_len = exists('b:buf_name_len') ? b:buf_name_len : max([len(fnamemodify(bufname('.'),':p'))+150, 150])
   "au BufAdd * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+120, 150])
   "au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
+augroup end
+
+let buf_name_t = {}
+let mod_name_t = {}
+augroup MyVimrc_StatusLine_Test
+	au!
+	au BufAdd         * let buf_name_t["BufAdd"] = bufname('')
+	au BufNewFile     * let buf_name_t["BufNewFile"] = bufname('')
+	au BufRead        * let buf_name_t["BufRead"] = bufname('')
+	au BufFilePost    * let buf_name_t["BufFilePost"] = bufname('')
+	au BufNew         * let buf_name_t["BufNew"] = bufname('')
+	au FilterReadPost * let buf_name_t["FilterReadPost"] = bufname('')
+	au FileReadPost	  * let buf_name_t["FileReadPost"] = bufname('')
+	au BufEnter       * let buf_name_t["BufEnter"] = bufname('')
+	au BufWinEnter    * let buf_name_t["BufWinEnter"] = bufname('')
+
+	au BufAdd         * let mod_name_t["BufAdd"] = fnamemodify(bufname(''), ':p')
+	au BufNewFile     * let mod_name_t["BufNewFile"] = fnamemodify(bufname(''), ':p')
+	au BufRead        * let mod_name_t["BufRead"] = fnamemodify(bufname(''), ':p')
+	au BufFilePost    * let mod_name_t["BufFilePost"] = fnamemodify(bufname(''), ':p')
+	au BufNew         * let mod_name_t["BufNew"] = fnamemodify(bufname(''), ':p')
+	au FilterReadPost * let mod_name_t["FilterReadPost"] = fnamemodify(bufname(''), ':p')
+	au FileReadPost	  * let mod_name_t["FileReadPost"] = fnamemodify(bufname(''), ':p')
+	au BufEnter       * let mod_name_t["BufEnter"] = fnamemodify(bufname(''), ':p')
+	au BufWinEnter    * let mod_name_t["BufWinEnter"] = fnamemodify(bufname(''), ':p')
 augroup end
 "function! Buf_name_len_set()
 "  try
