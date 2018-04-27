@@ -171,8 +171,6 @@ function! s:hex2bin(hex)
 	endfor
 	return substitute(bin, '_$', '', '')
 endfunc
-" 0xaf45 0xf0 0b011100 0716 1234 65535 0xfdb97531 256 0b111111110000000011010000  0101111
-" 0xaf45UL 0xf0ll 0b011100 0716 1234 65535 0xfdb97531 256a 0b111111110000000011010000  0101111
 
 function! Hex2bits(word)
 	let r = Ana_numstr(a:word)
@@ -189,7 +187,7 @@ function! Hex2bits(word)
 		let hex = printf("%x", r.numstr)
 		"echo '[Hex]  ' hex
 		"echo '[Bin]  ' s:hex2bin(hex)
-		echo '[Hex] ' hex '    [Bin] ' s:hex2bin(hex) '    [byt]' float2nr(ceil(len(hex)/2.0)) '    [bit]' len(hex)*4 '    [len]' len(r.numstr)
+		echo '[Hex] 0x' hex '    [Bin] ' s:hex2bin(hex) '    [byt]' float2nr(ceil(len(hex)/2.0)) '    [bit]' len(hex)*4 '    [len]' len(r.numstr)
 	elseif r.base == 2
 		let hex = s:bin2hex(r.numstr)
 		"echo '[Hex]  ' hex
@@ -199,15 +197,27 @@ function! Hex2bits(word)
 		echo ""
 	endif
 endfun
+
 command! H2B :call Hex2bits(expand("<cword>"))
-H2B
 nnoremap <leader>eb :H2B<CR>
-au CursorHold * H2B
-set updatetime=100
-au VimResized * H2B
+
+augroup Em
+	au!
+
+	au CursorMoved * H2B
+	au VimResized * H2B
+	"au CursorHold * H2B
+	"set updatetime=100
+augroup end
+
+H2B
+
+" Test
+" 0xaf45 0xf0 0b011100 0716 1234 65535 0xfdb97531 256 0b111111110000000011010000  0101111
+" 0xaf45UL 0xf0ll 0b011100 0716 1234 65535 0xfdb97531 256a 0b111111110000000011010000  0101111
 
 
-" 実装すべき機能
+" 実装すべき機能 TODO
 "1	基数変換して表示
 "2	基数変換
 "3	0拡張
