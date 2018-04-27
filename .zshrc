@@ -176,6 +176,9 @@ zle -N history-beginning-search-forward-end history-search-end
 bindkey "^P" history-beginning-search-backward-end
 bindkey "^N" history-beginning-search-forward-end
 
+bindkey "^[[A" history-beginning-search-backward-end
+bindkey "^[[B" history-beginning-search-forward-end
+
 
 
 
@@ -238,7 +241,8 @@ bindkey "\t" input-cd
 ## 行頭の ; で "ls" を入力
 function input-ls {
     if [ "${BUFFER}" = "" ] ; then
-        LBUFFER="ls "
+        #? LBUFFER="ls "
+        LBUFFER="ms "
 	zle accept-line
     else
         zle self-insert
@@ -274,8 +278,10 @@ bindkey "kk" input-dollar
 ## 行頭/パイプ後/セミコロン後の . で './' 入力
 function input-curdir {
     # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-    case `echo -n ${LBUFFER%%(#)[ 	]#} | tail -c1` in
-        '|' | ';' | '' ) LBUFFER=${LBUFFER}'./' ;;
+    #case `echo -n ${LBUFFER[-1]%%(#)[ 	]#}` in
+    #case `echo ${LBUFFER} | sed 's%[ 	]*$%%'` in
+    case `echo -n ${LBUFFER%%[ 	]}` in
+        *\| | *\; | '' ) LBUFFER=${LBUFFER}'./' ;;
         * )              zle self-insert ;;
     esac
 }
@@ -285,8 +291,10 @@ bindkey "." input-curdir
 ## ~で '~/' 入力
 function input-homedir {
     # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-    case `echo -n ${LBUFFER} | tail -c1` in
+    case `echo -n ${LBUFFER[-1]}` in
         ' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'~/' ;;
+    #case `echo -n ${LBUFFER%%[ 	]}` in
+        #*\| | *\; | '' ) LBUFFER=${LBUFFER}'~/' ;;
         * )                          zle self-insert ;;
     esac
 }
@@ -294,20 +302,28 @@ zle -N input-homedir
 bindkey "~" input-homedir
 
 ## ^で '../' 入力
-function input-updir {
-    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-    case `echo -n ${LBUFFER} | tail -c1` in
-        ' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'../' ;;
-        * )                          zle self-insert ;;
-    esac
+function input-or-move-updir {
+	if [ "${BUFFER}" = "" ] ; then
+		BUFFER='cd ../'
+		zle accept-line
+	else
+		# # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+		# case `echo -n ${LBUFFER[-1]}` in
+		# 	' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'../' ;;
+		# 	* )                          zle self-insert ;;
+		# esac
+		zle self-insert
+	fi
 }
-zle -N input-updir
-bindkey "\^" input-updir
+zle -N input-or-move-updir
+bindkey "\^" input-or-move-updir
 
 ## -で 'cd -' 入力
 function go-prev-dir {
     if [ "${BUFFER}" = "" ] ; then
-	LBUFFER="cd -"
+	#LBUFFER="cd -"
+	BUFFER="cd -"
+	zle accept-line
     else
 	zle self-insert
     fi
@@ -321,15 +337,15 @@ bindkey "\-" go-prev-dir
 ######## Process Control ########
 
 # ^Zで "fg %" 実行
-function run-fglast {
+function run-fg-last {
     #zle push-input
     #BUFFER="fg %"
     #zle accept-line
     fg %
     zle reset-prompt
 }
-zle -N run-fglast
-bindkey "^z" run-fglast
+zle -N run-fg-last
+bindkey "^z" run-fg-last
 
 ## 実行したプロセスの消費時間が5秒以上かかったら
 ## 自動的に消費時間の統計情報を表示する。
@@ -366,6 +382,11 @@ alias llt='ls -lht'
 alias llT='ls -lhrt'
 alias llr='ls -lhrt'
 
+alias ml='ms -l'
+alias ma='ms -a'
+alias mla='ms -la'
+alias m1='ms -1'
+
 alias df='df -h'
 alias md='mkdir'
 #alias md='source $HOME/bin/md'
@@ -380,21 +401,21 @@ alias grep='grep --color=auto'
 # to abbreviations alias -g A='| awk'
 # to abbreviations alias -g B='| bc -l'
 # to abbreviations alias -g C='| cut'
-alias -g C='| clip'
-alias -g D='| disp'
+#ga alias -g C='| clip'
+#ga alias -g D='| disp'
 # to abbreviations alias -g F='| s2t | cut -f'	#field
 # to abbreviations alias -g G='| grep'
-alias -g H='| head -n 20'
-alias -g J='| japan_numerical'
+#ga alias -g H='| head -n 20'
+#ga alias -g J='| japan_numerical'
 alias -g L='| less'
 # to abbreviations alias -g N='| cat -n'
 # to abbreviations alias -g Q='| sort'
 # to abbreviations alias -g R='| tr'
 # to abbreviations alias -g S='| sed'
-alias -g T='| tail'
-alias -g U='| iconv -f cp932 -t utf-8'
+#ga alias -g T='| tail'
+#ga alias -g U='| iconv -f cp932 -t utf-8'
 # to abbreviations alias -g V='| vim -R -'
-alias -g W='| wc -l'
+#ga alias -g W='| wc -l'
 # to abbreviations alias -g X='| xargs'
 # to abbreviations alias -g Y='| wc'
 # EIKMOPZ
@@ -503,7 +524,7 @@ abbreviations=(
     "M"    "| mc '"
     "B"    "| xc '"
 
-    "FN"   "| find -name '"
+    "FN"   "| find -name '*"
     "FNS"  "| find -name '.svn' -prune -type f -o -name '"
     "FG"   "| find | xargs grep"
 
