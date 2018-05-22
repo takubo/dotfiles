@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 19-Apr-2018.
+" Last Change: 22-May-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -864,26 +864,12 @@ let s:stl = ''
 	\ . '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
 	\ . '%{&iminsert?''j'':''e''}\ %##%6l,%3v\ '
         \ . '%#SLFileName#%3p%%\ [%4L]\ %##\ \ '
-	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6))}'
-        \ . '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#StatuslineFile#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
-	"\ . '%{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
-        "\ . '\ \ \ \ ' . '%#String#\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%##\ \ %#Number#\ %{strftime(''%X'')}\ ' . '%##\ \ %#String#\ %{g:bat_str}\ %##\ \ '
-        "\ . '\ \ \ \ ' . '%#Number#\ %{strftime(''%Y/%m/%d(%a)'')}' . '%##%#Number#\ %{strftime(''%X'')}\ ' . '%##\ \ %#String#\ %{g:bat_str}\ %##\ \ '
-        "\ . '\ \ \ \ ' . '%#StatusLineDate#\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#Number#\ %{strftime(''%X'')}' . '%#String#\ %{g:bat_str}\ %##\ \ '
-        "\ . '\ \ \ \ %#Number#\ ' . '%{strftime(''%Y/%m/%d\ %H:%M:%S'')}' . '%#String#\ %{g:bat_str}\ '
-	"\ . '%{repeat(''\ '',winwidth(0)-strdisplaywidth(bufname(''''))-max([strdisplaywidth(fnamemodify(bufname(''''),'':p''))+110,150]))}'
-	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#yellow#\ %t\ %<%##\ %F\ \ \ '
-	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#yellow#\ %t\ %<%#SLFileName#\ %F\ \ \ '
-	"\ . '%{repeat(''\ '',winwidth(0)-b:buf_name_len)}'
-	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%#StatusLine2#\ (\ %n\ )\ %m\%r%##%h%w\ %#keyword#\ %t\ %<%#Number#\ %F%#SLFileName#'
-	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%#StatusLine2#\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ '
-        "\ . '%=%##\ \ \ \ \ \ \ \ %#SLFileName#\ %{toupper(&fenc)},\ %{toupper(&ff[0])},\ %y\ '
-        "\ . '%#Number#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
-        "\ . '%#Number#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %#String#\ %{g:bat_str}\ %##\ '
-        "\ . '%#Number#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
-        "\ . '%#Special#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
-        "\ . '%#SLFileName#\ ' . "%{strftime('%H:%M:%S')}" . '\ %##\ %{g:bat_str}\ '
-exe 'set statusline=' . s:stl
+	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?55:0))}'
+
+let g:stl_time_org = '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#StatuslineFile#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
+let g:stl_time     = g:stl_time_org
+
+nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_time_org : '' )<CR>
 
 augroup MyVimrc_StatusLine
   au!
@@ -904,30 +890,32 @@ augroup MyVimrc_StatusLine
   "au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
 augroup end
 
-let buf_name_t = {}
-let mod_name_t = {}
-augroup MyVimrc_StatusLine_Test
-	au!
-	au BufAdd         * let buf_name_t["BufAdd"] = bufname('')
-	au BufNewFile     * let buf_name_t["BufNewFile"] = bufname('')
-	au BufRead        * let buf_name_t["BufRead"] = bufname('')
-	au BufFilePost    * let buf_name_t["BufFilePost"] = bufname('')
-	au BufNew         * let buf_name_t["BufNew"] = bufname('')
-	au FilterReadPost * let buf_name_t["FilterReadPost"] = bufname('')
-	au FileReadPost	  * let buf_name_t["FileReadPost"] = bufname('')
-	au BufEnter       * let buf_name_t["BufEnter"] = bufname('')
-	au BufWinEnter    * let buf_name_t["BufWinEnter"] = bufname('')
-
-	au BufAdd         * let mod_name_t["BufAdd"] = fnamemodify(bufname(''), ':p')
-	au BufNewFile     * let mod_name_t["BufNewFile"] = fnamemodify(bufname(''), ':p')
-	au BufRead        * let mod_name_t["BufRead"] = fnamemodify(bufname(''), ':p')
-	au BufFilePost    * let mod_name_t["BufFilePost"] = fnamemodify(bufname(''), ':p')
-	au BufNew         * let mod_name_t["BufNew"] = fnamemodify(bufname(''), ':p')
-	au FilterReadPost * let mod_name_t["FilterReadPost"] = fnamemodify(bufname(''), ':p')
-	au FileReadPost	  * let mod_name_t["FileReadPost"] = fnamemodify(bufname(''), ':p')
-	au BufEnter       * let mod_name_t["BufEnter"] = fnamemodify(bufname(''), ':p')
-	au BufWinEnter    * let mod_name_t["BufWinEnter"] = fnamemodify(bufname(''), ':p')
-augroup end
+"----------------------------------------------------------------------------------------------
+"let buf_name_t = {}
+"let mod_name_t = {}
+"augroup MyVimrc_StatusLine_Test
+"	au!
+"	au BufAdd         * let buf_name_t["BufAdd"] = bufname('')
+"	au BufNewFile     * let buf_name_t["BufNewFile"] = bufname('')
+"	au BufRead        * let buf_name_t["BufRead"] = bufname('')
+"	au BufFilePost    * let buf_name_t["BufFilePost"] = bufname('')
+"	au BufNew         * let buf_name_t["BufNew"] = bufname('')
+"	au FilterReadPost * let buf_name_t["FilterReadPost"] = bufname('')
+"	au FileReadPost	  * let buf_name_t["FileReadPost"] = bufname('')
+"	au BufEnter       * let buf_name_t["BufEnter"] = bufname('')
+"	au BufWinEnter    * let buf_name_t["BufWinEnter"] = bufname('')
+"
+"	au BufAdd         * let mod_name_t["BufAdd"] = fnamemodify(bufname(''), ':p')
+"	au BufNewFile     * let mod_name_t["BufNewFile"] = fnamemodify(bufname(''), ':p')
+"	au BufRead        * let mod_name_t["BufRead"] = fnamemodify(bufname(''), ':p')
+"	au BufFilePost    * let mod_name_t["BufFilePost"] = fnamemodify(bufname(''), ':p')
+"	au BufNew         * let mod_name_t["BufNew"] = fnamemodify(bufname(''), ':p')
+"	au FilterReadPost * let mod_name_t["FilterReadPost"] = fnamemodify(bufname(''), ':p')
+"	au FileReadPost	  * let mod_name_t["FileReadPost"] = fnamemodify(bufname(''), ':p')
+"	au BufEnter       * let mod_name_t["BufEnter"] = fnamemodify(bufname(''), ':p')
+"	au BufWinEnter    * let mod_name_t["BufWinEnter"] = fnamemodify(bufname(''), ':p')
+"augroup end
+"----------------------------------------------------------------------------------------------
 "function! Buf_name_len_set()
 "  try
 "    return max([len(fnamemodify(bufname('.'),':p'))+60, 120])
@@ -935,11 +923,10 @@ augroup end
 "endfunction
 "au BufNewFile,BufRead * let b:buf_name_len = max([len(fnamemodify('.',':p') . bufname('.'))+30, 120])
 "echo max([len(fnamemodify(".", ":p") . bufname(".")) + 40, 120]
-" Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+"----------------------------------------------------------------------------------------------
 
-" Statusline
 function! UpdateStatusline(dummy)
-	exe 'set statusline=' . s:stl
+  exe 'set statusline=' . s:stl . g:stl_time
 endfunction
 if exists('TimerUsl')
   call timer_stop(TimerUsl)
@@ -947,7 +934,10 @@ endif
 let UpdateStatuslineInterval = 1000
 let TimerUsl = timer_start(UpdateStatuslineInterval, 'UpdateStatusline', {'repeat': -1})
 
-" Battery
+" Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Battery {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 try
   " bat_win.pyが存在しない環境でもエラーとさせない。
   py3file ~/bin/bat_win.py
@@ -971,6 +961,7 @@ catch
   "let bat_str=': 100% [2:05:27]'
   let bat_str='? ---% [-:--:--]'
 endtry
+" Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 "TODO
