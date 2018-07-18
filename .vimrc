@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 22-May-2018.
+" Last Change: 18-Jul-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -334,7 +334,7 @@ set wrap
 " 検索時にファイルの最後まで行ったら最初に戻る (nowrapscan:戻らない)
 set nowrapscan
 set noundofile
-set nrformats=alpha,bin,hex
+set nrformats=bin,hex
 set shiftround
 "set fileformats=unix,dos,mac
 set fileformats=unix,dos
@@ -357,6 +357,9 @@ colorscheme Vitamin
 " TODO hi CursorLine ctermbg=NONE guibg=NONE
 
 
+set timeoutlen=2500
+
+
 augroup MyVimrc
   au!
 
@@ -369,12 +372,17 @@ augroup MyVimrc
   "au QuickfixCmdPost make,grep,grepadd,vimgrep 999wincmd w
 
   au InsertEnter * set timeoutlen=300
-  au InsertLeave * set timeoutlen=800
+  au InsertLeave * set timeoutlen=2500
 
   au WinEnter * set cursorline
   au WinEnter * set cursorcolumn
   au WinLeave * set nocursorline
   au WinLeave * set nocursorcolumn
+
+  au BufEnter * set cursorline
+  au BufEnter * set cursorcolumn
+  au BufLeave * set nocursorline
+  au BufLeave * set nocursorcolumn
 
   "au FileType c,cpp,awk set mps+=?::,=:;
 
@@ -405,7 +413,9 @@ augroup end
 " http://nanasi.jp/articles/vim/kwbd_vim.html
 com! Kwbd let kwbd_bn= bufnr("%")|enew|exe "bdel ".kwbd_bn|unlet kwbd_bn
 
-let $PATH = $PATH . 'C:\Oracle\Ora11R2\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;C:\Program Files\Common Files\Compuware;C:\Program Files\WinMerge;C:\Program Files\Subversion\bin;C:\Program Files\TortoiseSVN\bin;D:\takubo\bin\;C:\Perl\bin'
+let $PATH = $PATH . 'C:\Oracle\Ora11R2\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;'
+		\ . 'C:\Program Files\Common Files\Compuware;C:\Program Files\WinMerge;C:\Program Files\Subversion\bin;C:\Program Files\TortoiseSVN\bin;'
+		\ . 'D:\takubo\bin\;C:\Perl\bin'
 
 
 nnoremap <silent> <Space> <C-f>
@@ -438,7 +448,7 @@ nnoremap <silent><expr> <leader>n !&number <Bar><Bar> &relativenumber ?  ':set  
 nnoremap <silent><expr> <leader>N  &number <Bar><Bar> &relativenumber ?  ':set nonumber norelativenumber<CR>' : ':set number<CR>'
 
 " コメント行後の新規行の自動コメント化のON/OFF
-nnoremap <silent><expr> <leader># &formatoptions =~# 'o' ?  ':set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':set formatoptions+=o<CR>:set formatoptions+=r<CR>'
+nnoremap <silent><expr> <leader># &formatoptions =~# 'o' ? ':set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':set formatoptions+=o<CR>:set formatoptions+=r<CR>'
 
 nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':setl isk-=.<CR>'
 nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':setl isk-=_<CR>'
@@ -450,6 +460,7 @@ nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>')
 nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
 nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
 
+nnoremap <silent> <leader>d :<C-u>pwd<CR>
 nnoremap <silent> <leader>p :<C-u>disp<CR>
 nnoremap <silent> <Leader>m :<C-u>marks<CR>
 nnoremap <silent> <Leader>" :<C-u>disp<CR>
@@ -515,7 +526,11 @@ cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
 			\ '<C-t>'
 
 
+
+
+
 " Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 "? nnoremap <leader>/ /<Up>\<Bar>
 
 "? nnoremap ? /\<\><Left><Left>
@@ -548,7 +563,7 @@ nnoremap     ? /<C-p>\<Bar>
 nnoremap     ? /\M
 nnoremap <Bar> /<C-p>\<Bar>\<\><Left><Left>
 
-cnoremap <C-g> \<\><Left><Left>
+"cnoremap <C-g> \<\><Left><Left>
 
 let g:MigemoIsSlash = 0
 if has('migemo')
@@ -591,26 +606,101 @@ endif
 
 
 " Substitute {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <C-s>           :<C-u>g%.%s    /
-nnoremap <C-s>           :<C-u>g%.%s    %%<Left>
-nnoremap <leader><C-s>   :<C-u>g%.%s    %
-nnoremap g<C-s>          :<C-u>g%.%s    /<C-R>//<C-R><C-W>/
-nnoremap <A-s>           :<C-u>g%.%s    /<C-R>//
-vnoremap <C-s>           :s    /
-vnoremap <leader><C-s>   :s    /<C-R>//<C-R><C-W>/
+
+nnoremap <C-s>           :<C-u>g$.$s    //<Left>
+nnoremap <Leader><C-s>   :<C-u>g$.$s    %%<Left>
+nnoremap <Leader>s       :<C-u>g$.$s    /<C-R>///g<Left><Left>
+nnoremap S               :<C-u>g$.$s    /<C-R>//<C-R><C-W>/g
+
+nnoremap g<C-s>              :<C-u>s    //<Left>
+nnoremap g<Leader><C-s>      :<C-u>s    %%<Left>
+nnoremap g<Leader>s          :<C-u>s    /<C-R>///g<Left><Left>
+nnoremap gS                  :<C-u>s    /<C-R>//<C-R><C-W>/g
+
+vnoremap <C-s>                    :s    //<Left>
+vnoremap <Leader><C-s>            :s    %%<Left>
+vnoremap <leader>s                :s    /<C-R>///g<Left><Left>
+vnoremap S                        :s    /<C-R>//<C-R><C-W>/g
+
+cnoremap <expr> <C-g> match(getcmdline(), '\(g.\..s\\|s\)    /') == 0 ? '<End>/g' :
+                    \ match(getcmdline(), '\(g.\..s\\|s\)    %') == 0 ? '<End>/g' : ''
+
 " Substitute }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Grep {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 "nnoremap <C-g> :<C-u>vim "\<<C-R><C-W>\>" *.c *.h<CR>
 nnoremap <C-g> :<C-u>vim "" <Left><Left>
 nnoremap <leader>g :<C-u>vim "\<<C-R><C-W>\>" 
 "nnoremap <leader>G :<C-u>vim "<C-R><C-W>" *.c *.h<CR>
 nnoremap <leader>G :<C-u>vim "<C-R><C-W>" 
+
+let c_jk_local = 1
+"例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
+nnoremap <expr><silent> <C-k> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <expr><silent> <C-j> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <silent> <Leader>0 :<C-u>let c_jk_local = !c_jk_local<CR>
+
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+let s:root_file = '.git'
+
+set grepprg=$HOME/bin/ag\ --line-numbers
+set grepprg=/usr/bin/grep\ -an
+
+
+augroup MyVimrc_Grep
+  au!
+  exe "au WinEnter * if (&buftype == 'quickfix') | cd " . getcwd() . " | endif"
+augroup end
+
+function! CS(str)
+  let save_autochdir = &autochdir
+  set autochdir
+
+  let pwd = getcwd()
+
+  for i in range(7)
+    if glob(s:root_file) != ''  " root_fileファイルの存在確認
+      try
+        if exists("*CS_Local")
+          call CS_Local(a:str)
+        else
+          exe "silent grep! '" . a:str . "' **/*.c" . " **/*.h" . " **/*.s"
+        endif
+        call feedkeys("\<CR>:\<Esc>\<C-o>", "tn")  " 見つかった最初へ移動させない。
+      finally
+      endtry
+      break
+    endif
+    cd ..
+  endfor
+
+  exe 'cd ' . pwd
+  exe 'set ' . save_autochdir
+endfunction
+
+com! CS call CS("\<C-r>\<C-w>")
+
+nnoremap          <leader>g     :<C-u>call CS("\\<<C-r><C-w>\\>")<CR>
+nnoremap <silent> <C-g>         :<C-u>call CS("\\<<C-r><C-w>\\>")<CR>
+nnoremap          <leader>G     :<C-u>call CS("<C-r><C-w>")<CR>
+nnoremap          <leader><C-g> :<C-u>call CS('')<Left><Left>
+nnoremap <silent> <C-g>         :<C-u>call CS("\\b<C-r><C-w>\\b")<CR>
+nnoremap <silent> <leader>g     :<C-u>call CS("\\b<C-r><C-w>\\b")<CR>
+nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
+
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
 " Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Tag {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 "   TODO
 "     先頭のアンダーバー
 "     関数のみf(b
@@ -628,8 +718,8 @@ nnoremap zl L
 nnoremap <expr> zl &wrap ? 'L' : 'zl'
 nnoremap <expr> zh &wrap ? 'H' : 'zh'
 
-nnoremap <C-k> H
-nnoremap <C-j> L
+"nnoremap <C-k> H
+"nnoremap <C-j> L
 
 nnoremap <S-CR> gD
 
@@ -725,36 +815,31 @@ nnoremap <BS><CR> <C-w><C-]>
 nnoremap <leader><CR> <C-w><C-]>
 
 nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
+
 " Tag }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-"" diff
-nnoremap <expr> <leader>d &diff ? ':diffoff<CR>' : ':diffthis<CR>'
-"" diffup (diffthisを実行)
-nnoremap <expr> <leader>D &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
 
-nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
-nnoremap <expr> d<Space> match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
-
-nnoremap        dq :<C-u>diffoff<CR>
-nnoremap        dc :<C-u>diffoff<CR>
+"nnoremap <expr> <Leader>d &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> dx &diff ? ':diffoff<CR>' : ':diffthis<CR>'
-nnoremap <expr> di match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
-nnoremap <expr> <leader><C-d> match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
+nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
+nnoremap        dc :<C-u>diffoff<CR>
 
-nnoremap        dz :<C-u>echo &diffopt<CR>
+nnoremap <expr> di match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
+nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
+
 nnoremap        dv :<C-u>echo &diffopt<CR>
 
-"nnoremap <silent> <leader>o :<C-u>%foldopen<CR>
-"nnoremap <silent> <leader>O :<C-u>%foldclose<CR>
-" 余りキーマップ	dq, dr, ds. dg, dz, dx, dc, dv, dm
+nnoremap <Ins> [c^
+nnoremap <Del> ]c^
+
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <BS> <C-w>
+
+nmap <BS> <C-w>
 
 "nnoremap <BS> <C-w>v
 nnoremap <BS><BS> <C-w>v
@@ -767,9 +852,9 @@ nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
 "nnoremap <c-left> <C-w>H
 "nnoremap <c-right> <C-w>L
 
-nnoremap <Tab> <C-w>w
-nnoremap <S-Tab> <C-w>W
-nnoremap <C-w><C-w> <C-w>p
+nnoremap <silent> <Tab>	     <C-w>w
+nnoremap <silent> <S-Tab>    <C-w>W
+nnoremap <silent> <C-w><C-w> <C-w>p
 
 nnoremap <silent> <up>	    <esc>3<C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <down>    <esc>3<C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
@@ -797,44 +882,47 @@ nnoremap <silent> <C-q>/ q/
 nnoremap <silent> <C-q>? q?
 nnoremap <silent> <leader>q :<C-u>q<CR>
 
-nnoremap <C-Left>	<C-w>h
-nnoremap <C-Right>	<C-w>l
-nnoremap <C-Down>	<C-w>j
-nnoremap <C-Up>		<C-w>k
+nnoremap <silent> <C-Left>	<C-w>h
+nnoremap <silent> <C-Right>	<C-w>l
+nnoremap <silent> <C-Down>	<C-w>j
+nnoremap <silent> <C-Up>	<C-w>k
 
 nnoremap <C-w><C-t> <C-w>T
+
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Tab {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <C-t> :<C-u>tabnew<Space>
-"nnoremap <C-t> :<C-u>tabnew %<CR> :e 
-
-noremap <C-Tab>   gt
-noremap <C-S-Tab> gT
-
-nnoremap <C-f> gt
-nnoremap <C-b> gT
-
-nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
-nnoremap <silent><expr> <leader>= !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
-nnoremap <silent><expr> gt !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
-" Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
 " Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap K :<C-u>ls!<CR>:<C-u>b 
+
 nnoremap K :<C-u>ls<CR>:<C-u>b 
+nnoremap gK :<C-u>ls!<CR>:<C-u>b 
 
 nnoremap <silent> <C-n> :<C-u>bnext<CR>
 nnoremap <silent> <C-p> :<C-u>bprev<CR>
 
 nnoremap <leader>z :<C-u>bdel
 nnoremap <leader>Z :<C-u>bdel!
+
 " Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+" Tab {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+nnoremap <C-t> :<C-u>tabnew<Space>
+
+nnoremap <C-f> gt
+nnoremap <C-b> gT
+
+nnoremap <A-f> :tabmove +1<CR>
+nnoremap <A-b> :tabmove -1<CR>T
+
+nnoremap <silent><expr> <leader>= !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
+
+" Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
 " Transparency {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 let g:my_transparency = 229
 let g:my_transparency = 235
 augroup MyVimrc_GUI
@@ -851,6 +939,7 @@ nnoremap <silent><expr> <pagedown> ':<C-u>se transparency=' . max([&transparency
 
 nnoremap <silent>       <c-pageup>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <CR>
 nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <CR>
+
 " Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -858,18 +947,18 @@ nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency ==
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let s:stl = ''
-	\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#StatuslineFile#\ %t\ %<%##\ %F\ \ \ \ '
-        \ . '%=%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
+	\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ '
+	\ . '%=%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
 	\ . '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
 	\ . '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
-	\ . '%{&iminsert?''j'':''e''}\ %##%6l,%3v\ '
-        \ . '%#SLFileName#%3p%%\ [%4L]\ %##\ \ '
-	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?55:0))}'
+	\ . '%{&iminsert?''j'':''e''}\ %##%3p\ [%L]\ '
+	\ . '%#SLFileName#\ %5l,\ %v\ %##\ \ '
+	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}'
 
-let g:stl_time_org = '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#StatuslineFile#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
-let g:stl_time     = g:stl_time_org
+let g:stl_time_org = '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#SLFileName#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
 
-nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_time_org : '' )<CR>
+let g:stl_time = g:stl_time_org
+nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_time_org : '' )<CR>:call UpdateStatusline(0)<CR>
 
 augroup MyVimrc_StatusLine
   au!
@@ -928,18 +1017,26 @@ augroup end
 function! UpdateStatusline(dummy)
   exe 'set statusline=' . s:stl . g:stl_time
 endfunction
+
+" 旧タイマの削除
+" vimrcを再読み込みする際、旧タイマを停止しないと、どんどん貯まっていってしまう。
 if exists('TimerUsl')
   call timer_stop(TimerUsl)
 endif
+
 let UpdateStatuslineInterval = 1000
 let TimerUsl = timer_start(UpdateStatuslineInterval, 'UpdateStatusline', {'repeat': -1})
+
+call UpdateStatusline(0)
 
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Battery {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 try
-  " bat_win.pyが存在しない環境でもエラーとさせない。
+  " bat_win.pyが存在しない環境でもエラーとさせないためtry catchブロック内で実行。
+
   py3file ~/bin/bat_win.py
 
   " Battery (Statusline)
@@ -947,20 +1044,26 @@ try
     call py3eval('bat_win_main()')
     let g:bat_str = g:bat_info['ACLine'] . ' ' . g:bat_info['RemainingPercent'] . ' ' . g:bat_info['RemainingTime']
   endfunction
+
+  " 旧タイマの削除
   if exists('TimerUbi')
     call timer_stop(TimerUbi)
   endif
+
   let UpdateBatteryInfoInterval = 5 * 1000
   let TimerUbi = timer_start(UpdateBatteryInfoInterval, 'UpdateStlBatteryInfo', {'repeat': -1})
 
   " Battery Information
   let bat_info = {}
+
   call py3eval('bat_win_ini()')
+
   call UpdateStlBatteryInfo(0)
 catch
   "let bat_str=': 100% [2:05:27]'
   let bat_str='? ---% [-:--:--]'
 endtry
+
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -992,6 +1095,8 @@ endtry
 " 移動
 " 見た目
 " 編集
+
+" Completion CScope Snippets cnext_cprev
 
 
 
@@ -1303,8 +1408,6 @@ nnoremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\
 nnoremap <expr> <C-BS><C-BS> <SID>WindowRatio() < 0 ? "\<C-w>v" : "\<C-w>s"
 nnoremap <C-w><C-w> <C-w>v
 
-nnoremap <Ins> [c^
-nnoremap <del> ]c^
 
 
 nnoremap <C-Tab> <C-w>p
@@ -1315,62 +1418,6 @@ nnoremap <leader>w <Esc>:<C-u>w<CR>
 
 
 
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-set autochdir
-
-let s:root_file = "prj.root"
-
-set grepprg=/usr/bin/grep\ -an
-set grepprg=/home/PK65278/ag\ --line-numbers
-set grepprg=/home/PK65278/bin/ag
-set grepprg=$HOME/bin/ag
-function! CS(str)
-	let str = a:str
-	let pwd = getcwd()
-	for i in range(6)
-		"pwd
-		if filereadable(s:root_file)
-			augroup MyVimrc_Grep
-				au!
-				"au! WinEnter qf
-				exe "au WinEnter * if (&buftype == 'quickfix') | cd " . getcwd() . " | endif"
-			augroup end
-			try
-				if exists("*CS_Customer")
-					call CS_Customer(a:str)
-				else
-					"exe "silent grep! '" . str . "' **/*.c" . " **/*.h" . " **/*.s"
-				endif
-				"exe "!$HOME/bin/fff " . str
-				call feedkeys("\<CR>:\<Esc>\<C-o>", "tn")
-				finally
-			endtry
-			break
-		endif
-		cd ..
-	endfor
-	exe "cd " . pwd
-endfunction
-
-com! CS call CS("\<C-r>\<C-w>")
-
-nnoremap          <leader>g     :<C-u>call CS("\\<<C-r><C-w>\\>")<CR>
-nnoremap <silent> <C-g>         :<C-u>call CS("\\<<C-r><C-w>\\>")<CR>
-nnoremap          <leader>G     :<C-u>call CS("<C-r><C-w>")<CR>
-nnoremap          <leader><C-g> :<C-u>call CS('')<Left><Left>
-nnoremap <silent> <C-g>         :<C-u>call CS("\\b<C-r><C-w>\\b")<CR>
-nnoremap <silent> <leader>g     :<C-u>call CS("\\b<C-r><C-w>\\b")<CR>
-nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
-
-let c_jk_local = 0
-"QuickenFixバッファOnlyとすべき
-nnoremap <expr><silent> <C-k> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
-nnoremap <expr><silent> <C-j> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
-"nnoremap <silent> <leader> :<C-u>let c_jk_local = !c_jk_local<CR>
-
-"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 so $vim/exp.vim
 
 "nnoremap s f_l
@@ -1378,7 +1425,6 @@ so $vim/exp.vim
 "nnoremap ci s
 "nnoremap cI S
 
-nnoremap S           :<C-u>g#.#s    /<C-R>//
 
 set showtabline=0
 nnoremap <C-h> :<C-u>tabs<CR>
@@ -1398,8 +1444,8 @@ nnoremap <C-w>T :<C-u>call TabReopen()<CR>
 
 "cbuf
 
-nnoremap <silent><expr> <leader>r &readonly ? ':<C-u>set noreadonly<CR>' : ':<C-u>set readonly<CR>'
-nnoremap <silent><expr> <leader>R &modifiable ? ':<C-u>set nomodifiable<CR>' : ':<C-u>set modifiable<CR>'
+nnoremap <silent><expr> <Leader>r &readonly ? ':<C-u>set noreadonly<CR>' : ':<C-u>set readonly<CR>'
+nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable<CR>' : ':<C-u>setl modifiable<CR>'
 
 
 set nowildmenu
@@ -1426,7 +1472,7 @@ cnoremap <C-d>	<Del>
 inoremap <C-e>	<End>
 "if exists('loaded_mru')
  "nnoremap <silent> <leader>o :<C-u>MRU<CR>
-  nnoremap          <leader>o :<C-u>MRU<CR>/
+  nnoremap          <leader>o :<C-u>MRU<CR>
  "nnoremap <silent> <leader><CR> :<C-u>MRU<CR>
 "endif
 
@@ -1434,7 +1480,6 @@ inoremap <C-e>	<End>
 nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
 
 so D:/bin/vim74-kaoriya-win32/test.vim
-so D:/bin/vim74-kaoriya-win32/blockdiff.vim
 
 
 function! PushPos()
@@ -1472,17 +1517,18 @@ cnoremap <C-y> <C-R><C-O>*
 set packpath+=$VIMRUNTIME
 
 
-com! TVIMRC  :tabnew $vim/vimrc
-com! TGVIMRC :tabnew $vim/vimrc
-
+com! Vimrc   :sp $vim/vimrc
+com! VIMRC   :sp $vim/vimrc
+com! EVIMRC  :e $vim/vimrc
 com! VVIMRC  :vsp $vim/vimrc
-com! VGVIMRC :vsp $vim/vimrc
+com! TVIMRC  :tabnew $vim/vimrc
 
-com! VIMRC  :sp $vim/vimrc
-com! Vimrc  :sp $vim/vimrc
-com! GVIMRC :sp $vim/gvimrc
-com! GVimrc :sp $vim/gvimrc
-com! Gvimrc :sp $vim/gvimrc
+com! Gvimrc  :sp $vim/gvimrc
+com! GVIMRC  :sp $vim/gvimrc
+com! EGVIMRC :e $vim/gvimrc
+com! VGVIMRC :vsp $vim/gvimrc
+com! TGVIMRC :tabnew $vim/gvimrc
+
 
 
 "=====================================================================================================================================
@@ -1512,3 +1558,10 @@ au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome
 
 
 com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+
+nnoremap <silent> <Leader>F :<C-u>help function-list<CR>
+
+com! XMLShape :%s/></>\r</g | filetype indent on | setf xml | normal gg=G
+
+
