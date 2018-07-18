@@ -1482,23 +1482,75 @@ nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<
 so D:/bin/vim74-kaoriya-win32/test.vim
 
 
+"-----------------------------------------------------------------------------------------------------------
+
+"  dict {
+"    'TopRow' : #;
+"    'Cursor' : [];
+"  } s:SavePos[スタック];
+
+let g:SavePos = []
+
 function! PushPos()
-    let s:save_cursor = getcurpos()
-    let s:save_top = getpos('w0')
+  " 画面最上行番号取得 (インデックス1が行番号)
+  let toprow = getpos('w0')[1]
+
+  " カーソル位置取得
+  let cursor = getcurpos()
+
+  " スタックへ保存
+  call add(g:SavePos, {'TopRow' : toprow, 'Cursor' : cursor})
 endfunction
 com! PushPos :call PushPos()
 
-function! PopPos()
-    let save_scrolloff = &scrolloff
-    let &scrolloff = 0
-    exe "normal! " . s:save_top[1] . "zt"
-    let &scrolloff = save_scrolloff
+function! ApplyPos()
+  " " スタックが空なら何もしない
+  " if empty(g:SavePos) | return | endif
 
-    call setpos('.', s:save_cursor)
-    let g:sss = s:save_top
+  " スタックトップの要素を取得
+  let savepos = get(g:SavePos, len(g:SavePos)- 1)
+
+  " 画面最上行番号を復帰
+  " scrolloffを一旦0にしないと、上手く設定できない。
+  let save_scrolloff = &scrolloff
+  let &scrolloff = 0
+  exe "normal! " . savepos['TopRow'] . "zt"
+  let &scrolloff = save_scrolloff
+
+  " カーソル位置を復帰
+  call setpos('.', savepos['Cursor'])
+endfunction
+com! ApplyPos :call ApplyPos()
+
+function! DropPos()
+  " " スタックが空なら何もしない
+  " if empty(g:SavePos) | return | endif
+
+  " スタックトップの要素を除去
+  call remove(g:SavePos, len(g:SavePos)- 1)
+endfunction
+com! DropPos :call DropPos()
+
+function! PopPos()
+  " " スタックが空なら何もしない
+  " if empty(g:SavePos) | return | endif
+
+  " スタックトップの要素と取得と除去を同時に行う
+  let savepos = remove(g:SavePos, len(g:SavePos)- 1)
+
+  " 画面最上行番号を復帰
+  " scrolloffを一旦0にしないと、上手く設定できない。
+  let save_scrolloff = &scrolloff
+  let &scrolloff = 0
+  exe "normal! " . savepos['TopRow'] . "zt"
+  let &scrolloff = save_scrolloff
+
+  " カーソル位置を復帰
+  call setpos('.', savepos['Cursor'])
 endfunction
 com! PopPos :call PopPos()
 
+"-----------------------------------------------------------------------------------------------------------
 
 nnoremap gG G
 
@@ -1516,6 +1568,8 @@ cnoremap <C-y> <C-R><C-O>*
 
 set packpath+=$VIMRUNTIME
 
+
+com! ReVimrc :so $vim/vimrc
 
 com! Vimrc   :sp $vim/vimrc
 com! VIMRC   :sp $vim/vimrc
@@ -1563,5 +1617,3 @@ com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 nnoremap <silent> <Leader>F :<C-u>help function-list<CR>
 
 com! XMLShape :%s/></>\r</g | filetype indent on | setf xml | normal gg=G
-
-
