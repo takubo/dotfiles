@@ -1532,21 +1532,8 @@ endfunction
 com! DropPos :call DropPos()
 
 function! PopPos()
-  " " スタックが空なら何もしない
-  " if empty(g:SavePos) | return | endif
-
-  " スタックトップの要素と取得と除去を同時に行う
-  let savepos = remove(g:SavePos, len(g:SavePos)- 1)
-
-  " 画面最上行番号を復帰
-  " scrolloffを一旦0にしないと、上手く設定できない。
-  let save_scrolloff = &scrolloff
-  let &scrolloff = 0
-  exe "normal! " . savepos['TopRow'] . "zt"
-  let &scrolloff = save_scrolloff
-
-  " カーソル位置を復帰
-  call setpos('.', savepos['Cursor'])
+  call ApplyPos()
+  call DropPos()
 endfunction
 com! PopPos :call PopPos()
 
