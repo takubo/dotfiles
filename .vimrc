@@ -1,10 +1,9 @@
-scriptencoding utf-8
 " vim:set ts=8 sts=2 sw=2 tw=0: (この行に関しては:help modelineを参照)
 "
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 18-Jul-2018.
+" Last Change: 22-Oct-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -42,6 +41,11 @@ if 1 && filereadable($VIM . '/vimrc_local.vim')
     finish
   endif
 endif
+
+
+let g:skip_defaults_vim = 1
+let g:no_vimrc_example = 1
+
 
 "---------------------------------------------------------------------------
 " ユーザ優先設定($HOME/.vimrc_first.vim)があれば読み込む。読み込んだ後に変数
@@ -336,8 +340,8 @@ set nowrapscan
 set noundofile
 set nrformats=bin,hex
 set shiftround
-"set fileformats=unix,dos,mac
-set fileformats=unix,dos
+set fileformats=unix,dos,mac
+"set fileformats=unix,dos
 " for 1st empty buffer
 set fileformat=unix
 "set tag+=;
@@ -357,7 +361,7 @@ colorscheme Vitamin
 " TODO hi CursorLine ctermbg=NONE guibg=NONE
 
 
-set timeoutlen=2500
+set timeoutlen=1100
 
 
 augroup MyVimrc
@@ -372,7 +376,7 @@ augroup MyVimrc
   "au QuickfixCmdPost make,grep,grepadd,vimgrep 999wincmd w
 
   au InsertEnter * set timeoutlen=300
-  au InsertLeave * set timeoutlen=2500
+  au InsertLeave * set timeoutlen=1100
 
   au WinEnter * set cursorline
   au WinEnter * set cursorcolumn
@@ -389,7 +393,7 @@ augroup MyVimrc
  "au BufNewFile,BufRead,FileType *.awk so $vim/avd/avd.vim
   au BufNewFile,BufRead,FileType * set textwidth=0
 
-  au BufNewFile,BufRead *.c inoremap @ /*  */<Left><Left><Left>
+  "au BufNewFile,BufRead *.c inoremap @ /*  */<Left><Left><Left>
 augroup end
 
 
@@ -435,24 +439,24 @@ nnoremap <expr> y} '0y}' . col('.') . "\<Bar>"
 nnoremap y{ $y{
 nnoremap <expr> yp '0y$' . col('.') . "\<Bar>"
 "nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
-nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:call clever_f#reset()<CR>
-"nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>:SearchReset<CR>:SearchBuffersReset<CR> TODO multiplesearch
+nnoremap <silent> <Esc><Esc> <Esc>:<C-u>noh<CR>:call clever_f#reset()<CR>:echon <Esc>
+"nnoremap <silent> <Esc><Esc> <Esc>:<C-u>noh<CR>:SearchReset<CR>:SearchBuffersReset<CR> TODO multiplesearch
 nnoremap cp cw<C-r>0
 nnoremap da 0d$
 nnoremap <silent> ZZ :<C-u><CR>
 nnoremap <silent> ZQ :<C-u><CR>
-nnoremap <C-o> O<Esc>
+"nnoremap <C-o> O<Esc>
 nnoremap <A-o> o<Esc>
 
-nnoremap <silent><expr> <leader>n !&number <Bar><Bar> &relativenumber ?  ':set   number norelativenumber<CR>' : ':set relativenumber<CR>'
-nnoremap <silent><expr> <leader>N  &number <Bar><Bar> &relativenumber ?  ':set nonumber norelativenumber<CR>' : ':set number<CR>'
+nnoremap <silent><expr> <leader>n !&number <Bar><Bar> &relativenumber ?  ':<C-u>set   number norelativenumber<CR>' : ':<C-u>set relativenumber<CR>'
+nnoremap <silent><expr> <leader>N  &number <Bar><Bar> &relativenumber ?  ':<C-u>set nonumber norelativenumber<CR>' : ':<C-u>set number<CR>'
 
 " コメント行後の新規行の自動コメント化のON/OFF
-nnoremap <silent><expr> <leader># &formatoptions =~# 'o' ? ':set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':set formatoptions+=o<CR>:set formatoptions+=r<CR>'
+nnoremap <silent><expr> <leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':<C-u>set formatoptions+=o<CR>:set formatoptions+=r<CR>'
 
-nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':setl isk-=.<CR>'
-nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':setl isk-=_<CR>'
-nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':setl isk-=_<CR>'
+nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>' : ':<C-u>setl isk-=.<CR>'
+nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
+nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 
 " ^に、|の機能を重畳
 nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
@@ -460,12 +464,13 @@ nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>')
 nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
 nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
 
-nnoremap <silent> <leader>d :<C-u>pwd<CR>
+"nnoremap <silent> <leader>d :<C-u>pwd<CR>
+"nnoremap <silent> <C-o> :<C-u>pwd<CR>
 nnoremap <silent> <leader>p :<C-u>disp<CR>
 nnoremap <silent> <Leader>m :<C-u>marks<CR>
 nnoremap <silent> <Leader>" :<C-u>disp<CR>
 nnoremap <silent> <Leader>k :<C-u>make<CR>
-nnoremap <silent> <leader>t :<C-u>ToggleWord<CR>
+"nnoremap <silent> <leader>t :<C-u>ToggleWord<CR>
 nnoremap <leader>: :<C-u>setl<Space>
 nnoremap <leader>; :<C-u>set<Space>
 nnoremap <leader>: q:
@@ -474,8 +479,8 @@ nnoremap g; :<C-u>set<Space>
 nnoremap <leader>; :<C-u>setl<Space>
 nnoremap <C-z> nop
 
-nnoremap <silent><expr> <Leader>c &cursorline ? ':set nocursorline<CR>' : ':set cursorline<CR>'
-nnoremap <silent><expr> <leader>C &cursorcolumn ? ':setlocal nocursorcolumn<CR>' : ':setlocal cursorcolumn<CR>'
+nnoremap <silent><expr> <Leader>c &cursorline ? ':<C-u>set nocursorline<CR>' : ':<C-u>set cursorline<CR>'
+nnoremap <silent><expr> <leader>C &cursorcolumn ? ':<C-u>setlocal nocursorcolumn<CR>' : ':<C-u>setlocal cursorcolumn<CR>'
 
 nnoremap  ]]  ]]f(bzt
 nnoremap g]]  ]]f(b
@@ -547,21 +552,21 @@ cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
 
 "nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
 
-nnoremap <expr> * (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
-nnoremap <expr> # (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+nnoremap <expr> *  (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+nnoremap <expr> #  (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
 
-nnoremap        g# g*
-nnoremap        g* *
+nnoremap       g*  *
+nnoremap       g#  g*
 
-nnoremap <expr> ! '/<C-p>\\|\<' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '\><CR>'
-nnoremap <expr> & '/<C-p>\\|' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '<CR>'
+nnoremap <expr> !  '/<C-p>\\|\<' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '\><CR>'
+nnoremap <expr> &  '/<C-p>\\|' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '<CR>'
 
-nnoremap        g! /<C-p>\\|\<<C-r><C-w>\><CR>
-nnoremap        g& /<C-p>\\|<C-r><C-w><CR>
+nnoremap       g!  /<C-p>\\|\<<C-r><C-w>\><CR>
+nnoremap       g&  /<C-p>\\|<C-r><C-w><CR>
 
-nnoremap     ? /<C-p>\<Bar>
-nnoremap     ? /\M
-nnoremap <Bar> /<C-p>\<Bar>\<\><Left><Left>
+nnoremap        ?  /<C-p>\<Bar>
+nnoremap        ?  /\M
+nnoremap    <Bar>  /<C-p>\<Bar>\<\><Left><Left>
 
 "cnoremap <C-g> \<\><Left><Left>
 
@@ -774,6 +779,22 @@ function! CR(arg)
 				if w0 =~ '^_'
 				" 元の検索語は"_"始まり
 					let w = substitute(w0, '^_', '', '')
+" CUSTOMER ++
+				elseif w0 =~ '^fix_'
+				" 元の検索語は"fix_"始まり
+					let w = substitute(w0, '^fix_', '', '')
+					let w0 = w
+				"elseif w0 =~ '^fix_'
+				"" 元の検索語は"fix_"始まりで、本体がアセンブラ。
+				"	let w = substitute(w0, '^fix', '', '')
+				elseif w0 =~ '^sub_'
+				" 元の検索語は"sub_"始まり
+					let w = substitute(w0, '^sub_', '', '')
+					let w0 = w
+				"elseif w0 =~ '^sub_'
+				"" 元の検索語は"sub_"始まりで、本体がアセンブラ。
+				"	let w = substitute(w0, '^sub', '', '')
+" CUSTOMER --
 				else
 				" 元の検索語は"_"始まりでない
 					let w = '_' . w0
@@ -811,7 +832,7 @@ nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-
 " TODO Quickfix
 nnoremap <expr> <C-w><CR> (&ft != 'qf') ? ('<C-w><C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
 " TODO QuickFix
-nnoremap <BS><CR> <C-w><C-]>
+"unibs	nnoremap <BS><CR> <C-w><C-]>
 nnoremap <leader><CR> <C-w><C-]>
 
 nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
@@ -839,13 +860,12 @@ nnoremap <Del> ]c^
 
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-nmap <BS> <C-w>
+"unibs	nmap <BS> <C-w>
 
-"nnoremap <BS> <C-w>v
-nnoremap <BS><BS> <C-w>v
-nnoremap <silent> <s-BS> :<C-u>vnew<cr>
-nnoremap <c-BS> <C-w>s
-nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
+"unibs	nnoremap <BS><BS> <C-w>v
+"unibs	nnoremap <silent> <s-BS> :<C-u>vnew<cr>
+"unibs	nnoremap <c-BS> <C-w>s
+"unibs	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
 
 "nnoremap <c-up> <C-w>K
 "nnoremap <c-down> <C-w>J
@@ -951,8 +971,8 @@ let s:stl = ''
 	\ . '%=%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
 	\ . '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
 	\ . '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
-	\ . '%{&iminsert?''j'':''e''}\ %##%3p\ [%L]\ '
-	\ . '%#SLFileName#\ %5l,\ %v\ %##\ \ '
+	\ . '%{&iminsert?''j'':''e''}\ %##%3p%%\ [%L]\ '
+	\ . '%#SLFileName#\ %5l\ L,\ %v\ C\ %##\ \ '
 	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}'
 
 let g:stl_time_org = '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#SLFileName#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
@@ -1400,14 +1420,29 @@ function! s:WindowRatio()
   return (w / h - 178.0 / 78.0)
 endfunction
 
-nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
-nnoremap <expr> <S-BS> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <C-S-BS> <SID>WindowRatio() < 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
-nnoremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
-nnoremap <expr> <C-BS><C-BS> <SID>WindowRatio() < 0 ? "\<C-w>v" : "\<C-w>s"
-nnoremap <C-w><C-w> <C-w>v
+"unibs	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+nnoremap <expr> <BS>         <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <Leader><BS> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <S-BS>       <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <C-BS>       <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <C-S-BS>     <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+"unibs	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+"noremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+"noremap <expr> <C-BS><C-BS> <SID>WindowRatio() < 0 ? "\<C-w>v" : "\<C-w>s"
+"nnoremap <C-w><C-w> <C-w>v
 
+"++++ test ++++
+"nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+"nnoremap <Bar> <C-w>v
+"nnoremap -     <C-w>s
+"nnoremap -     <C-w>p
+
+nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+"nnoremap <Bar> <C-w>v
+nnoremap -     <C-w>p
+"nnoremap `     <C-w>p
+"nnoremap ,     <C-w>p
+"---- test ----
 
 
 nnoremap <C-Tab> <C-w>p
@@ -1419,6 +1454,8 @@ nnoremap <leader>w <Esc>:<C-u>w<CR>
 
 
 so $vim/exp.vim
+so $vim/qf.vim
+so $vim/func_name.vim
 
 "nnoremap s f_l
 "nnoremap S F_h
@@ -1444,7 +1481,7 @@ nnoremap <C-w>T :<C-u>call TabReopen()<CR>
 
 "cbuf
 
-nnoremap <silent><expr> <Leader>r &readonly ? ':<C-u>set noreadonly<CR>' : ':<C-u>set readonly<CR>'
+nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
 nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable<CR>' : ':<C-u>setl modifiable<CR>'
 
 
@@ -1489,7 +1526,7 @@ so D:/bin/vim74-kaoriya-win32/test.vim
 "    'Cursor' : [];
 "  } s:SavePos[スタック];
 
-let g:SavePos = []
+let s:SavePos = []
 
 function! PushPos()
   " 画面最上行番号取得 (インデックス1が行番号)
@@ -1499,16 +1536,20 @@ function! PushPos()
   let cursor = getcurpos()
 
   " スタックへ保存
-  call add(g:SavePos, {'TopRow' : toprow, 'Cursor' : cursor})
+  call add(s:SavePos, {'TopRow' : toprow, 'Cursor' : cursor})
 endfunction
 com! PushPos :call PushPos()
 
 function! ApplyPos()
   " " スタックが空なら何もしない
-  " if empty(g:SavePos) | return | endif
+  " if empty(s:SavePos) | return | endif
+
+
+  " silentを付けて回る!!!!!!
+
 
   " スタックトップの要素を取得
-  let savepos = get(g:SavePos, len(g:SavePos)- 1)
+  let savepos = get(s:SavePos, len(s:SavePos)- 1)
 
   " 画面最上行番号を復帰
   " scrolloffを一旦0にしないと、上手く設定できない。
@@ -1524,10 +1565,10 @@ com! ApplyPos :call ApplyPos()
 
 function! DropPos()
   " " スタックが空なら何もしない
-  " if empty(g:SavePos) | return | endif
+  " if empty(s:SavePos) | return | endif
 
   " スタックトップの要素を除去
-  call remove(g:SavePos, len(g:SavePos)- 1)
+  call remove(s:SavePos, len(s:SavePos)- 1)
 endfunction
 com! DropPos :call DropPos()
 
@@ -1549,6 +1590,8 @@ nnoremap <expr> yr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'yw'
 
 " US Keyboard
 nnoremap ; :
+cnoremap <expr> ; getcmdline() =~# '^:*$' ? ':' : ';'
+cnoremap <expr> : getcmdline() =~# '^:*$' ? ';' : ':'
 
 
 cnoremap <C-y> <C-R><C-O>*
@@ -1570,6 +1613,15 @@ com! EGVIMRC :e $vim/gvimrc
 com! VGVIMRC :vsp $vim/gvimrc
 com! TGVIMRC :tabnew $vim/gvimrc
 
+com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+
+let g:vimrc_buf_name = '^' . $vim . '/vimrc$'
+let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
+let g:color_buf_name2 = '.vim$'
+nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:vimrc_buf_name))[0]) . '<C-w><C-w>' ) : ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
+"nnoremap <Leader>V :EditColor<CR>
+nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) : ( ':EditColor<CR>' )
 
 
 "=====================================================================================================================================
@@ -1598,9 +1650,22 @@ let $PATH.=';C:\cygwin\bin'
 au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome/Application/chrome.exe %
 
 
-com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
-com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 
-nnoremap <silent> <Leader>F :<C-u>help function-list<CR>
+"nnoremap <silent> <Leader>F :<C-u>help function-list<CR>
+com! FL help function-list<CR>
+
 
 com! XMLShape :%s/></>\r</g | filetype indent on | setf xml | normal gg=G
+
+
+"nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
+"nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
+nnoremap <silent> <C-l> :<C-u>normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
+
+nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
+
+
+" from default
+  filetype plugin indent on
+
+
