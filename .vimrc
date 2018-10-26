@@ -1,9 +1,10 @@
+scriptencoding utf-8
 " vim:set ts=8 sts=2 sw=2 tw=0: (この行に関しては:help modelineを参照)
 "
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 22-Oct-2018.
+" Last Change: 26-Oct-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -352,6 +353,8 @@ set isfname-=:
 "set viminfo+='100,c
 set sessionoptions+=unix,slash
 " set_end set end
+
+set showtabline=0
 
 filetype on
 
@@ -779,22 +782,6 @@ function! CR(arg)
 				if w0 =~ '^_'
 				" 元の検索語は"_"始まり
 					let w = substitute(w0, '^_', '', '')
-" CUSTOMER ++
-				elseif w0 =~ '^fix_'
-				" 元の検索語は"fix_"始まり
-					let w = substitute(w0, '^fix_', '', '')
-					let w0 = w
-				"elseif w0 =~ '^fix_'
-				"" 元の検索語は"fix_"始まりで、本体がアセンブラ。
-				"	let w = substitute(w0, '^fix', '', '')
-				elseif w0 =~ '^sub_'
-				" 元の検索語は"sub_"始まり
-					let w = substitute(w0, '^sub_', '', '')
-					let w0 = w
-				"elseif w0 =~ '^sub_'
-				"" 元の検索語は"sub_"始まりで、本体がアセンブラ。
-				"	let w = substitute(w0, '^sub', '', '')
-" CUSTOMER --
 				else
 				" 元の検索語は"_"始まりでない
 					let w = '_' . w0
@@ -842,18 +829,38 @@ nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
 
 " Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"nnoremap <expr> <Leader>d &diff ? ':diffoff<CR>' : ':diffthis<CR>'
-nnoremap <expr> dx &diff ? ':diffoff<CR>' : ':diffthis<CR>'
+"nnoremap <expr> dx &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
 nnoremap        dc :<C-u>diffoff<CR>
+"nnoremap        dq :<C-u>diffoff<CR>
 
+" diff Ignorecase
 nnoremap <expr> di match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
+" diff Y(whi)tespace
 nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
+" diff Vision option
 nnoremap        dv :<C-u>echo &diffopt<CR>
 
 nnoremap <Ins> [c^
 nnoremap <Del> ]c^
+vnoremap <Ins> [c^
+vnoremap <Del> ]c^
+
+" diff Accept and next
+"nnoremap da do[c^
+" diff obtain and next (accept)
+nnoremap d<Space> do[c^
+" diff Reject and next
+nnoremap dr [c^
+
+" diff X(cross)
+nnoremap <expr> dx winnr('$') != 2 ? ':echoerr "Windows not 2."<CR>' :
+		\  winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
+		\  ':windo diffthis<CR>'
+
+" diff (all) Quit
+nnoremap dq :windo diffoff<CR>
 
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -938,6 +945,8 @@ nnoremap <A-b> :tabmove -1<CR>T
 
 nnoremap <silent><expr> <leader>= !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
 
+nnoremap <C-h> :<C-u>tabs<CR>
+
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -963,7 +972,6 @@ nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency ==
 " Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let s:stl = ''
@@ -982,57 +990,8 @@ nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_ti
 
 augroup MyVimrc_StatusLine
   au!
-  "au BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+60, 120])
-  " M$ Windowsの不具合対策 他のドライブのファイルを読み込んだときにバグがある?
-
-  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150])
-  "au BufEnter,BufWinEnter                                                                 * if !exists('b:buf_name_len') | let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 150]) | endif
   au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter * let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
-
-  "au BufEnter * echo strdisplaywidth(bufname(''))
-  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = strdisplaywidth(bufname('')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+60, 150])
-  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+120, 150])
-  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufEnter,BufWinEnter,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = exists('b:buf_name_len') ? b:buf_name_len : max([len(fnamemodify(bufname('.'),':p'))+120, 150])
-  "au BufEnter * let b:buf_name_len = exists('b:buf_name_len') ? b:buf_name_len : max([len(fnamemodify(bufname('.'),':p'))+150, 150])
-  "au BufNew * let b:buf_name_len = exists('b:buf_name_len') ? b:buf_name_len : max([len(fnamemodify(bufname('.'),':p'))+150, 150])
-  "au BufAdd * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+120, 150])
-  "au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost * let b:buf_name_len = max([len(fnamemodify(bufname('.'),':p'))+90, 150])
 augroup end
-
-"----------------------------------------------------------------------------------------------
-"let buf_name_t = {}
-"let mod_name_t = {}
-"augroup MyVimrc_StatusLine_Test
-"	au!
-"	au BufAdd         * let buf_name_t["BufAdd"] = bufname('')
-"	au BufNewFile     * let buf_name_t["BufNewFile"] = bufname('')
-"	au BufRead        * let buf_name_t["BufRead"] = bufname('')
-"	au BufFilePost    * let buf_name_t["BufFilePost"] = bufname('')
-"	au BufNew         * let buf_name_t["BufNew"] = bufname('')
-"	au FilterReadPost * let buf_name_t["FilterReadPost"] = bufname('')
-"	au FileReadPost	  * let buf_name_t["FileReadPost"] = bufname('')
-"	au BufEnter       * let buf_name_t["BufEnter"] = bufname('')
-"	au BufWinEnter    * let buf_name_t["BufWinEnter"] = bufname('')
-"
-"	au BufAdd         * let mod_name_t["BufAdd"] = fnamemodify(bufname(''), ':p')
-"	au BufNewFile     * let mod_name_t["BufNewFile"] = fnamemodify(bufname(''), ':p')
-"	au BufRead        * let mod_name_t["BufRead"] = fnamemodify(bufname(''), ':p')
-"	au BufFilePost    * let mod_name_t["BufFilePost"] = fnamemodify(bufname(''), ':p')
-"	au BufNew         * let mod_name_t["BufNew"] = fnamemodify(bufname(''), ':p')
-"	au FilterReadPost * let mod_name_t["FilterReadPost"] = fnamemodify(bufname(''), ':p')
-"	au FileReadPost	  * let mod_name_t["FileReadPost"] = fnamemodify(bufname(''), ':p')
-"	au BufEnter       * let mod_name_t["BufEnter"] = fnamemodify(bufname(''), ':p')
-"	au BufWinEnter    * let mod_name_t["BufWinEnter"] = fnamemodify(bufname(''), ':p')
-"augroup end
-"----------------------------------------------------------------------------------------------
-"function! Buf_name_len_set()
-"  try
-"    return max([len(fnamemodify(bufname('.'),':p'))+60, 120])
-"  endtry
-"endfunction
-"au BufNewFile,BufRead * let b:buf_name_len = max([len(fnamemodify('.',':p') . bufname('.'))+30, 120])
-"echo max([len(fnamemodify(".", ":p") . bufname(".")) + 40, 120]
-"----------------------------------------------------------------------------------------------
 
 function! UpdateStatusline(dummy)
   exe 'set statusline=' . s:stl . g:stl_time
@@ -1087,37 +1046,32 @@ endtry
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-"TODO
-"バッファ切り替えイベントでも、カーソルラインをセットする。
-"ftpluginのCとAWKを統合する。
-"無名バッファで、カレントディレクトリを設定できるようにする。
-"Split + 戻る, Split + 進む
+" Configure {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
+com! ReVimrc :so $vim/vimrc
 
-"modifide filese
-" vimrc
-" gvimrc
-" vitamin
-" syntax xms
-" syntax C
-" syntax vim
+com! Vimrc   :sp $vim/vimrc
+com! VIMRC   :sp $vim/vimrc
+com! EVIMRC  :e $vim/vimrc
+com! VVIMRC  :vsp $vim/vimrc
+com! TVIMRC  :tabnew $vim/vimrc
 
+com! Gvimrc  :sp $vim/gvimrc
+com! GVIMRC  :sp $vim/gvimrc
+com! EGVIMRC :e $vim/gvimrc
+com! VGVIMRC :vsp $vim/gvimrc
+com! TGVIMRC :tabnew $vim/gvimrc
 
-" 基本
-" 検索
-" 置換
-" 補完
-" 画面、表示 （ウィンドウ、バッファ、タブ）
-" 便利ツール
-" 移動、切り替え （ウィンドウ、バッファ、タブ）
-" タブジャンプ
-"
-" 移動
-" 見た目
-" 編集
+com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 
-" Completion CScope Snippets cnext_cprev
+let g:vimrc_buf_name = '^' . $vim . '/vimrc$'
+let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
+let g:color_buf_name2 = '.vim$'
+nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:vimrc_buf_name))[0]) . '<C-w><C-w>' ) : ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
+nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) : ( ':EditColor<CR>' )
 
+" Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 inoremap <expr> <CR>  pumvisible() ? '<C-y>' : '<C-]><C-G>u<CR>'
@@ -1172,11 +1126,10 @@ inoremap <C-/> <C-O>u
 
 
 
-"""""""" Completion """"""""""""""
+" Completion {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 set complete=.,w,b,u,i,t
 set completeopt=menuone,preview
-
 
 function! TrigCompl(key)
   "set timeoutlen=1
@@ -1289,62 +1242,42 @@ imap <expr> <C-k> pumvisible() ? 'k' : '<C-k>'
 
 "inoremap <Tab> <C-]><Tab>
 
-"""""""" Completion End """"""""""""""
+" Completion }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+" TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-function! Eatchar(pat)
-  let c = nr2char(getchar(0))
-  return (c =~ a:pat) ? '' : c
-endfunc
-"例 iabbr <silent> if if ()<Left><C-R>=Eatchar('\s')<CR>
-
-
-
-" Cscope
-" nnoremap <C-j><C-a> :<C-u>cscope add cscope.out<CR>
-" nnoremap <C-j><C-j> :<C-u>cscope find 
-" nnoremap <C-j>c     :<C-u>cscope find c 
-" nnoremap <C-j>d     :<C-u>cscope find d 
-" nnoremap <C-j>e     :<C-u>cscope find e 
-" nnoremap <C-j>f     :<C-u>cscope find f 
-" nnoremap <C-j>g     :<C-u>cscope find g 
-" nnoremap <C-j>i     :<C-u>cscope find i 
-" nnoremap <C-j>s     :<C-u>cscope find s 
-" nnoremap <C-j>t     :<C-u>cscope find t 
-" nnoremap <C-j>C     :<C-u>cscope find c <C-r><C-w><CR>
-" nnoremap <C-j>D     :<C-u>cscope find d <C-r><C-w><CR>
-" nnoremap <C-j>E     :<C-u>cscope find e <C-r><C-w><CR>
-" nnoremap <C-j>F     :<C-u>cscope find f <C-r><C-w><CR>
-" nnoremap <C-j>G     :<C-u>cscope find g <C-r><C-w><CR>
-" nnoremap <C-j>I     :<C-u>cscope find i <C-r><C-w><CR>
-" nnoremap <C-j>S     :<C-u>cscope find s <C-r><C-w><CR>
-" nnoremap <C-j>T     :<C-u>cscope find t <C-r><C-w><CR>
+"バッファ切り替えイベントでも、カーソルラインをセットする。
+"ftpluginのCとAWKを統合する。
+"無名バッファで、カレントディレクトリを設定できるようにする。
+"Split + 戻る, Split + 進む
 
 
+"modifide filese
+" vimrc
+" gvimrc
+" vitamin
+" syntax xms
+" syntax C
+" syntax vim
 
-if exists('*smartchr#one_of')
-  "TODO 行末
-  inoremap <expr> , smartchr#one_of(', ', ',')
 
-  " 演算子の間に空白を入れる
-  inoremap <expr> + smartchr#one_of(' = ', ' == ', '=')
-  inoremap <expr> + smartchr#one_of(' + ', '++', '+')
-  inoremap <expr> - smartchr#one_of(' - ', '--', '-')
-  inoremap <expr> * smartchr#one_of(' * ', '*')
-  inoremap <expr> / smartchr#one_of(' / ', '/')
-  inoremap <expr> % smartchr#one_of(' % ', '%')
-  inoremap <expr> & smartchr#one_of(' & ', ' && ', '&')
-  inoremap <expr> <Bar> smartchr#one_of(' <Bar> ', ' <Bar><Bar> ', '<Bar>')
+" 基本
+" 検索
+" 置換
+" 補完
+" 画面、表示 （ウィンドウ、バッファ、タブ）
+" 便利ツール
+" 移動、切り替え （ウィンドウ、バッファ、タブ）
+" タブジャンプ
+"
+" 移動
+" 見た目
+" 編集
 
-  if &filetype == "c"
-    " 下記の文字は連続して現れることがまれなので、二回続けて入力したら改行する
-    inoremap <buffer><expr> } smartchr#one_of('}', '}<cr>')
-    inoremap <buffer><expr> ; smartchr#one_of(';', ';<cr>')
-  endif
-  inoremap <expr> + smartchr#one_of(' = ', ' == ', '=')
-endif
+" Completion CScope Snippets cnext_cprev
 
+" TODO }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1372,7 +1305,6 @@ nnoremap <silent> <leader>l :<C-u>FuncLines<CR>
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 function! s:tab2space()
   setlocal expandtab
@@ -1392,7 +1324,6 @@ command! Tab2space :call s:tab2space()
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 augroup MyVimrc_Em
   au!
@@ -1405,6 +1336,20 @@ function! D2X(dec)
 endfunction
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+" 現在のバッファを、別のタブでも開き直す。
+" デフォルトの<C-w>tとの違いは、元のウィンドウも残るということ。
+function! TabReopen()
+  let b0 = bufnr("%")
+  tabnew
+  let b1 = bufnr("%")
+  execute 'buf  ' b0
+  execute 'bdel ' b1
+  echo b0 b1
+endfunction
+nnoremap <C-w>T :<C-u>call TabReopen()<CR>
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
@@ -1421,15 +1366,16 @@ function! s:WindowRatio()
 endfunction
 
 "unibs	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
-nnoremap <expr> <BS>         <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <Leader><BS> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <S-BS>       <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <C-BS>       <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <C-S-BS>     <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <BS>             <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <Leader><Leader> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <C-S-BS>         <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
 "unibs	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
 "noremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
 "noremap <expr> <C-BS><C-BS> <SID>WindowRatio() < 0 ? "\<C-w>v" : "\<C-w>s"
 "nnoremap <C-w><C-w> <C-w>v
+nnoremap <C-o> :<C-u>new<CR>
 
 "++++ test ++++
 "nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
@@ -1446,50 +1392,42 @@ nnoremap -     <C-w>p
 
 
 nnoremap <C-Tab> <C-w>p
-
 nnoremap <leader>w <Esc>:<C-u>w<CR>
+nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
+nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable<CR>' : ':<C-u>setl modifiable<CR>'
+inoremap <C-f> <C-p>
+cnoremap <C-a>	<Home>
+cnoremap <C-d>	<Del>
+inoremap <C-e>	<End>
+"if exists('loaded_mru')
+ "nnoremap <silent> <leader>o :<C-u>MRU<CR>
+  nnoremap          <leader>o :<C-u>MRU<CR>
+ "nnoremap <silent> <leader><CR> :<C-u>MRU<CR>
+"endif
+
+"set whichwrap+=h,l
+nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
+
 
 "set foldmethod=syntax
 
+
+function! Eatchar(pat)
+  let c = nr2char(getchar(0))
+  return (c =~ a:pat) ? '' : c
+endfunc
+"例 iabbr <silent> if if ()<Left><C-R>=Eatchar('\s')<CR>
 
 
 so $vim/exp.vim
 so $vim/qf.vim
 so $vim/func_name.vim
-
-"nnoremap s f_l
-"nnoremap S F_h
-"nnoremap ci s
-"nnoremap cI S
-
-
-set showtabline=0
-nnoremap <C-h> :<C-u>tabs<CR>
-
-" 現在のバッファを、別のタブでも開き直す。
-" デフォルトの<C-w>tとの違いは、元のウィンドウも残るということ。
-function! TabReopen()
-  let b0 = bufnr("%")
-  tabnew
-  let b1 = bufnr("%")
-  execute 'buf  ' b0
-  execute 'bdel ' b1
-  echo b0 b1
-endfunction
-nnoremap <C-w>T :<C-u>call TabReopen()<CR>
-
-
-"cbuf
-
-nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
-nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable<CR>' : ':<C-u>setl modifiable<CR>'
+so $vim/test.vim
+"so $VIMRUNTIME/macros/matchit.vim
 
 
 set nowildmenu
 set wildmode=longest,full
-inoremap <C-f> <C-p>
-
-"source $VIMRUNTIME/macros/matchit.vim
 
 
 " clever-f Configure
@@ -1504,19 +1442,6 @@ if 0
   let g:clever_f_mark_char = 1
 endif
 
-cnoremap <C-a>	<Home>
-cnoremap <C-d>	<Del>
-inoremap <C-e>	<End>
-"if exists('loaded_mru')
- "nnoremap <silent> <leader>o :<C-u>MRU<CR>
-  nnoremap          <leader>o :<C-u>MRU<CR>
- "nnoremap <silent> <leader><CR> :<C-u>MRU<CR>
-"endif
-
-"set whichwrap+=h,l
-nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
-
-so D:/bin/vim74-kaoriya-win32/test.vim
 
 
 "-----------------------------------------------------------------------------------------------------------
@@ -1599,31 +1524,6 @@ cnoremap <C-y> <C-R><C-O>*
 set packpath+=$VIMRUNTIME
 
 
-com! ReVimrc :so $vim/vimrc
-
-com! Vimrc   :sp $vim/vimrc
-com! VIMRC   :sp $vim/vimrc
-com! EVIMRC  :e $vim/vimrc
-com! VVIMRC  :vsp $vim/vimrc
-com! TVIMRC  :tabnew $vim/vimrc
-
-com! Gvimrc  :sp $vim/gvimrc
-com! GVIMRC  :sp $vim/gvimrc
-com! EGVIMRC :e $vim/gvimrc
-com! VGVIMRC :vsp $vim/gvimrc
-com! TGVIMRC :tabnew $vim/gvimrc
-
-com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
-com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
-
-let g:vimrc_buf_name = '^' . $vim . '/vimrc$'
-let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
-let g:color_buf_name2 = '.vim$'
-nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:vimrc_buf_name))[0]) . '<C-w><C-w>' ) : ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
-"nnoremap <Leader>V :EditColor<CR>
-nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) : ( ':EditColor<CR>' )
-
-
 "=====================================================================================================================================
 if 0
   " diffのコマンド
@@ -1639,16 +1539,14 @@ if 0
 endif
 "=====================================================================================================================================
 
-
 nnoremap _    <C-w>s
 nnoremap <Bar> <C-w>v
 
 let $PATH.=';C:\cygwin\bin'
 
 
-"// Windowsでの設定例です。Mac他の場合は外部コマンド部分を読み替えてください。
+" Windowsでの設定例です。Mac他の場合は外部コマンド部分を読み替えてください。
 au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome/Application/chrome.exe %
-
 
 
 "nnoremap <silent> <Leader>F :<C-u>help function-list<CR>
@@ -1662,10 +1560,16 @@ com! XMLShape :%s/></>\r</g | filetype indent on | setf xml | normal gg=G
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
 nnoremap <silent> <C-l> :<C-u>normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
 
+
 nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
 
 
 " from default
-  filetype plugin indent on
+filetype plugin indent on
+
+
+nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
+
+
 
 
