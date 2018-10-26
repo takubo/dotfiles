@@ -1146,28 +1146,9 @@ inoremap <expr> <Esc> pumvisible() ? '<C-e>' : '<Esc>'
 " Snippets {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 "source D:/bin/vim74-kaoriya-win32/vim74/plugin/snipMate.vim
-function! s:Tab()
-  if 0 && pumvisible()
-    call feedkeys("\<C-n>")
-    return ''
-  else
-    let ret = TriggerSnippet()
-    "if ret == "\t" && search('\W\I\i*\%#', 'bcn')
-    "  "call feedkeys("\<C-n>\<C-n>", 'n')
-    "  "call feedkeys("\<S-Tab>", 'm')
-    "  return "\<C-n>"
-    "endif
-    return ret
-  endif
-endfunction
 if exists('*TriggerSnippet')
-  inoremap <silent> <Tab>   <C-R>=<SID>Tab()<CR>
-else
-  "coml inoremap <expr> <Tab> pumvisible() ? '<C-n>' : '<C-]><Tab>'
+  inoremap <silent> <Tab>   <C-R>=<SID>TriggerSnippet()<CR>
 endif
-"compl inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<C-n>'
-"inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<C-p><C-n>'
-"inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<Tab>'
 
 " Snippets }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
