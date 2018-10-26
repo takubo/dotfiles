@@ -1074,24 +1074,78 @@ nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g
 " Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+" Completion {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+set complete=.,w,b,u,i,t
+set completeopt=menuone,preview
+
+" 全文字キーへの補完開始トリガの割り当て
+function! SetCpmplKey(str)
+  for k in split(a:str, '\zs')
+    exec "inoremap <expr> " . k . " pumvisible() ? '" . k . "' : search('\\k\\{1\\}\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
+  endfor
+endfunction
+call SetCpmplKey('_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+inoremap <expr> <BS> pumvisible() ? (search('\k\k\k\k\%#', 'bcn') ? '<BS>' : "\<BS>") : (search('\k\k\k\%#', 'bcn') ? TrigCompl("\<BS>") : "\<BS>")
+
+augroup MyComplete
+  au!
+
+  au CompleteDone * try | iunmap ff | catch | finally
+  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
+
+  au InsertCharPre * try | iunmap ff | catch | finally
+
+  au TextChangedI * exe pumvisible() ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
+  au TextChangedI * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
+
+  au InsertLeave * try | iunmap ff | catch | finally
+  au InsertLeave * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
+
+  au InsertCharPre * exe pumvisible() || v:char != "j" ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
+  au InsertCharPre * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
+
+augroup end
+
+" 補完を開始する
+function! TrigCompl(key)
+  try
+    iunmap jj
+  catch
+    inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
+  finally
+  endtry
+  call feedkeys("\<C-n>\<C-p>")
+  return a:key
+endfunc
+
+" 補完中のj,kキーの処理を行う
+function! Cmpl_jk(key)
+  try
+    iunmap jj
+  catch
+  finally
+  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
+  endtry
+  call feedkeys(a:key)
+  return ''
+endfunction
+
+inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+inoremap <expr> j pumvisible() ? Cmpl_jk("\<C-n>") : TrigCompl('j')
+inoremap <expr> k pumvisible() ? Cmpl_jk("\<C-p>") : TrigCompl('k')
+inoremap <expr> <C-j> pumvisible() ? 'j' : '<C-n>'
+inoremap <expr> <C-k> pumvisible() ? 'k' : '<Esc>'
+
 inoremap <expr> <CR>  pumvisible() ? '<C-y>' : '<C-]><C-G>u<CR>'
 inoremap <expr> <Esc> pumvisible() ? '<C-e>' : '<Esc>'
 
+" Completion }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Snippets {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 "source D:/bin/vim74-kaoriya-win32/vim74/plugin/snipMate.vim
-" function! s:Tab()
-"   if pumvisible()
-"     call feedkeys("\<C-n>")
-"     return ''
-"   else
-"     let ret = TriggerSnippet()
-"     if ret == "\t" && search('\W\I\i*\%#', 'bcn')
-"       "call feedkeys("\<C-n>\<C-n>", 'n')
-"       "call feedkeys("\<S-Tab>", 'm')
-"       return "\<C-n>"
-"     endif
-"     return ret
-"   endif
-" endfunction
 function! s:Tab()
   if 0 && pumvisible()
     call feedkeys("\<C-n>")
@@ -1115,169 +1169,7 @@ endif
 "inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<C-p><C-n>'
 "inoremap <expr>   <S-Tab> pumvisible() ? '<C-p>' : '<Tab>'
 
-
-inoremap <silent> <C-j> <Esc>
-
-
-
-inoremap <C-H> <C-G>u<C-H>
-"inoremap <CR> <C-]><C-G>u<CR>
-inoremap <C-/> <C-O>u
-
-
-
-" Completion {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-
-set complete=.,w,b,u,i,t
-set completeopt=menuone,preview
-
-function! TrigCompl(key)
-  "set timeoutlen=1
-  "set ttimeoutlen=1000
-  try
-    iunmap jj
-  catch
-  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
-  finally
-  endtry
-  call feedkeys("\<C-n>\<C-p>")
-  "call feedkeys("\<C-x>\<C-o>")
-  return a:key
-endfunc
-
-function! SetJJFF()
-  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
-  au CompleteDone * try | iunmap ff | catch | finally
-endfunction
-
-function! SetCpmplKey(str)
-  for k in split(a:str, '\zs')
-   "exec "inoremap <expr> " . k . " pumvisible() ? '\<C-e>" . k . "' : search('\\k\\k\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
-   "exec "inoremap <expr> " . k . " pumvisible() ? '\<C-e>" . k . "' : search('\\k\\{1\\}\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
-    exec "inoremap <expr> " . k . " pumvisible() ? '" . k . "' : search('\\k\\{1\\}\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
-   "exec "inoremap <expr> " . k . " pumvisible() ? '\<C-e>" . k . "\<C-n>\<C-p>' : search('\\k\\%#', 'bcn') ? TrigCompl('" . k . "')" . " : '" . k . "'"
-  endfor
-endfunction
-inoremap <expr> <BS> pumvisible() ? (search('\k\k\k\k\%#', 'bcn') ? '<BS>' : "\<BS>") : (search('\k\k\k\%#', 'bcn') ? TrigCompl("\<BS>") : "\<BS>")
-"inoremap <expr> <BS> pumvisible() ? (search('\k\k\k\k\%#', 'bcn') ? '<BS>' : "\<C-e>\<BS>") : (search('\k\k\k\%#', 'bcn') ? TrigCompl("\<BS>") : "\<BS>")
-"inoremap <buffer><expr> <BS> pumvisible() ? (search('\k\k\k\k\%#', 'bcn') ? '<BS>' : "\<C-e>\<BS>") : (search('\k\k\k\k\%#', 'bcn') ? TrigCompl("\<BS>") : "\<BS>")
-
-call SetCpmplKey('_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
-
-
-"" function! SubsubBS()
-""   set timeoutlen=100
-""   "set ttimeoutlen=1000
-""   call feedkeys("\<C-n>\<C-p>")
-""   return "\<BS>"
-"" endfunc
-"inoremap <buffer><expr> <BS> pumvisible() ? (search('\k\k\k\k\%#', 'bcn') ? '<BS>' : "\<C-e>\<BS>") : (search('\k\k\k\k\%#', 'bcn') ? "\<BS>\<C-N>\<C-P>" : "\<BS>")
-
-augroup MyComplete
-  au!
-  "au CompleteDone * set timeoutlen=200
-  "au CompleteDone * iunmap ff
-
-  au CompleteDone * try | iunmap ff | catch | finally
-  au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
-
-  au InsertCharPre * try | iunmap ff | catch | finally
-  " au InsertCharPre * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
-
-  au TextChangedI * exe pumvisible() ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
-  au TextChangedI * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
-
-  au InsertLeave * try | iunmap ff | catch | finally
-  au InsertLeave * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
-
-  au InsertCharPre * exe pumvisible() || v:char != "j" ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
-  au InsertCharPre * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
-
-  "au CompleteDone * try | iunmap ff | catch | finally
-  "au CompleteDone * set ttimeoutlen=-1
-augroup end
-
-"inoremap <buffer><expr> <C-J> pumvisible() ? '<C-N>' : '<C-J>'
-"inoremap <buffer><expr> <C-K> pumvisible() ? '<C-P>' : '<C-K>'
-
-function! Cmpl_j()
-  "set timeoutlen=1
-  try
-    iunmap jj
-  catch
-  finally
-  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
-  endtry
-  call feedkeys("\<C-n>")
-  return ''
-endfunction
-function! Cmpl_k()
-  "set timeoutlen=1
-  try
-    iunmap jj
-  catch
-  finally
-  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
-  endtry
-  call feedkeys("\<C-p>")
-  return ''
-endfunction
-
-
-inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
-inoremap <expr> j pumvisible() ? Cmpl_j() : TrigCompl('j')
-inoremap <expr> k pumvisible() ? Cmpl_k() : TrigCompl('k')
-"inoremap <expr> j pumvisible() ? '<C-N>' : TrigCompl('j')
-"inoremap <expr> k pumvisible() ? '<C-P>' : TrigCompl('k')
-imap <expr> <C-j> pumvisible() ? 'j' : '<C-j>'
-imap <expr> <C-k> pumvisible() ? 'k' : '<C-k>'
-
-
-"inoremap <buffer><expr> j pumvisible() ? '<C-N>' : TrigCompl('j')
-"inoremap <buffer><expr> k pumvisible() ? '<C-P>' : TrigCompl('k')
-"inoremap <buffer><expr> <C-J> pumvisible() ? 'j' : '<C-J>'
-"inoremap <buffer><expr> <C-K> pumvisible() ? 'k' : '<C-K>'
-"inoremap <buffer><expr> <M-J> pumvisible() ? 'j' : '<M-J>'
-"inoremap <buffer><expr> <M-K> pumvisible() ? 'k' : '<M-K>'
-
-"inoremap <Tab> <C-]><Tab>
-
-" Completion }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
-" TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-
-"バッファ切り替えイベントでも、カーソルラインをセットする。
-"ftpluginのCとAWKを統合する。
-"無名バッファで、カレントディレクトリを設定できるようにする。
-"Split + 戻る, Split + 進む
-
-
-"modifide filese
-" vimrc
-" gvimrc
-" vitamin
-" syntax xms
-" syntax C
-" syntax vim
-
-
-" 基本
-" 検索
-" 置換
-" 補完
-" 画面、表示 （ウィンドウ、バッファ、タブ）
-" 便利ツール
-" 移動、切り替え （ウィンドウ、バッファ、タブ）
-" タブジャンプ
-"
-" 移動
-" 見た目
-" 編集
-
-" Completion CScope Snippets cnext_cprev
-
-" TODO }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+" Snippets }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1404,6 +1296,9 @@ inoremap <C-e>	<End>
   nnoremap          <leader>o :<C-u>MRU<CR>
  "nnoremap <silent> <leader><CR> :<C-u>MRU<CR>
 "endif
+
+inoremap <C-H> <C-G>u<C-H>
+"inoremap <CR> <C-]><C-G>u<CR>
 
 "set whichwrap+=h,l
 nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
@@ -1569,6 +1464,41 @@ filetype plugin indent on
 
 
 nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
+
+
+" TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+"バッファ切り替えイベントでも、カーソルラインをセットする。
+"ftpluginのCとAWKを統合する。
+"無名バッファで、カレントディレクトリを設定できるようにする。
+"Split + 戻る, Split + 進む
+
+
+"modifide filese
+" vimrc
+" gvimrc
+" vitamin
+" syntax xms
+" syntax C
+" syntax vim
+
+
+" 基本
+" 検索
+" 置換
+" 補完
+" 画面、表示 （ウィンドウ、バッファ、タブ）
+" 便利ツール
+" 移動、切り替え （ウィンドウ、バッファ、タブ）
+" タブジャンプ
+"
+" 移動
+" 見た目
+" 編集
+
+" Completion CScope Snippets cnext_cprev
+
+" TODO }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 
