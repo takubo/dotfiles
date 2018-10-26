@@ -1172,29 +1172,67 @@ endif
 " Snippets }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-function! CountFunctionLines()
-  " 現在位置を保存
-  let cur = line('.')
-  normal! H
-  let cur_top = line('.')
-  execute 'normal ' . cur . 'G'
-  " 関数先頭へ移動
-  normal! [[
-  let s = line('.')
-  " 関数末尾へ移動
-  normal! ][
-  let e = line('.')
-  " 結果表示
-  echo e - s + 1
-  " 保存していた位置に戻る
-  execute 'normal ' . cur_top . 'G'
-  normal! z<CR>
-  execute 'normal ' . cur . 'G'
-endfunction
-command! FuncLines call CountFunctionLines()
-nnoremap <silent> <leader>l :<C-u>FuncLines<CR>
-"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+" Other Key-Maps {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+nnoremap <leader>w <Esc>:<C-u>w<CR>
+nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
+nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable<CR>' : ':<C-u>setl modifiable<CR>'
+nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
+nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
+
+"if exists('loaded_mru')
+  nnoremap <silent> <leader>o :<C-u>MRU<CR>
+"endif
+
+"nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
+"nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
+nnoremap <silent> <C-l> :<C-u>normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
+
+" US Keyboard {{{
+nnoremap ; :
+cnoremap <expr> ; getcmdline() =~# '^:*$' ? ':' : ';'
+cnoremap <expr> : getcmdline() =~# '^:*$' ? ';' : ':'
+" US Keyboard }}}
+
+
+nnoremap <C-Tab> <C-w>p
+inoremap <C-f> <C-p>
+inoremap <C-e>	<End>
+"inoremap <CR> <C-]><C-G>u<CR>
+inoremap <C-H> <C-G>u<C-H>
+cnoremap <C-a>	<Home>
+cnoremap <C-d>	<Del>
+cnoremap <C-y> <C-R><C-O>*
+
+nnoremap <leader>E :<C-u><C-R>"
+"set whichwrap+=h,l
+nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
+nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
+
+nnoremap _    <C-w>s
+nnoremap <Bar> <C-w>v
+
+nnoremap gG G
+
+nnoremap <expr> cr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'cw'
+nnoremap <expr> dr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'dw'
+nnoremap <expr> yr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'yw'
+
+" Other Key-Maps }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Clever-f Configuration {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+let g:clever_f_smart_case=1			"
+let g:clever_f_use_migemo=0			"
+"let g:clever_f_fix_key_direction=1		"
+let g:clever_f_chars_match_any_signs = '\\'	" 任意の記号にマッチする文字を設定する
+if 0
+  let g:clever_f_mark_cursor_color = 'gui=none guifg=black guibg=yellow'
+  let g:clever_f_mark_char_color   = 'gui=none guifg=black guibg=red'
+  let g:clever_f_mark_cursor = 1
+  let g:clever_f_mark_char = 1
+endif
+" Clever-f Configuration }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1217,19 +1255,6 @@ command! Tab2space :call s:tab2space()
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-augroup MyVimrc_Em
-  au!
-  au BufNewFile,BufRead,BufFilePost,BufWinEnter,BufNew,FilterReadPost,FileReadPost *.{c,h} so $vim/em.vim
-augroup end
-function! D2X(dec)
-  "return printf("0x%X", a:dec)
-  let hex = printf("0x%X", a:dec)
-  return hex . "U" . (len(hex) > 6 ? "UL" : "U")
-endfunction
-"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 " 現在のバッファを、別のタブでも開き直す。
 " デフォルトの<C-w>tとの違いは、元のウィンドウも残るということ。
 function! TabReopen()
@@ -1244,11 +1269,17 @@ nnoremap <C-w>T :<C-u>call TabReopen()<CR>
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
-nnoremap <leader>E :<C-u><C-R>"
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+function! Eatchar(pat)
+  let c = nr2char(getchar(0))
+  return (c =~ a:pat) ? '' : c
+endfunc
+"例 iabbr <silent> if if ()<Left><C-R>=Eatchar('\s')<CR>
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-"""""""""""""""" Window Ratio
+" Window Ratio {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 " 正方形 w:h = 178:78
 " 横長なほど、大きい値が返る。
 function! s:WindowRatio()
@@ -1282,69 +1313,17 @@ nnoremap -     <C-w>p
 "nnoremap ,     <C-w>p
 "---- test ----
 
-
-nnoremap <C-Tab> <C-w>p
-nnoremap <leader>w <Esc>:<C-u>w<CR>
-nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
-nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable<CR>' : ':<C-u>setl modifiable<CR>'
-inoremap <C-f> <C-p>
-cnoremap <C-a>	<Home>
-cnoremap <C-d>	<Del>
-inoremap <C-e>	<End>
-"if exists('loaded_mru')
- "nnoremap <silent> <leader>o :<C-u>MRU<CR>
-  nnoremap          <leader>o :<C-u>MRU<CR>
- "nnoremap <silent> <leader><CR> :<C-u>MRU<CR>
-"endif
-
-inoremap <C-H> <C-G>u<C-H>
-"inoremap <CR> <C-]><C-G>u<CR>
-
-"set whichwrap+=h,l
-nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
+" Window Ratio }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-"set foldmethod=syntax
+" Push Pop Pos {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-
-function! Eatchar(pat)
-  let c = nr2char(getchar(0))
-  return (c =~ a:pat) ? '' : c
-endfunc
-"例 iabbr <silent> if if ()<Left><C-R>=Eatchar('\s')<CR>
-
-
-so $vim/exp.vim
-so $vim/qf.vim
-so $vim/func_name.vim
-so $vim/test.vim
-"so $VIMRUNTIME/macros/matchit.vim
-
-
-set nowildmenu
-set wildmode=longest,full
-
-
-" clever-f Configure
-let g:clever_f_smart_case=1			"
-let g:clever_f_use_migemo=0			"
-"let g:clever_f_fix_key_direction=1		"
-let g:clever_f_chars_match_any_signs = '\\'	" 任意の記号にマッチする文字を設定する
-if 0
-  let g:clever_f_mark_cursor_color = 'gui=none guifg=black guibg=yellow'
-  let g:clever_f_mark_char_color   = 'gui=none guifg=black guibg=red'
-  let g:clever_f_mark_cursor = 1
-  let g:clever_f_mark_char = 1
-endif
-
-
-
-"-----------------------------------------------------------------------------------------------------------
-
+"" データ構造定義 """"""""""""""""
 "  dict {
 "    'TopRow' : #;
 "    'Cursor' : [];
 "  } s:SavePos[スタック];
+""""""""""""""""""""""""""""""""""
 
 let s:SavePos = []
 
@@ -1364,9 +1343,7 @@ function! ApplyPos()
   " " スタックが空なら何もしない
   " if empty(s:SavePos) | return | endif
 
-
   " silentを付けて回る!!!!!!
-
 
   " スタックトップの要素を取得
   let savepos = get(s:SavePos, len(s:SavePos)- 1)
@@ -1398,25 +1375,32 @@ function! PopPos()
 endfunction
 com! PopPos :call PopPos()
 
-"-----------------------------------------------------------------------------------------------------------
-
-nnoremap gG G
-
-nnoremap <expr> cr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'cw'
-nnoremap <expr> dr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'dw'
-nnoremap <expr> yr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'yw'
+" Push Pop Pos }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+augroup MyVimrc_Em
+  au!
+  au BufNewFile,BufRead,BufFilePost,BufWinEnter,BufNew,FilterReadPost,FileReadPost *.{c,h} so $vim/em.vim
+augroup end
+function! D2X(dec)
+  "return printf("0x%X", a:dec)
+  let hex = printf("0x%X", a:dec)
+  return hex . "U" . (len(hex) > 6 ? "UL" : "U")
+endfunction
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-" US Keyboard
-nnoremap ; :
-cnoremap <expr> ; getcmdline() =~# '^:*$' ? ':' : ';'
-cnoremap <expr> : getcmdline() =~# '^:*$' ? ';' : ':'
+
+so $vim/exp.vim
+so $vim/qf.vim
+so $vim/func_name.vim
+so $vim/test.vim
+"so $VIMRUNTIME/macros/matchit.vim
 
 
-cnoremap <C-y> <C-R><C-O>*
-
-set packpath+=$VIMRUNTIME
+"set foldmethod=syntax
+set nowildmenu
+set wildmode=longest,full
 
 
 "=====================================================================================================================================
@@ -1434,36 +1418,20 @@ if 0
 endif
 "=====================================================================================================================================
 
-nnoremap _    <C-w>s
-nnoremap <Bar> <C-w>v
+set packpath+=$VIMRUNTIME
 
 let $PATH.=';C:\cygwin\bin'
-
 
 " Windowsでの設定例です。Mac他の場合は外部コマンド部分を読み替えてください。
 au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome/Application/chrome.exe %
 
-
 "nnoremap <silent> <Leader>F :<C-u>help function-list<CR>
 com! FL help function-list<CR>
 
-
 com! XMLShape :%s/></>\r</g | filetype indent on | setf xml | normal gg=G
-
-
-"nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
-"nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
-nnoremap <silent> <C-l> :<C-u>normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
-
-
-nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
-
 
 " from default
 filetype plugin indent on
-
-
-nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
 
 
 " TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1499,7 +1467,5 @@ nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 " Completion CScope Snippets cnext_cprev
 
 " TODO }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
 
 
