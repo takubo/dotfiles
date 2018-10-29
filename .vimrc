@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 26-Oct-2018.
+" Last Change: 29-Oct-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -819,7 +819,7 @@ nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-
 " TODO Quickfix
 nnoremap <expr> <C-w><CR> (&ft != 'qf') ? ('<C-w><C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
 " TODO QuickFix
-"unibs	nnoremap <BS><CR> <C-w><C-]>
+"Unified_BS_Key	nnoremap <BS><CR> <C-w><C-]>
 nnoremap <leader><CR> <C-w><C-]>
 
 nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
@@ -829,7 +829,6 @@ nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
 
 " Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"nnoremap <expr> dx &diff ? ':diffoff<CR>' : ':diffthis<CR>'
 nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
 nnoremap        dc :<C-u>diffoff<CR>
 "nnoremap        dq :<C-u>diffoff<CR>
@@ -847,32 +846,34 @@ nnoremap <Del> ]c^
 vnoremap <Ins> [c^
 vnoremap <Del> ]c^
 
-" diff Accept and next
-"nnoremap da do[c^
-" diff obtain and next (accept)
-nnoremap d<Space> do[c^
-" diff Reject and next
-nnoremap dr [c^
+" diff Accept (obtain and next)
+nnoremap <expr> d<Space> &diff ? do[c^ ' '<C-f>'
+" diff Reject (next)
+nnoremap <expr> dr &diff ? '[c^' : ''
 
 " diff X(cross)
 nnoremap <expr> dx winnr('$') != 2 ? ':echoerr "Windows not 2."<CR>' :
 		\  winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
-		\  ':windo diffthis<CR>'
+		\  ':<C-u>windo diffthis<CR>'
 
 " diff (all) Quit
 nnoremap dq :windo diffoff<CR>
+
+" diff (all) Quit
+"nnoremap <silent> dQ :<C-u>windo call PushPos_All() <Bar> silent bufdo diffoff <Bar> call PopPos_All()<CR>
+nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> silent bufdo diffoff <Bar> call PopPos_All() <Bar> silent windo diffoff<CR>
 
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"unibs	nmap <BS> <C-w>
+"Unified_BS_Key	nmap <BS> <C-w>
 
-"unibs	nnoremap <BS><BS> <C-w>v
-"unibs	nnoremap <silent> <s-BS> :<C-u>vnew<cr>
-"unibs	nnoremap <c-BS> <C-w>s
-"unibs	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
+"Unified_BS_Key	nnoremap <BS><BS> <C-w>v
+"Unified_BS_Key	nnoremap <silent> <s-BS> :<C-u>vnew<cr>
+"Unified_BS_Key	nnoremap <c-BS> <C-w>s
+"Unified_BS_Key	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
 
 "nnoremap <c-up> <C-w>K
 "nnoremap <c-down> <C-w>J
@@ -990,7 +991,8 @@ nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_ti
 
 augroup MyVimrc_StatusLine
   au!
-  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter * let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
+  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter * 
+    \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
 augroup end
 
 function! UpdateStatusline(dummy)
@@ -1044,34 +1046,6 @@ catch
 endtry
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
-" Configure {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-
-com! ReVimrc :so $vim/vimrc
-
-com! Vimrc   :sp $vim/vimrc
-com! VIMRC   :sp $vim/vimrc
-com! EVIMRC  :e $vim/vimrc
-com! VVIMRC  :vsp $vim/vimrc
-com! TVIMRC  :tabnew $vim/vimrc
-
-com! Gvimrc  :sp $vim/gvimrc
-com! GVIMRC  :sp $vim/gvimrc
-com! EGVIMRC :e $vim/gvimrc
-com! VGVIMRC :vsp $vim/gvimrc
-com! TGVIMRC :tabnew $vim/gvimrc
-
-com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
-com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
-
-let g:vimrc_buf_name = '^' . $vim . '/vimrc$'
-let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
-let g:color_buf_name2 = '.vim$'
-nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:vimrc_buf_name))[0]) . '<C-w><C-w>' ) : ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
-nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ? ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) : ( ':EditColor<CR>' )
-
-" Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Completion {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1151,6 +1125,38 @@ if exists('*TriggerSnippet')
 endif
 
 " Snippets }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Configure {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+com! ReVimrc :so $vim/vimrc
+
+com! Vimrc   :sp $vim/vimrc
+com! VIMRC   :sp $vim/vimrc
+com! EVIMRC  :e $vim/vimrc
+com! VVIMRC  :vsp $vim/vimrc
+com! TVIMRC  :tabnew $vim/vimrc
+
+com! Gvimrc  :sp $vim/gvimrc
+com! GVIMRC  :sp $vim/gvimrc
+com! EGVIMRC :e $vim/gvimrc
+com! VGVIMRC :vsp $vim/gvimrc
+com! TGVIMRC :tabnew $vim/gvimrc
+
+com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+
+let g:vimrc_buf_name = '^' . $vim . '/vimrc$'
+let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
+let g:color_buf_name2 = '.vim$'
+nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) ?
+			\  ( win_id2win(win_findbuf(buffer_number(g:vimrc_buf_name))[0]) . '<C-w><C-w>' ) :
+			\  ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
+nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ?
+			\  ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) :
+			\  ( ':EditColor<CR>' )
+
+" Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Other Key-Maps {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1269,13 +1275,13 @@ function! s:WindowRatio()
   return (w / h - 178.0 / 78.0)
 endfunction
 
-"unibs	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+"Unified_BS_Key	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
 nnoremap <expr> <BS>             <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap <expr> <Leader><Leader> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap <expr> <C-S-BS>         <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
-"unibs	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+"Unified_BS_Key	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
 "noremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
 "noremap <expr> <C-BS><C-BS> <SID>WindowRatio() < 0 ? "\<C-w>v" : "\<C-w>s"
 "nnoremap <C-w><C-w> <C-w>v
@@ -1355,6 +1361,26 @@ function! PopPos()
   call DropPos()
 endfunction
 com! PopPos :call PopPos()
+
+" ---------------
+" PushPos_All:
+" ---------------
+function! PushPos_All()
+    let s:now_win = winnr()
+    let s:now_tab = tabpagenr()
+    let s:now_buf = bufnr('')
+    "PushPos
+endfunction
+
+" ---------------
+" PopPos_All:
+" ---------------
+function! PopPos_All()
+    silent exe 'tabnext ' . s:now_tab
+    silent exe s:now_win . 'wincmd w'
+    silent exe 'buffer ' . s:now_buf
+    "PopPos
+endfunction
 
 " Push Pop Pos }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
