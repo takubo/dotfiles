@@ -868,17 +868,16 @@ nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> silent bufdo diffoff <Bar> c
 
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"Unified_BS_Key	nmap <BS> <C-w>
-
-"Unified_BS_Key	nnoremap <BS><BS> <C-w>v
-"Unified_BS_Key	nnoremap <silent> <s-BS> :<C-u>vnew<cr>
-"Unified_BS_Key	nnoremap <c-BS> <C-w>s
-"Unified_BS_Key	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
-
-"nnoremap <c-up> <C-w>K
-"nnoremap <c-down> <C-w>J
-"nnoremap <c-left> <C-w>H
-"nnoremap <c-right> <C-w>L
+" ---------------
+" Window Ratio
+"   正方形 w:h = 178:78
+"   横長なほど、大きい値が返る。
+" ---------------
+function! s:WindowRatio()
+  let h = winheight(0) + 0.0
+  let w = winwidth(0) + 0.0
+  return (w / h - 178.0 / 78.0)
+endfunction
 
 nnoremap <silent> <Tab>	     <C-w>w
 nnoremap <silent> <S-Tab>    <C-w>W
@@ -904,18 +903,43 @@ nnoremap <silent> <A-down>  <C-w>J:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <A-left>  <C-w>H:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <A-right> <C-w>L:<C-u>call		<SID>best_scrolloff()<CR>
 
-nnoremap <silent> q <C-w><C-c>
-nnoremap <silent> <C-q>: q:
-nnoremap <silent> <C-q>/ q/
-nnoremap <silent> <C-q>? q?
-nnoremap <silent> <leader>q :<C-u>q<CR>
-
 nnoremap <silent> <C-Left>	<C-w>h
 nnoremap <silent> <C-Right>	<C-w>l
 nnoremap <silent> <C-Down>	<C-w>j
 nnoremap <silent> <C-Up>	<C-w>k
 
+nnoremap <silent> <C-q>: q:
+nnoremap <silent> <C-q>/ q/
+nnoremap <silent> <C-q>? q?
+
+nnoremap <silent> q <C-w><C-c>
+nnoremap <silent> <leader>q :<C-u>q<CR>
+
 nnoremap <C-w><C-t> <C-w>T
+
+"-------------------------------------- TODO -------------------------------
+
+"Unified_BS_Key	nmap <BS> <C-w>
+"Unified_BS_Key	nnoremap <c-BS> <C-w>s
+"Unified_BS_Key	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
+
+"Unified_BS_Key	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+nnoremap <expr> <BS>             <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <Leader><Leader> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <C-S-BS>         <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <C-o> :<C-u>new<CR>
+
+"Unified_BS_Key	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+"Unified_BS_Key	noremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+
+nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+nnoremap <Bar> <C-w>v
+"nnoremap -     <C-w>s
+nnoremap -     <C-w>p
+nnoremap `     <C-w>p
+nnoremap ,     <C-w>p
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1263,44 +1287,6 @@ function! Eatchar(pat)
 endfunc
 "例 iabbr <silent> if if ()<Left><C-R>=Eatchar('\s')<CR>
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-" Window Ratio {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-
-" 正方形 w:h = 178:78
-" 横長なほど、大きい値が返る。
-function! s:WindowRatio()
-  let h = winheight(0) + 0.0
-  let w = winwidth(0) + 0.0
-  return (w / h - 178.0 / 78.0)
-endfunction
-
-"Unified_BS_Key	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
-nnoremap <expr> <BS>             <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <Leader><Leader> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <C-S-BS>         <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
-"Unified_BS_Key	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
-"noremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
-"noremap <expr> <C-BS><C-BS> <SID>WindowRatio() < 0 ? "\<C-w>v" : "\<C-w>s"
-"nnoremap <C-w><C-w> <C-w>v
-nnoremap <C-o> :<C-u>new<CR>
-
-"++++ test ++++
-"nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
-"nnoremap <Bar> <C-w>v
-"nnoremap -     <C-w>s
-"nnoremap -     <C-w>p
-
-nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
-"nnoremap <Bar> <C-w>v
-nnoremap -     <C-w>p
-"nnoremap `     <C-w>p
-"nnoremap ,     <C-w>p
-"---- test ----
-
-" Window Ratio }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Push Pop Pos {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
