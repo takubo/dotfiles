@@ -1026,8 +1026,10 @@ augroup MyVimrc_StatusLine
     \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
 augroup end
 
+let g:alt_stl_time = 0
 function! UpdateStatusline(dummy)
-  exe 'set statusline=' . s:stl . g:stl_time
+  if g:alt_stl_time > 0 | let g:alt_stl_time = g:alt_stl_time - 1 | endif
+  if !g:alt_stl_time | exe 'set statusline=' . s:stl . g:stl_time | endif
 endfunction
 
 " 旧タイマの削除
@@ -1204,7 +1206,7 @@ nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 
 "nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
-nnoremap <silent> <C-l> :<C-u>normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
+nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
 
 " US Keyboard {{{
 nnoremap ; :
