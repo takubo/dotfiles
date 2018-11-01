@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 29-Oct-2018.
+" Last Change: 01-Nov-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -342,7 +342,6 @@ set noundofile
 set nrformats=bin,hex
 set shiftround
 set fileformats=unix,dos,mac
-"set fileformats=unix,dos
 " for 1st empty buffer
 set fileformat=unix
 "set tag+=;
@@ -497,27 +496,6 @@ nnoremap g[]  []
 vnoremap af ][<ESC>V[[
 vnoremap if ][k<ESC>V[[j
 
-" Emacs {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-" コマンドラインでのキーバインドを Emacs スタイルにします
-" 行頭へ移動
-cnoremap <C-A>		<Home>
-" 一文字戻る
-cnoremap <C-B>		<Left>
-" カーソルの下の文字を削除
-cnoremap <C-D>		<Del>
-" 行末へ移動
-cnoremap <C-E>		<End>
-" 一文字進む
-cnoremap <C-F>		<Right>
-" コマンドライン履歴を一つ進む
-cnoremap <C-N>		<Down>
-" コマンドライン履歴を一つ戻る
-cnoremap <C-P>		<Up>
-" 前の単語へ移動
-"cnoremap <Esc><C-B>	<S-Left>
-" 次の単語へ移動
-"cnoremap <Esc><C-F>	<S-Right>
-" Emacs }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 " 検索時に/, ?を楽に入力する
 cnoremap <expr> / getcmdtype() == '/' ? '\/' : '/'
@@ -534,7 +512,31 @@ cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
 			\ '<C-t>'
 
 
-
+" Emacs {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+" コマンドラインでのキーバインドを Emacs スタイルにする
+" 行頭へ移動
+cnoremap <C-a>		<Home>
+" 一文字戻る
+cnoremap <C-b>		<Left>
+" カーソルの下の文字を削除
+cnoremap <C-d>		<Del>
+" 行末へ移動
+cnoremap <C-e>		<End>
+" 一文字進む
+cnoremap <C-f>		<Right>
+" コマンドライン履歴を一つ進む
+cnoremap <C-n>		<Down>
+" コマンドライン履歴を一つ戻る
+cnoremap <C-p>		<Up>
+" Emacs Yank
+cnoremap <C-y> <C-R><C-O>*
+" 次の単語へ移動
+cnoremap <A-f>		<S-Right>
+"cnoremap <Esc>f		<S-Right>
+" 前の単語へ移動
+cnoremap <A-b>		<S-Left>
+"cnoremap <Esc><b>	<S-Left>
+" Emacs }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -707,124 +709,130 @@ nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
 " Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Tag {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+" Tag, Jump, and Unified CR {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"   TODO
-"     先頭のアンダーバー
-"     関数のみf(b
-"     ラベルならf:b
-"     変数なら、スクロールしない
-"     引数のタグ
-"     asmのタグ
-"
+" Browse
 noremap H <C-o>
 noremap L <C-i>
-"補償
+
+" 補償
 nnoremap zh H
 nnoremap zl L
 "nnoremap zm M
-nnoremap <expr> zl &wrap ? 'L' : 'zl'
 nnoremap <expr> zh &wrap ? 'H' : 'zh'
+nnoremap <expr> zl &wrap ? 'L' : 'zl'
 
-"nnoremap <C-k> H
-"nnoremap <C-j> L
-
-nnoremap <S-CR> gD
-
-function! MyTag(www)
-  exe "tjump " . a:www
-  exe 'normal! ' . 'z<CR>' . (winheight(0)/4) . '<C-y>'
+" ---------------
+" Unified CR
+"   数字付きなら、行へジャンプ
+"   qfなら当該行へジャンプ
+"   helpなら当該行へジャンプ
+"   それ以外なら、タグジャンプ
+" ---------------
+function! Unified_CR(mode)
+  if v:prevcount
+    "この方法(feedkeys)なら、移動行が履歴に残る。"exe v:prevcount"だと、残らない。
+    "最後のEscは、コマンドラインに残った数字を消すため。
+    call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 't')
+    return
+  elseif &ft == 'qf'
+    exe "normal! \<CR>"
+    return
+  elseif &ft == 'help'
+    exe "normal! \<C-]>"
+    return
+  else
+    call JumpToDefine(a:mode)
+    return
+  endif
 endfunction
 
-"nnoremap <expr> <CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
+" TODO
+"   ラベルならf:b
+"   変数なら、スクロールしない
+"   引数のタグ
+"   asmのタグ
+function! JumpToDefine(mode)
+  let w0 = expand("<cword>")
+  let w = w0
 
+ "for i in range(2)
+  for i in range(2 + 2)
+    try
+      if a:mode =~? 's'
+	exe (a:mode =~? 'p' ? 'p' : (a:mode =~? 'w' ? 's' : '')) . "tselect " . w
+      else
+	exe (a:mode =~? 'p' ? 'p' : (a:mode =~? 'w' ? 's' : '')) . "tjump " . w
+      endif
+      " 表示範囲を最適化
+      exe "normal! z\<CR>" . (winheight(0)/4) . "\<C-y>"
+      " カーソル位置を調整 (C専用)
+      call PostTagJumpCursor_C()
+      return
+    catch /:E426:/
+      if w0 =~ '^_'
+	" 元の検索語は"_"始まり
+	let w = substitute(w0, '^_', '', '')
+      else
+	" 元の検索語は"_"始まりでない
+	let w = '_' . w0
+      endif
+      let exception = v:exception
+    catch /:E433:/
+      echohl ErrorMsg | echo matchstr(v:exception, 'E\d\+:.*') | echohl None
+      return
+    endtry
+  endfor
+  echohl ErrorMsg | echo matchstr(exception, 'E\d\+:.*') | echohl None
+endfunction
+
+" カーソル位置を調整 (C専用)
 function! PostTagJumpCursor_C()
-	if search('\%##define\s\+\k\+(', 'bcn')
-		normal! ww
-	elseif search('\%##define\s\+\k\+\s\+', 'bcn')
-		normal! ww
-	elseif search('\%#.\+;', 'bcn')
-		normal! f;b
-	else
-		"関数
-		normal! $F(b
-	endif
+  if search('\%##define\s\+\k\+(', 'bcn')
+  "関数形式マクロ
+    normal! ww
+  elseif search('\%##define\s\+\k\+\s\+', 'bcn')
+  "定数マクロ
+    normal! ww
+  elseif search('\%#.\+;', 'bcn')
+  "変数
+    normal! f;b
+  else
+    "関数
+    normal! $F(b
+  endif
 endfunction
-function! CR(arg)
-	"let w = a:w
-	let w0 = expand("<cword>")
-	let w = w0
-	let g:tacubo = w
 
-	if v:prevcount
-		"exe v:prevcount
-		"この方法(feedkeys)なら、移動行が履歴に残る。 exeだと、残らない。
-		call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 't')
-	elseif &ft == 'qf'
-		exe "normal! \<CR>"
-	elseif &ft == 'help'
-		exe "normal! \<C-]>"
-	else
-		"for i in range(2)
-		for i in range(2 + 2)
-			try
-				"exe "normal! \<C-]>z\<CR>" . (winheight(0)/4) . "\<C-y>"
-				if a:arg == ''
-					exe "tag " . w
-				else
-					exe "tselect " . w
-				endif
-				exe "normal! z\<CR>" . (winheight(0)/4) . "\<C-y>"
-				call PostTagJumpCursor_C()
-				"
-				return
-			catch
-				if w0 =~ '^_'
-				" 元の検索語は"_"始まり
-					let w = substitute(w0, '^_', '', '')
-				else
-				" 元の検索語は"_"始まりでない
-					let w = '_' . w0
-				endif
-			endtry
-		endfor
+" 対象
+"   カーソル下  ->  Normal mode デフォルト
+"   Visual      ->  Visual mode デフォルト
+"   (入力)      ->  対応なし
 
-		echohl ErrorMsg
-		"echo "タグが見つかりません。"
-		echo "E***: No Tag Found."
-		"echo v:exception
-		echohl None
-	endif
-endfunction
-nnoremap <silent> <CR> <Esc>:call CR('')<CR>
-nnoremap <silent> g<CR> <Esc>:call CR('g')<CR>
+" タグ動作
+"   直接ジャンプ -> なし
+"   よきに計らう(タグの数次第で) -> デフォルトとする
+"   強制選択
+
+" ウィンドウ
+"   そのまま
+"   別ウィンドウ
+"   プレビュー
+
+" mode
+"   s:select
+"   p:preview
+"   w:別ウィンドウ
 "
-"nnoremap <expr> <CR>   (&ft != 'qf') ? (':<C-u>tjump <C-r><C-w><CR>') : ('<CR>')
-"? nnoremap <silent><expr> <CR>   (&ft != 'qf') ? (':call MyTag("' . "\<C-r>\<C-w>" . '")<CR>') : ('<CR>')
-"? nnoremap <expr> <leader><CR> (&ft != 'qf') ? (':tselect <C-r><C-w><CR>') : ('<CR>')
-nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
-"? au BufNewFile,BufRead *.jax nnoremap <expr> <S-CR>   (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
-"nnoremap <expr> <S-CR> (&ft != 'qf') ? ('<C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
-"function! Jump(c)
-"  echo a:c
-"  return
-"  if a:c < 1
-"    tag
-"  else
-"    exe "normal " . a:c . "G"
-"  endif
-"endfunction
-"com! -count JUMP :<C-u>call Jump(<q-count>)
-"nnoremap <CR> :<C-u>JUMP<CR>
-" TODO Quickfix
-nnoremap <expr> <C-w><CR> (&ft != 'qf') ? ('<C-w><C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>')
-" TODO QuickFix
-"Unified_BS_Key	nnoremap <BS><CR> <C-w><C-]>
-nnoremap <leader><CR> <C-w><C-]>
+" 最初の<Esc>がないと、prevcountをうまく処理できない。
+nnoremap <silent> <CR>         <Esc>:call Unified_CR('')<CR>
+nnoremap <silent> g<CR>        <Esc>:call Unified_CR('p')<CR>
+nnoremap <silent> <Leader><CR> <Esc>:call Unified_CR('w')<CR>
+nnoremap <silent> <C-CR>       <Esc>:call Unified_CR('s')<CR>
+nnoremap <silent> <S-CR>       <Esc>:call Unified_CR('sp')<CR>
+nnoremap <silent> <C-S-CR>     <Esc>:call Unified_CR('sw')<CR>
+nnoremap          <C-S-CR>     <Esc>:tags<CR>;pop
 
-nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
-
-" Tag }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+" Tag, Jump, and Unified CR }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -853,8 +861,8 @@ nnoremap <expr> dr &diff ? '[c^' : ''
 
 " diff X(cross)
 nnoremap <expr> dx winnr('$') != 2 ? ':echoerr "Windows not 2."<CR>' :
-		\  winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
-		\  ':<C-u>windo diffthis<CR>'
+                \  winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
+                \  ':<C-u>windo diffthis<CR>'
 
 " diff (all) Quit
 nnoremap dq :windo diffoff<CR>
@@ -925,10 +933,9 @@ nnoremap <C-w><C-t> <C-w>T
 
 "Unified_BS_Key	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
 nnoremap <expr> <BS>             <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <Leader><Leader> <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <Leader><Leader> <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <C-S-BS>         <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <C-o> :<C-u>new<CR>
 
 "Unified_BS_Key	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
@@ -938,7 +945,7 @@ nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
 nnoremap <Bar> <C-w>v
 "nnoremap -     <C-w>s
 nnoremap -     <C-w>p
-nnoremap `     <C-w>p
+"nnoremap `     <C-w>p
 nnoremap ,     <C-w>p
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1024,7 +1031,7 @@ function! UpdateStatusline(dummy)
 endfunction
 
 " 旧タイマの削除
-" vimrcを再読み込みする際、旧タイマを停止しないと、どんどん貯まっていってしまう。
+" vimrcを再読み込みする際、旧タイマを削除しないと、どんどん貯まっていってしまう。
 if exists('TimerUsl')
   call timer_stop(TimerUsl)
 endif
@@ -1040,9 +1047,9 @@ call UpdateStatusline(0)
 " Battery {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 try
-  " bat_win.pyが存在しない環境でもエラーとさせないためtry catchブロック内で実行。
+  " bat_win.pyが存在しない環境でもエラーとさせないためtryブロック内で実行。
 
-  py3file ~/bin/bat_win.py
+  py3file $HOME/bin/bat_win.py
 
   " Battery (Statusline)
   function! UpdateStlBatteryInfo(dummy)
@@ -1065,7 +1072,7 @@ try
 
   call UpdateStlBatteryInfo(0)
 catch
-  "let bat_str=': 100% [2:05:27]'
+  "let bat_str=': 100% [13:05:24]'
   let bat_str='? ---% [-:--:--]'
 endtry
 
@@ -1089,19 +1096,19 @@ inoremap <expr> <BS> pumvisible() ? (search('\k\k\k\k\%#', 'bcn') ? '<BS>' : "\<
 augroup MyComplete
   au!
 
-  au CompleteDone * try | iunmap ff | catch | finally
+  au CompleteDone * try | iunmap gg | catch | finally
   au CompleteDone * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
 
-  au InsertCharPre * try | iunmap ff | catch | finally
+  au InsertCharPre * try | iunmap gg | catch | finally
 
   au TextChangedI * exe pumvisible() ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
-  au TextChangedI * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
+  au TextChangedI * exe pumvisible() ? "" : "try | iunmap gg | catch | finally"
 
-  au InsertLeave * try | iunmap ff | catch | finally
+  au InsertLeave * try | iunmap gg | catch | finally
   au InsertLeave * inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'
 
   au InsertCharPre * exe pumvisible() || v:char != "j" ? "" : "inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:<C-u>w<CR>'"
-  au InsertCharPre * exe pumvisible() ? "" : "try | iunmap ff | catch | finally"
+  au InsertCharPre * exe pumvisible() ? "" : "try | iunmap gg | catch | finally"
 
 augroup end
 
@@ -1110,7 +1117,7 @@ function! TrigCompl(key)
   try
     iunmap jj
   catch
-    inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
+    inoremap <expr> gg pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'gg'
   finally
   endtry
   call feedkeys("\<C-n>\<C-p>")
@@ -1123,7 +1130,7 @@ function! Cmpl_jk(key)
     iunmap jj
   catch
   finally
-  inoremap <expr> ff pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'ff'
+  inoremap <expr> gg pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'gg'
   endtry
   call feedkeys(a:key)
   return ''
@@ -1211,9 +1218,6 @@ inoremap <C-f> <C-p>
 inoremap <C-e>	<End>
 "inoremap <CR> <C-]><C-G>u<CR>
 inoremap <C-H> <C-G>u<C-H>
-cnoremap <C-a>	<Home>
-cnoremap <C-d>	<Del>
-cnoremap <C-y> <C-R><C-O>*
 
 nnoremap <leader>E :<C-u><C-R>"
 "set whichwrap+=h,l
@@ -1228,6 +1232,8 @@ nnoremap gG G
 nnoremap <expr> cr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'cw'
 nnoremap <expr> dr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'dw'
 nnoremap <expr> yr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'yw'
+
+nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
 
 " Other Key-Maps }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1444,18 +1450,21 @@ filetype plugin indent on
 " syntax vim
 
 
-" 基本
 " 検索
 " 置換
+" Grep
+" Diff
+" タグ
 " 補完
+" Snippet
 " 画面、表示 （ウィンドウ、バッファ、タブ）
-" 便利ツール
 " 移動、切り替え （ウィンドウ、バッファ、タブ）
-" タブジャンプ
-"
+
+" 基本
 " 移動
 " 見た目
 " 編集
+" 便利ツール
 
 " Completion CScope Snippets cnext_cprev
 
