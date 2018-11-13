@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 01-Nov-2018.
+" Last Change: 13-Nov-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -887,19 +887,125 @@ function! s:WindowRatio()
   return (w / h - 178.0 / 78.0)
 endfunction
 
-nnoremap <silent> <Tab>	     <C-w>w
-nnoremap <silent> <S-Tab>    <C-w>W
-nnoremap <silent> <C-w><C-w> <C-w>p
+function! s:SkipTerm0()
+  "normal! '<C-w>w'
+  "call feedkeys('w', 'n')
+  exe 'wincmd w'
+  "call feedkeys('', 'x')
+  echo &buftype
+  if &buftype == 'terminal'
+    "call feedkeys('<C-w><C-w>', 'n')
+    "echo 'TTTT'
+  endif
+endfunction
+
+function! s:SkipTerm1(direction)
+  if v:prevcount
+    let g:SKSK = v:prevcount
+    echo v:prevcount
+    red
+    sleep 1
+    return v:prevcount
+  endif
+
+  let ret_num = 0
+  let terms = term_list()
+
+  let my = winnr()
+  let next_w = my
+
+  for i in range(winnr('$'))
+    if a:direction > 0
+      "順方向
+      let next_w = ( next_w == winnr('$') ? 1 : next_w + 1 )
+    else
+      "逆方向
+      let next_w = ( next_w == 1 ? winnr('$') : next_w - 1 )
+    endif
+
+    let bn = winbufnr(next_w)
+    if count(terms, bn) < 1
+      let ret_num = next_w
+      break
+    endif
+  endfor
+
+  let g:SKSK =  ret_num
+  "echo ret_num
+  "red
+  "sleep 1
+  return ret_num
+endfunction
+
+function! s:SkipTerm(direction)
+  if v:prevcount
+    "echo v:prevcount
+    "red
+    "sleep 1
+    return v:prevcount
+  endif
+
+  let terms = term_list()
+  let next_w = winnr()
+
+  for i in range(winnr('$'))
+    if a:direction > 0
+      "順方向
+      let next_w = ( next_w == winnr('$') ? 1 : next_w + 1 )
+    else
+      "逆方向
+      let next_w = ( next_w == 1 ? winnr('$') : next_w - 1 )
+    endif
+
+    let nr = winbufnr(next_w)
+    if count(terms, nr) < 1 || term_getstatus(nr) =~# 'normal'
+      break
+    endif
+  endfor
+
+  "echo next_w
+  "red
+  "sleep 1
+  return next_w
+endfunction
+
+"nnoremap <silent> <Tab>	     <C-w>w
+"nnoremap <silent> <Tab>	     <C-w>w<C-w>:exe ( &buftype == 'terminal' ? 'normal! <C-w><C-w>' : '' )<CR>
+nnoremap <silent> <Tab>	     <C-w>w<C-w>:call feedkeys( &buftype == 'terminal' ? 'normal! <C-w><C-w>' : '' )<CR>
+nnoremap <expr><silent> <Tab>	':wincmd w<CR>' . ':echo &buftype<CR>'
+nnoremap <expr><silent> <Tab>	<SID>SkipTerm0()
+nnoremap <expr><silent> <Tab>	( <SID>SkipTerm1(+1) == 0 ? '' : ( ':' . g:SKSK . 'wincmd w
+' ) )
+nnoremap <expr><silent> <S-Tab>	( <SID>SkipTerm1(-1) == 0 ? '' : ( ':' . g:SKSK . 'wincmd w
+' ) )
+nnoremap <silent> <Tab>		<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+nnoremap <silent> <S-Tab>	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+nnoremap <C-Tab> <C-w>w
+tnoremap <C-Tab> <C-w>w
+nnoremap <S-C-Tab> <C-w>W
+tnoremap <S-C-Tab> <C-w>W
+"nnoremap <silent> <S-Tab>    <C-w>W
+"nnoremap <silent> <C-w><C-w> <C-w>p
 
 nnoremap <silent> <up>	    <esc>3<C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <down>    <esc>3<C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <left>    <esc>4<C-w><
 nnoremap <silent> <right>   <esc>4<C-w>>
 
+tnoremap <silent> <up>	    <C-w>2+:<C-u>| "call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <down>    <C-w>2-:<C-u>| "call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <left>    <C-w>4<
+tnoremap <silent> <right>   <C-w>4>
+
 nnoremap <silent> <S-up>    <esc><C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <S-left>  <esc><C-w><
 nnoremap <silent> <S-right> <esc><C-w>>
+
+tnoremap <silent> <S-up>    <C-w>+:<C-u>| "call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <S-down>  <C-w>-:<C-u>| "call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <S-left>  <C-w><
+tnoremap <silent> <S-right> <C-w>>
 
 nnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
@@ -949,6 +1055,42 @@ nnoremap -     <C-w>p
 nnoremap ,     <C-w>p
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Terminal {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+function! OpenTerm_Sub(key, val)
+  if bufwinnr(a:val) < 0
+    return 9999
+  endif
+  if bufwinnr(v:val) >= winnr()
+    let ret = bufwinnr(a:val) - winnr()
+  else
+    let ret = winnr('$') - winnr() + bufwinnr(a:val)
+  endif
+  return ret
+endfunction
+function! OpenTerm()
+  let terms = term_list()
+  "echo terms
+  call map(terms, function('OpenTerm_Sub'))
+  "echo terms
+  let minval = min(terms)
+  "echo minval
+  if minval != 0 && minval != 9999
+    exe (minval + winnr() - 1) % (winnr('$')) + 1 . ' wincmd w'
+  else
+    terminal
+  endif
+endfunction
+
+nnoremap <silent> gt         :<C-u>call OpenTerm()<CR>
+nnoremap <silent> gT         :terminal<CR>
+nnoremap <silent> <Leader>gt :vsplit<CR>:terminal ++curwin<CR>
+
+nnoremap <Leader>e :so %<CR>
+
+tnoremap <C-w>; <C-w>:
+" Terminal }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1215,7 +1357,7 @@ cnoremap <expr> : getcmdline() =~# '^:*$' ? ';' : ':'
 " US Keyboard }}}
 
 
-nnoremap <C-Tab> <C-w>p
+"nnoremap <C-Tab> <C-w>p
 inoremap <C-f> <C-p>
 inoremap <C-e>	<End>
 "inoremap <CR> <C-]><C-G>u<CR>
@@ -1260,6 +1402,7 @@ function! s:tab2space()
 
   try
     normal! gg/	
+
 
     while 1
       normal! r	n
