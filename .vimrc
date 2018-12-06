@@ -534,7 +534,21 @@ cnoremap <A-b>		<S-Left>
 
 
 " Esc_Esc {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-nnoremap <silent> <Esc><Esc> <Esc>:<C-u>let g:alt_stl_time = 0 <Bar> call UpdateStatusline(0) <Bar> noh <Bar> call clever_f#reset() <Bar> echon <CR>
+
+let g:EscEsc = []
+
+call add(g:EscEsc, 'let g:alt_stl_time = 0 | call UpdateStatusline(0)')
+call add(g:EscEsc, 'call clever_f#reset()')
+call add(g:EscEsc, 'noh')
+
+function! Esc_Esc()
+  for i in g:EscEsc
+    "echo i
+    exe i
+  endfor
+endfunction
+
+nnoremap <silent> <Esc><Esc> <Esc>:<C-u>call Esc_Esc() <Bar> echon <CR>
 " Esc_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
