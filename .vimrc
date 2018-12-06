@@ -537,9 +537,11 @@ cnoremap <A-b>		<S-Left>
 
 let g:EscEsc = []
 
-call add(g:EscEsc, 'let g:alt_stl_time = 0 | call UpdateStatusline(0)')
-call add(g:EscEsc, 'call clever_f#reset()')
-call add(g:EscEsc, 'noh')
+function! Esc_Add(str)
+  call add(g:EscEsc, a:str)
+endfunction
+
+com! EscDisp echo g:EscEsc
 
 function! Esc_Esc()
   for i in g:EscEsc
@@ -548,7 +550,13 @@ function! Esc_Esc()
   endfor
 endfunction
 
-nnoremap <silent> <Esc><Esc> <Esc>:<C-u>call Esc_Esc() <Bar> echon <CR>
+" なぜか'noh'だけexeでは実行されないので、別途実行。
+nnoremap <silent> <Esc><Esc> <Esc>:<C-u>call Esc_Esc() <Bar> noh  <Bar> echon <CR>
+
+call Esc_Add('let g:alt_stl_time = 0 | call UpdateStatusline(0)')
+call Esc_Add('call clever_f#reset()')
+call Esc_Add('noh')
+
 " Esc_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
