@@ -437,9 +437,6 @@ nnoremap Y y$
 nnoremap <expr> y} '0y}' . col('.') . "\<Bar>"
 nnoremap y{ $y{
 nnoremap <expr> yp '0y$' . col('.') . "\<Bar>"
-"nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
-nnoremap <silent> <Esc><Esc> <Esc>:<C-u>let g:alt_stl_time = 0 <Bar> call UpdateStatusline(0) <Bar> noh <Bar> call clever_f#reset() <Bar> echon <CR>
-"nnoremap <silent> <Esc><Esc> <Esc>:<C-u>noh<CR>:SearchReset<CR>:SearchBuffersReset<CR> TODO multiplesearch
 nnoremap cp cw<C-r>0
 nnoremap da 0d$
 nnoremap <silent> ZZ <Nop>
@@ -534,6 +531,11 @@ cnoremap <A-f>		<S-Right>
 cnoremap <A-b>		<S-Left>
 "cnoremap <Esc><b>	<S-Left>
 " Emacs }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Esc_Esc {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+nnoremap <silent> <Esc><Esc> <Esc>:<C-u>let g:alt_stl_time = 0 <Bar> call UpdateStatusline(0) <Bar> noh <Bar> call clever_f#reset() <Bar> echon <CR>
+" Esc_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
