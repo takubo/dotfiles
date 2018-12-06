@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 13-Nov-2018.
+" Last Change: 06-Dec-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -44,8 +44,8 @@ if 1 && filereadable($VIM . '/vimrc_local.vim')
 endif
 
 
-let g:skip_defaults_vim = 1
-let g:no_vimrc_example = 1
+let skip_defaults_vim = 1
+let no_vimrc_example = 1
 
 
 "---------------------------------------------------------------------------
@@ -345,7 +345,7 @@ set fileformats=unix,dos,mac
 " for 1st empty buffer
 set fileformat=unix
 "set tag+=;
-set tags+=tags;
+set tags=./tags,./tags;
 "grepコマンドの出力を取り込んで、gfするため。
 set isfname-=:
 
@@ -395,7 +395,6 @@ augroup MyVimrc
  "au BufNewFile,BufRead,FileType *.awk so $vim/avd/avd.vim
   au BufNewFile,BufRead,FileType * set textwidth=0
 
-  "au BufNewFile,BufRead *.c inoremap @ /*  */<Left><Left><Left>
 augroup end
 
 
@@ -415,9 +414,7 @@ augroup MyVimrc_ScrollOff
   au WinEnter		* call <SID>best_scrolloff()
   au VimResized		* call <SID>best_scrolloff()
 augroup end
-"kwbd.vim : ウィンドウレイアウトを崩さないでバッファを閉じる
-" http://nanasi.jp/articles/vim/kwbd_vim.html
-com! Kwbd let kwbd_bn= bufnr("%")|enew|exe "bdel ".kwbd_bn|unlet kwbd_bn
+
 
 let $PATH = $PATH . 'C:\Oracle\Ora11R2\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;'
 		\ . 'C:\Program Files\Common Files\Compuware;C:\Program Files\WinMerge;C:\Program Files\Subversion\bin;C:\Program Files\TortoiseSVN\bin;'
@@ -441,12 +438,12 @@ nnoremap <expr> y} '0y}' . col('.') . "\<Bar>"
 nnoremap y{ $y{
 nnoremap <expr> yp '0y$' . col('.') . "\<Bar>"
 "nnoremap <silent> <Esc><Esc> <Esc>:noh<CR>
-nnoremap <silent> <Esc><Esc> <Esc>:<C-u>noh<CR>:call clever_f#reset()<CR>:echon <Esc>
+nnoremap <silent> <Esc><Esc> <Esc>:<C-u>let g:alt_stl_time = 0 <Bar> call UpdateStatusline(0) <Bar> noh <Bar> call clever_f#reset() <Bar> echon <CR>
 "nnoremap <silent> <Esc><Esc> <Esc>:<C-u>noh<CR>:SearchReset<CR>:SearchBuffersReset<CR> TODO multiplesearch
 nnoremap cp cw<C-r>0
 nnoremap da 0d$
-nnoremap <silent> ZZ :<C-u><CR>
-nnoremap <silent> ZQ :<C-u><CR>
+nnoremap <silent> ZZ <Nop>
+nnoremap <silent> ZQ <Nop>
 "nnoremap <C-o> O<Esc>
 nnoremap <A-o> o<Esc>
 
@@ -609,7 +606,7 @@ endif
 
 " 新規 追加
 " 通常 単語囲み
-" 入力 カーソル下の単語 クリップボード
+" 入力 カーソル下の単語 クリップボード 前回
 " Enter要 不要
 
 " Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -733,13 +730,10 @@ function! Unified_CR(mode)
   if v:prevcount
     "この方法(feedkeys)なら、移動行が履歴に残る。"exe v:prevcount"だと、残らない。
     "最後のEscは、コマンドラインに残った数字を消すため。
-    call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 't')
+    call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 'tn')
     return
-  elseif &ft == 'qf'
+  elseif &ft == 'qf' || &ft == 'help'
     exe "normal! \<CR>"
-    return
-  elseif &ft == 'help'
-    exe "normal! \<C-]>"
     return
   else
     call JumpToDefine(a:mode)
@@ -860,12 +854,12 @@ nnoremap <expr> d<Space> &diff ? do[c^ ' '<C-f>'
 nnoremap <expr> dr &diff ? '[c^' : ''
 
 " diff X(cross)
-nnoremap <expr> dx winnr('$') != 2 ? ':echoerr "Windows not 2."<CR>' :
+nnoremap <expr> dx winnr('$') != 2 ? ':echoerr "dx error : Number of windows is not 2. "<CR>' :
                 \  winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
-                \  ':<C-u>windo diffthis<CR>'
+                \  ':<C-u>call PushPos_All() <Bar> <C-u>windo diffthis <Bar> call PopPos_All()<CR>'
 
 " diff (all) Quit
-nnoremap dq :windo diffoff<CR>
+nnoremap dq :<C-u>call PushPos_All() <Bar> windo diffoff <Bar> call PopPos_All()<CR>
 
 " diff (all) Quit
 "nnoremap <silent> dQ :<C-u>windo call PushPos_All() <Bar> silent bufdo diffoff <Bar> call PopPos_All()<CR>
@@ -887,113 +881,53 @@ function! s:WindowRatio()
   return (w / h - 178.0 / 78.0)
 endfunction
 
-function! s:SkipTerm0()
-  "normal! '<C-w>w'
-  "call feedkeys('w', 'n')
-  exe 'wincmd w'
-  "call feedkeys('', 'x')
-  echo &buftype
-  if &buftype == 'terminal'
-    "call feedkeys('<C-w><C-w>', 'n')
-    "echo 'TTTT'
-  endif
-endfunction
-
-function! s:SkipTerm1(direction)
-  if v:prevcount
-    let g:SKSK = v:prevcount
-    echo v:prevcount
-    red
-    sleep 1
-    return v:prevcount
-  endif
-
-  let ret_num = 0
-  let terms = term_list()
-
-  let my = winnr()
-  let next_w = my
-
-  for i in range(winnr('$'))
-    if a:direction > 0
-      "順方向
-      let next_w = ( next_w == winnr('$') ? 1 : next_w + 1 )
-    else
-      "逆方向
-      let next_w = ( next_w == 1 ? winnr('$') : next_w - 1 )
-    endif
-
-    let bn = winbufnr(next_w)
-    if count(terms, bn) < 1
-      let ret_num = next_w
-      break
-    endif
-  endfor
-
-  let g:SKSK =  ret_num
-  "echo ret_num
-  "red
-  "sleep 1
-  return ret_num
-endfunction
-
 function! s:SkipTerm(direction)
   if v:prevcount
-    "echo v:prevcount
-    "red
-    "sleep 1
     return v:prevcount
   endif
 
+  "windowが2つしかないなら、もう一方へ移動することは自明なので、
+  "terminalであっても、<Tab>での移動を許す。
+  if winnr('$') == 2
+    return winnr() == 1 ? 2 : 1
+  endif
+
   let terms = term_list()
-  let next_w = winnr()
+  let next_win = winnr()
 
   for i in range(winnr('$'))
     if a:direction > 0
       "順方向
-      let next_w = ( next_w == winnr('$') ? 1 : next_w + 1 )
+      let next_win = ( next_win == winnr('$') ? 1 : next_win + 1 )
     else
       "逆方向
-      let next_w = ( next_w == 1 ? winnr('$') : next_w - 1 )
+      let next_win = ( next_win == 1 ? winnr('$') : next_win - 1 )
     endif
 
-    let nr = winbufnr(next_w)
+    let nr = winbufnr(next_win)
     if count(terms, nr) < 1 || term_getstatus(nr) =~# 'normal'
       break
     endif
   endfor
 
-  "echo next_w
-  "red
-  "sleep 1
-  return next_w
+  return next_win
 endfunction
 
-"nnoremap <silent> <Tab>	     <C-w>w
-"nnoremap <silent> <Tab>	     <C-w>w<C-w>:exe ( &buftype == 'terminal' ? 'normal! <C-w><C-w>' : '' )<CR>
-nnoremap <silent> <Tab>	     <C-w>w<C-w>:call feedkeys( &buftype == 'terminal' ? 'normal! <C-w><C-w>' : '' )<CR>
-nnoremap <expr><silent> <Tab>	':wincmd w<CR>' . ':echo &buftype<CR>'
-nnoremap <expr><silent> <Tab>	<SID>SkipTerm0()
-nnoremap <expr><silent> <Tab>	( <SID>SkipTerm1(+1) == 0 ? '' : ( ':' . g:SKSK . 'wincmd w
-' ) )
-nnoremap <expr><silent> <S-Tab>	( <SID>SkipTerm1(-1) == 0 ? '' : ( ':' . g:SKSK . 'wincmd w
-' ) )
 nnoremap <silent> <Tab>		<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
 nnoremap <silent> <S-Tab>	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 nnoremap <C-Tab> <C-w>w
-tnoremap <C-Tab> <C-w>w
+tnoremap <expr> <C-Tab> winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
 nnoremap <S-C-Tab> <C-w>W
-tnoremap <S-C-Tab> <C-w>W
-"nnoremap <silent> <S-Tab>    <C-w>W
-"nnoremap <silent> <C-w><C-w> <C-w>p
+tnoremap <expr> <S-C-Tab> winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
+nnoremap <silent> <C-w><C-w> <C-w>p
 
 nnoremap <silent> <up>	    <esc>3<C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <down>    <esc>3<C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <left>    <esc>4<C-w><
 nnoremap <silent> <right>   <esc>4<C-w>>
 
-tnoremap <silent> <up>	    <C-w>2+:<C-u>| "call	<SID>best_scrolloff()<CR>
-tnoremap <silent> <down>    <C-w>2-:<C-u>| "call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <up>	    <C-w>2+:<C-u>
+tnoremap <silent> <down>    <C-w>2-:<C-u>
 tnoremap <silent> <left>    <C-w>4<
 tnoremap <silent> <right>   <C-w>4>
 
@@ -1002,8 +936,8 @@ nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <S-left>  <esc><C-w><
 nnoremap <silent> <S-right> <esc><C-w>>
 
-tnoremap <silent> <S-up>    <C-w>+:<C-u>| "call	<SID>best_scrolloff()<CR>
-tnoremap <silent> <S-down>  <C-w>-:<C-u>| "call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <S-up>    <C-w>+:<C-u>
+tnoremap <silent> <S-down>  <C-w>-:<C-u>
 tnoremap <silent> <S-left>  <C-w><
 tnoremap <silent> <S-right> <C-w>>
 
@@ -1022,42 +956,57 @@ nnoremap <silent> <C-Right>	<C-w>l
 nnoremap <silent> <C-Down>	<C-w>j
 nnoremap <silent> <C-Up>	<C-w>k
 
-nnoremap <silent> <C-q>: q:
-nnoremap <silent> <C-q>/ q/
-nnoremap <silent> <C-q>? q?
-
 nnoremap <silent> q <C-w><C-c>
 nnoremap <silent> <leader>q :<C-u>q<CR>
 
 nnoremap <C-w><C-t> <C-w>T
+tnoremap <C-w><C-t> <C-w>T
+
+nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 5<CR>
+nnoremap <silent> <S-PageDown> :<C-u>ScreenMode 4<CR>
+
+"kwbd.vim : ウィンドウレイアウトを崩さないでバッファを閉じる
+" http://nanasi.jp/articles/vim/kwbd_vim.html
+com! Kwbd let kwbd_bn = bufnr("%") | enew | exe "bdel ".kwbd_bn | unlet kwbd_bn
+nnoremap <silent> gq :<C-u>Kwbd<CR>
 
 "-------------------------------------- TODO -------------------------------
 
-"Unified_BS_Key	nmap <BS> <C-w>
-"Unified_BS_Key	nnoremap <c-BS> <C-w>s
-"Unified_BS_Key	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
+nnoremap <silent> <C-q>: q:
+nnoremap <silent> <C-q>/ q/
+nnoremap <silent> <C-q>? q?
 
-"Unified_BS_Key	nnoremap <expr> <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+nnoremap <silent> Q: q:
+nnoremap <silent> Q/ q/
+nnoremap <silent> Q? q?
+
 nnoremap <expr> <BS>             <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap <expr> <Leader><Leader> <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <C-o> :<C-u>new<CR>
 
-"Unified_BS_Key	nnoremap <expr> <BS><CR> <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
-"Unified_BS_Key	noremap <expr> <C-BS><C-CR> <SID>WindowRatio() < 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+"Unified_BS_Key	nmap     <BS>     <C-w>
+"Unified_BS_Key	nnoremap <c-BS>   <C-w>s
+"Unified_BS_Key	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
+"Unified_BS_Key	nnoremap <expr>   <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
 
-nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+"Unified_BS_Key	nnoremap <expr>   <BS><CR>     <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+"Unified_BS_Key	nnoremap <expr>   <C-BS><C-CR> <SID>WindowRatio() <  0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
+
+"nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
 nnoremap <Bar> <C-w>v
 "nnoremap -     <C-w>s
-nnoremap -     <C-w>p
+nnoremap -      <C-w>p
+nnoremap g<Tab> <C-w>p
 "nnoremap `     <C-w>p
-nnoremap ,     <C-w>p
+"nnoremap ,      <C-w>p
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Terminal {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 function! OpenTerm_Sub(key, val)
   if bufwinnr(a:val) < 0
     return 9999
@@ -1069,6 +1018,7 @@ function! OpenTerm_Sub(key, val)
   endif
   return ret
 endfunction
+
 function! OpenTerm()
   let terms = term_list()
   "echo terms
@@ -1087,9 +1037,13 @@ nnoremap <silent> gt         :<C-u>call OpenTerm()<CR>
 nnoremap <silent> gT         :terminal<CR>
 nnoremap <silent> <Leader>gt :vsplit<CR>:terminal ++curwin<CR>
 
-nnoremap <Leader>e :so %<CR>
-
 tnoremap <C-w>; <C-w>:
+tnoremap <Esc><Esc> <C-w>N
+tnoremap <S-Ins> <C-w>"*
+"tnoremap <C-l> <C-l>
+"tnoremap <expr> <S-Del> '<C-w>:call term_sendkeys(bufnr(""), "cd " . expand("#" . winbufnr(1) . ":h"))<CR>'
+tnoremap <expr> <S-Del> 'cd ' . expand('#' . winbufnr(1) . ':p:h')
+
 " Terminal }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1134,14 +1088,11 @@ augroup MyVimrc_GUI
   exe 'au GUIEnter * set transparency=' . g:my_transparency
 augroup end
 
-nnoremap <silent>       <s-pageup> :<C-u>exe 'se transparency=' . (&transparency + 1)<CR>
-nnoremap <silent><expr> <s-pagedown> (&transparency > 1) ? (":exe 'se transparency=' . (&transparency - 1)<CR>") : ("")
+nnoremap <silent><expr> <PageUp>   ':<C-u>se transparency=' .    ( &transparency + 1      ) . '<CR>'
+nnoremap <silent><expr> <PageDown> ':<C-u>se transparency=' . max([&transparency - 1,   1]) . '<CR>'   | " transparencyは、0以下を設定すると255になってしまう。
 
-nnoremap <silent><expr> <pageup>   ':<C-u>se transparency=' . min([&transparency + 3, 255]) . '<CR>'
-nnoremap <silent><expr> <pagedown> ':<C-u>se transparency=' . max([&transparency - 3,   1]) . '<CR>'
-
-nnoremap <silent>       <c-pageup>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <CR>
-nnoremap <silent>       <c-pagedown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <CR>
+nnoremap <silent>       <C-PageUp>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <CR>
+nnoremap <silent>       <C-PageDown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <CR>
 
 " Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1156,6 +1107,7 @@ let s:stl = ''
 	\ . '%{&iminsert?''j'':''e''}\ %##%3p%%\ [%L]\ '
 	\ . '%#SLFileName#\ %5l\ L,\ %v\ C\ %##\ \ '
 	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}'
+	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ \ \ \ \ '
 
 let g:stl_time_org = '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#SLFileName#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
 
@@ -1264,7 +1216,7 @@ function! TrigCompl(key)
     inoremap <expr> gg pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'gg'
   finally
   endtry
-  call feedkeys("\<C-n>\<C-p>")
+  call feedkeys("\<C-n>\<C-p>", 'n')
   return a:key
 endfunc
 
@@ -1276,7 +1228,7 @@ function! Cmpl_jk(key)
   finally
   inoremap <expr> gg pumvisible() ? '<C-Y><Esc>:<C-u>w<CR>' : 'gg'
   endtry
-  call feedkeys(a:key)
+  call feedkeys(a:key, 'n')
   return ''
 endfunction
 
@@ -1338,7 +1290,7 @@ nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g
 
 nnoremap <leader>w <Esc>:<C-u>w<CR>
 nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
-nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable<CR>' : ':<C-u>setl modifiable<CR>'
+nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable <BAR> setl readonly<CR>' : ':<C-u>setl modifiable<CR>'
 nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
 nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
 
@@ -1348,7 +1300,8 @@ nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 
 "nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
-nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
+"nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_func_name_stl#\ \ ' . expand('%:p')<CR>
+nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
 
 " US Keyboard {{{
 nnoremap ; :
@@ -1368,8 +1321,11 @@ nnoremap <leader>E :<C-u><C-R>"
 nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
 nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
 
-nnoremap _    <C-w>s
-nnoremap <Bar> <C-w>v
+nnoremap _           <C-w>s
+nnoremap <Bar>       <C-w>v
+nnoremap :           <C-w>v
+nnoremap g_          <C-w>n
+nnoremap <silent> g; :<C-u>vnew<CR>
 
 nnoremap gG G
 
@@ -1397,22 +1353,10 @@ endif
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-function! s:tab2space()
-  setlocal expandtab
+command! Tab2Space :setlocal   expandtab | retab<CR>
+command! Space2Tab :setlocal noexpandtab | retab!<CR>
 
-  try
-    normal! gg/	
-
-
-    while 1
-      normal! r	n
-    endwhile
-  catch
-  finally
-    setlocal expandtab&
-  endtry
-endfunction
-command! Tab2space :call s:tab2space()
+com! XMLShape :%s/></>\r</g | filetype indent on | setf xml | normal gg=G
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -1437,6 +1381,14 @@ function! Eatchar(pat)
   return (c =~ a:pat) ? '' : c
 endfunc
 "例 iabbr <silent> if if ()<Left><C-R>=Eatchar('\s')<CR>
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+" 数値比較用の関数 lhs のほうが大きければ正数，小さければ負数，lhs と rhs が等しければ 0 を返す
+function! CompNr(lhs, rhs)
+    return a:lhs - a:rhs
+endfunction
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -1503,9 +1455,9 @@ com! PopPos :call PopPos()
 " PushPos_All:
 " ---------------
 function! PushPos_All()
-    let s:now_win = winnr()
-    let s:now_tab = tabpagenr()
-    let s:now_buf = bufnr('')
+    let g:now_win = winnr()
+    let g:now_tab = tabpagenr()
+    let g:now_buf = bufnr('')
     "PushPos
 endfunction
 
@@ -1513,9 +1465,9 @@ endfunction
 " PopPos_All:
 " ---------------
 function! PopPos_All()
-    silent exe 'tabnext ' . s:now_tab
-    silent exe s:now_win . 'wincmd w'
-    silent exe 'buffer ' . s:now_buf
+    silent exe 'tabnext ' . g:now_tab
+    silent exe g:now_win . 'wincmd w'
+    silent exe 'buffer ' . g:now_buf
     "PopPos
 endfunction
 
@@ -1572,10 +1524,12 @@ au FileType plantuml command! OpenUml :!/cygdrive/c/Program\ Files/Google/Chrome
 "nnoremap <silent> <Leader>F :<C-u>help function-list<CR>
 com! FL help function-list<CR>
 
-com! XMLShape :%s/></>\r</g | filetype indent on | setf xml | normal gg=G
 
 " from default
 filetype plugin indent on
+
+
+nnoremap <Leader>e :so %<CR>
 
 
 " TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1616,3 +1570,15 @@ filetype plugin indent on
 " TODO }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
+" 1 f順方向 -
+" 2 f逆方向 ,
+" 3 前のWindow :
+" 4 関数名 \\
+" 5 画面Auto分割 <BS>
+" 5 画面横分割 _
+" 6 画面縦分割 +
+
+" - , <BS>
+" \\
+" : + |
