@@ -246,7 +246,7 @@ nnoremap <S-End>	:<C-u>call ResizeFont(-99999)<CR>:Font<CR>
 
 " initialize
 "exe 'set guifont=' . s:FontName . ':h' . s:FontHeight . ':w' s:FontWidth
-call ResizeFont(0) | Font
+call ResizeFont(0)
 
 
 " func_name
