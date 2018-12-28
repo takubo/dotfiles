@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 06-Dec-2018.
+" Last Change: 27-Dec-2018.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -295,7 +295,7 @@ set clipboard=unnamed
 set cmdheight=2
 set nocompatible
 set cursorline
-set cursorcolumn
+"set cursorcolumn
 set encoding=utf-8
 " テキスト挿入中の自動折り返しを日本語に対応させる
 set formatoptions+=mM
@@ -325,6 +325,7 @@ set shiftwidth=8
 set showcmd
 " 括弧入力時に対応する括弧を表示 (noshowmatch:表示しない)
 set showmatch
+set matchtime=2
 " オンのとき、ウィンドウを横分割すると新しいウィンドウはカレントウィンドウの下に開かれる。
 set splitbelow
 " オンのとき、ウィンドウを縦分割すると新しいウィンドウはカレントウィンドウの右に開かれる。
@@ -355,6 +356,12 @@ set sessionoptions+=unix,slash
 
 set showtabline=0
 
+set display+=lastline
+
+set pumheight=15
+
+set numberwidth=3
+
 filetype on
 
 syntax enable
@@ -381,12 +388,12 @@ augroup MyVimrc
   au InsertLeave * set timeoutlen=1100
 
   au WinEnter * set cursorline
-  au WinEnter * set cursorcolumn
+  "au WinEnter * set cursorcolumn
   au WinLeave * set nocursorline
   au WinLeave * set nocursorcolumn
 
   au BufEnter * set cursorline
-  au BufEnter * set cursorcolumn
+  "au BufEnter * set cursorcolumn
   au BufLeave * set nocursorline
   au BufLeave * set nocursorcolumn
 
@@ -398,41 +405,6 @@ augroup MyVimrc
 augroup end
 
 
-let g:TypewriterScroll = 0
-nnoremap <Leader>H <Esc>:<C-u>let g:TypewriterScroll = !g:TypewriterScroll <Bar> call <SID>best_scrolloff()<CR>
-
-function! s:best_scrolloff()
-  if g:TypewriterScroll
-    setlocal  scrolloff=9999
-  else
-    exe "setlocal  scrolloff=" . (winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5)
-  endif
-endfunction
-augroup MyVimrc_ScrollOff
-  au!
-  au BufNewFile,BufRead	* call <SID>best_scrolloff()
-  au WinEnter		* call <SID>best_scrolloff()
-  au VimResized		* call <SID>best_scrolloff()
-augroup end
-
-
-let $PATH = $PATH . 'C:\Oracle\Ora11R2\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;'
-		\ . 'C:\Program Files\Common Files\Compuware;C:\Program Files\WinMerge;C:\Program Files\Subversion\bin;C:\Program Files\TortoiseSVN\bin;'
-		\ . 'D:\takubo\bin\;C:\Perl\bin'
-
-
-nnoremap <silent> <Space> <C-f>
-nnoremap <silent> <S-Space> <C-b>
-vnoremap <silent> <Space> <C-f>
-vnoremap <silent> <S-Space> <C-b>
-nnoremap j gj
-nnoremap k gk
-nnoremap gj j
-nnoremap gk k
-vnoremap j gj
-vnoremap k gk
-vnoremap gj j
-vnoremap gk k
 nnoremap Y y$
 nnoremap <expr> y} '0y}' . col('.') . "\<Bar>"
 nnoremap y{ $y{
@@ -454,9 +426,6 @@ nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>
 nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 
-" ^に、|の機能を重畳
-nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
-
 nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
 nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
 
@@ -475,7 +444,7 @@ nnoremap g; :<C-u>set<Space>
 nnoremap <leader>; :<C-u>setl<Space>
 nnoremap <C-z> nop
 
-nnoremap <silent><expr> <Leader>c &cursorline ? ':<C-u>set nocursorline<CR>' : ':<C-u>set cursorline<CR>'
+"nnoremap <silent><expr> <Leader>c &cursorline ? ':<C-u>set nocursorline<CR>' : ':<C-u>set cursorline<CR>'
 nnoremap <silent><expr> <leader>C &cursorcolumn ? ':<C-u>setlocal nocursorcolumn<CR>' : ':<C-u>setlocal cursorcolumn<CR>'
 
 nnoremap  ]]  ]]f(bzt
@@ -506,8 +475,45 @@ cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
 			\ '<C-t>'
 
 
+" Cursor Move and Scroll {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+nnoremap <silent> <Space> <C-f>
+nnoremap <silent> <S-Space> <C-b>
+vnoremap <silent> <Space> <C-f>
+vnoremap <silent> <S-Space> <C-b>
+nnoremap j gj
+nnoremap k gk
+nnoremap gj j
+nnoremap gk k
+vnoremap j gj
+vnoremap k gk
+vnoremap gj j
+vnoremap gk k
+
+let g:TypewriterScroll = 0
+nnoremap <Leader>H <Esc>:<C-u>let g:TypewriterScroll = !g:TypewriterScroll <Bar> call <SID>best_scrolloff() <Bar> echo g:TypewriterScroll ? 'TypewriterScroll' : 'NoTypewriterScroll'<CR>
+
+function! s:best_scrolloff()
+  if g:TypewriterScroll
+    setlocal  scrolloff=9999
+  else
+    exe "setlocal  scrolloff=" . (winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5)
+  endif
+endfunction
+
+augroup MyVimrc_ScrollOff
+  au!
+  au BufNewFile,BufRead	* call <SID>best_scrolloff()
+  au WinEnter		* call <SID>best_scrolloff()
+  au VimResized		* call <SID>best_scrolloff()
+augroup end
+
+" Cursor Move and Scroll }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
 " Emacs {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 " コマンドラインでのキーバインドを Emacs スタイルにする
+
 " 行頭へ移動
 cnoremap <C-a>		<Home>
 " 一文字戻る
@@ -530,6 +536,7 @@ cnoremap <A-f>		<S-Right>
 " 前の単語へ移動
 cnoremap <A-b>		<S-Left>
 "cnoremap <Esc><b>	<S-Left>
+
 " Emacs }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -667,10 +674,10 @@ nnoremap <leader>g :<C-u>vim "\<<C-R><C-W>\>"
 "nnoremap <leader>G :<C-u>vim "<C-R><C-W>" *.c *.h<CR>
 nnoremap <leader>G :<C-u>vim "<C-R><C-W>" 
 
-let c_jk_local = 1
+let c_jk_local = 0
 "例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
-nnoremap <expr><silent> <C-k> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
-nnoremap <expr><silent> <C-j> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <expr><silent> <A-k> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <expr><silent> <A-j> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
 nnoremap <silent> <Leader>0 :<C-u>let c_jk_local = !c_jk_local<CR>
 
 
@@ -754,10 +761,13 @@ function! Unified_CR(mode)
   if v:prevcount
     "この方法(feedkeys)なら、移動行が履歴に残る。"exe v:prevcount"だと、残らない。
     "最後のEscは、コマンドラインに残った数字を消すため。
-    call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 'tn')
+    call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 'nt')
     return
-  elseif &ft == 'qf' || &ft == 'help'
-    exe "normal! \<CR>"
+  elseif &ft == 'qf'
+    call feedkeys("\<CR>:FF2\<CR>", 'nt')
+    return
+  elseif &ft == 'help'
+    call feedkeys("\<C-]>", 'nt')
     return
   else
     call JumpToDefine(a:mode)
@@ -850,6 +860,11 @@ nnoremap <silent> <S-CR>       <Esc>:call Unified_CR('sp')<CR>
 nnoremap <silent> <C-S-CR>     <Esc>:call Unified_CR('sw')<CR>
 nnoremap          <C-S-CR>     <Esc>:tags<CR>;pop
 
+nmap     <silent> <BS><CR>     <BS><BS><CR>
+
+" ^に、|の機能を重畳
+nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
+
 " Tag, Jump, and Unified CR }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -859,10 +874,10 @@ nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
 nnoremap        dc :<C-u>diffoff<CR>
 "nnoremap        dq :<C-u>diffoff<CR>
 
-" diff Ignorecase
-nnoremap <expr> di match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
-" diff Y(whi)tespace
-nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
+" diff Ignorecase  Statuslineにdiffoptが表示されるなら、silentでOK。
+nnoremap <silent> <expr> di match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
+" diff Y(whi)tespace  Statuslineにdiffoptが表示されるなら、silentでOK。
+nnoremap <silent> <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
 " diff Vision option
 nnoremap        dv :<C-u>echo &diffopt<CR>
@@ -873,21 +888,21 @@ vnoremap <Ins> [c^
 vnoremap <Del> ]c^
 
 " diff Accept (obtain and next)
-nnoremap <expr> d<Space> &diff ? do[c^ ' '<C-f>'
+nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
+
 " diff Reject (next)
-nnoremap <expr> dr &diff ? '[c^' : ''
+"nnoremap <expr> dr &diff ? '[c^' : ''
 
 " diff X(cross)
-nnoremap <expr> dx winnr('$') != 2 ? ':echoerr "dx error : Number of windows is not 2. "<CR>' :
-                \  winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
-                \  ':<C-u>call PushPos_All() <Bar> <C-u>windo diffthis <Bar> call PopPos_All()<CR>'
+nnoremap <silent> <expr> dx winnr('$') != 2 ? ':echoerr "dx error : Number of windows is not 2. "<CR>' :
+                \ winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
+                \ ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>'
 
-" diff (all) Quit
-nnoremap dq :<C-u>call PushPos_All() <Bar> windo diffoff <Bar> call PopPos_All()<CR>
+" diff (all window) Quit
+nnoremap <silent> dq :<C-u>call PushPos_All() <Bar> exe 'windo diffoff' <Bar> call PopPos_All() <Bar> echo 'windo diffoff'<CR>
 
-" diff (all) Quit
-"nnoremap <silent> dQ :<C-u>windo call PushPos_All() <Bar> silent bufdo diffoff <Bar> call PopPos_All()<CR>
-nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> silent bufdo diffoff <Bar> call PopPos_All() <Bar> silent windo diffoff<CR>
+" diff (all buffer and window) Quit
+nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> exe 'bufdo diffoff' <Bar> exe 'windo diffoff' <Bar> call PopPos_All()<CR>:echo 'bufdo diffoff <Bar> windo diffoff'<CR>
 
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -986,7 +1001,7 @@ nnoremap <silent> <leader>q :<C-u>q<CR>
 nnoremap <C-w><C-t> <C-w>T
 tnoremap <C-w><C-t> <C-w>T
 
-nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 5<CR>
+nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 6<CR>
 nnoremap <silent> <S-PageDown> :<C-u>ScreenMode 4<CR>
 
 "kwbd.vim : ウィンドウレイアウトを崩さないでバッファを閉じる
@@ -1004,8 +1019,9 @@ nnoremap <silent> Q: q:
 nnoremap <silent> Q/ q/
 nnoremap <silent> Q? q?
 
-nnoremap <expr> <BS>             <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <Leader><Leader> <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap        <BS>             <C-w>
+nnoremap <expr> <BS><BS>         <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <Leader><Leader> <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <C-o> :<C-u>new<CR>
@@ -1025,6 +1041,14 @@ nnoremap -      <C-w>p
 nnoremap g<Tab> <C-w>p
 "nnoremap `     <C-w>p
 "nnoremap ,      <C-w>p
+
+nnoremap          _      <C-w>s
+nnoremap          <Bar>  <C-w>v
+nnoremap          :      <C-w>v
+nnoremap <expr>   :      <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap          g_     <C-w>n
+nnoremap <silent> g<Bar> :<c-u>vnew<CR>
+nnoremap <silent> g:     :<C-u>vnew<CR>
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1067,6 +1091,10 @@ tnoremap <S-Ins> <C-w>"*
 "tnoremap <C-l> <C-l>
 "tnoremap <expr> <S-Del> '<C-w>:call term_sendkeys(bufnr(""), "cd " . expand("#" . winbufnr(1) . ":h"))<CR>'
 tnoremap <expr> <S-Del> 'cd ' . expand('#' . winbufnr(1) . ':p:h')
+
+for k in split('0123456789abcdefghijklmnopqrstuvwxyz', '\zs')
+  exec 'tnoremap <A-' . k . '> <Esc>' . k
+endfor
 
 " Terminal }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1112,28 +1140,34 @@ augroup MyVimrc_GUI
   exe 'au GUIEnter * set transparency=' . g:my_transparency
 augroup end
 
-nnoremap <silent><expr> <PageUp>   ':<C-u>se transparency=' .    ( &transparency + 1      ) . '<CR>'
-nnoremap <silent><expr> <PageDown> ':<C-u>se transparency=' . max([&transparency - 1,   1]) . '<CR>'   | " transparencyは、0以下を設定すると255になってしまう。
+nnoremap <silent><expr> <PageUp>   ':<C-u>se transparency=' .    ( &transparency + 1      ) . '<Bar> Transparency <CR>'
+nnoremap <silent><expr> <PageDown> ':<C-u>se transparency=' . max([&transparency - 1,   1]) . '<Bar> Transparency <CR>'   | " transparencyは、0以下を設定すると255になってしまう。
 
-nnoremap <silent>       <C-PageUp>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <CR>
-nnoremap <silent>       <C-PageDown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <CR>
+nnoremap <silent>       <C-PageUp>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <Bar> Transparency <CR>
+nnoremap <silent>       <C-PageDown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <Bar> Transparency <CR>
+
+com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 255.0)
 
 " Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-let s:stl = ''
-	\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ '
-	\ . '%=%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
-	\ . '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
-	\ . '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ '
-	\ . '%{&iminsert?''j'':''e''}\ %##%3p%%\ [%L]\ '
-	\ . '%#SLFileName#\ %5l\ L,\ %v\ C\ %##\ \ '
-	\ . '%{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}'
-	"\ . '\ \ %#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ \ \ \ \ '
+ let s:stl = '\ \ '
+ let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ %='
+"let s:stl .= '%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
+ let s:stl .= '%#SLFileName#\ '
+ let s:stl .= '%{&diff?''[''.&diffopt.'']'':''''}\ '
+ let s:stl .= '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
+ let s:stl .= '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ %{&iminsert?''j'':''e''}\ '
+ let s:stl .= '%##%3p%%\ [%L]\ '
+"let s:stl .= '%#SLFileName#\ %5l\ L,\ %v\ C\ '
+ let s:stl .= '%##\ \ %{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}\ '
 
-let g:stl_time_org = '\ \ \ \ ' . '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ ' . '%#SLFileName#\ %{strftime(''%X'')}\ ' . '%##\ \ %#SLFileName#\ %{g:bat_str}\ %##\ \ '
+ let g:stl_time_org = '%##\ \ '
+ let g:stl_time_org .= '%#SLFileName#\ %{g:bat_str}\ %##\ \ '
+"let g:stl_time_org .= '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ '
+ let g:stl_time_org .= '%#SLFileName#\ %{strftime(''%X'')}\ %##\ \ '
 
 let g:stl_time = g:stl_time_org
 nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_time_org : '' )<CR>:call UpdateStatusline(0)<CR>
@@ -1141,17 +1175,16 @@ nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_ti
 augroup MyVimrc_StatusLine
   au!
   au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter * 
-    \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
+     \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
 augroup end
 
 let g:alt_stl_time = 0
 function! UpdateStatusline(dummy)
-  if g:alt_stl_time > 0 | let g:alt_stl_time = g:alt_stl_time - 1 | endif
+  if g:alt_stl_time > 0 | let g:alt_stl_time -= 1 | endif
   if !g:alt_stl_time | exe 'set statusline=' . s:stl . g:stl_time | endif
 endfunction
 
-" 旧タイマの削除
-" vimrcを再読み込みする際、旧タイマを削除しないと、どんどん貯まっていってしまう。
+" 旧タイマの削除  vimrcを再読み込みする際、古いタイマを削除しないと、どんどん貯まっていってしまう。
 if exists('TimerUsl')
   call timer_stop(TimerUsl)
 endif
@@ -1193,7 +1226,7 @@ try
   call UpdateStlBatteryInfo(0)
 catch
   "let bat_str=': 100% [13:05:24]'
-  let bat_str='? ---% [-:--:--]'
+  let bat_str='? ---% [--:--:--]'
 endtry
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1257,6 +1290,7 @@ function! Cmpl_jk(key)
 endfunction
 
 inoremap <silent> <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
+inoremap          <expr> jj pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
 inoremap <expr> j pumvisible() ? Cmpl_jk("\<C-n>") : TrigCompl('j')
 inoremap <expr> k pumvisible() ? Cmpl_jk("\<C-p>") : TrigCompl('k')
 inoremap <expr> <C-j> pumvisible() ? 'j' : '<C-n>'
@@ -1266,6 +1300,60 @@ inoremap <expr> <CR>  pumvisible() ? '<C-y>' : '<C-]><C-G>u<CR>'
 inoremap <expr> <Esc> pumvisible() ? '<C-e>' : '<Esc>'
 
 " Completion }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" i_Esc {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+let g:IEscPre = []
+let g:IEscPost = []
+
+function! IEscPre_Add(str)
+  call add(g:IEscPre, a:str)
+endfunction
+
+function! IEscPost_Add(str)
+  call add(g:IEscPost, a:str)
+endfunction
+
+com! IEscDisp echo g:IEscPre g:IEscPost
+
+"function! I_Esc()
+"  call IEscPre()
+"  call feedkeys("\<Esc>", 'ntx')
+"  "normal! <Esc>
+"  call IEscPost()
+"  return ''
+"endfunction
+
+function! IEscPre()
+  let input = ''
+  for i in g:IEscPre
+    "echo i
+    "exe i
+    let input = input . funcref(i)()
+  endfor
+  "call feedkeys("k", 'ntx')
+  return input
+endfunction
+
+function! IEscPost()
+  for i in g:IEscPost
+    "echo i
+    exe i
+  endfor
+  return ''
+endfunction
+
+inoremap <expr> <plug>(I_Esc_Write) IEscPre() . "\<Esc>" . ':w<CR>'
+"imap , <Plug>(I_Esc_Write)
+
+"call IEscPre_Add('Semi')
+"function! Semi()
+"  return 'eStert'
+"endfunction
+"call IEscPost_Add('w')
+
+" i_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Snippets {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1300,8 +1388,8 @@ com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 let g:vimrc_buf_name = '^' . $vim . '/vimrc$'
 let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
 let g:color_buf_name2 = '.vim$'
-nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) ?
-			\  ( win_id2win(win_findbuf(buffer_number(g:vimrc_buf_name))[0]) . '<C-w><C-w>' ) :
+nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) && win_id2win(reverse(win_findbuf(buffer_number(g:vimrc_buf_name)))[0]) > 0 ?
+			\  ( win_id2win(reverse(win_findbuf(buffer_number(g:vimrc_buf_name)))[0]) . '<C-w><C-w>' ) :
 			\  ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
 nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ?
 			\  ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) :
@@ -1325,10 +1413,16 @@ nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 "nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_func_name_stl#\ \ ' . expand('%:p')<CR>
-nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
+"nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 12 <Bar> exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>') <Bar> pwd <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
+nnoremap  <C-l> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
+	      \ <Bar> let g:alt_stl_time = 12
+	      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%', line('$'), col('.'), line('.') * 100.0 / line('$'))
+	      \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
+	     "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
 
 " US Keyboard {{{
 nnoremap ; :
+vnoremap ; :
 cnoremap <expr> ; getcmdline() =~# '^:*$' ? ':' : ';'
 cnoremap <expr> : getcmdline() =~# '^:*$' ? ';' : ':'
 " US Keyboard }}}
@@ -1344,12 +1438,6 @@ nnoremap <leader>E :<C-u><C-R>"
 "set whichwrap+=h,l
 nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
 nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
-
-nnoremap _           <C-w>s
-nnoremap <Bar>       <C-w>v
-nnoremap :           <C-w>v
-nnoremap g_          <C-w>n
-nnoremap <silent> g; :<C-u>vnew<CR>
 
 nnoremap gG G
 
@@ -1479,10 +1567,10 @@ com! PopPos :call PopPos()
 " PushPos_All:
 " ---------------
 function! PushPos_All()
+    PushPos
+    let g:now_buf = bufnr('')
     let g:now_win = winnr()
     let g:now_tab = tabpagenr()
-    let g:now_buf = bufnr('')
-    "PushPos
 endfunction
 
 " ---------------
@@ -1492,7 +1580,7 @@ function! PopPos_All()
     silent exe 'tabnext ' . g:now_tab
     silent exe g:now_win . 'wincmd w'
     silent exe 'buffer ' . g:now_buf
-    "PopPos
+    PopPos
 endfunction
 
 " Push Pop Pos }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1515,7 +1603,7 @@ so $vim/exp.vim
 so $vim/qf.vim
 so $vim/func_name.vim
 so $vim/test.vim
-"so $VIMRUNTIME/macros/matchit.vim
+so $VIMRUNTIME/macros/matchit.vim
 
 
 "set foldmethod=syntax
@@ -1554,6 +1642,29 @@ filetype plugin indent on
 
 
 nnoremap <Leader>e :so %<CR>
+
+
+com! Date echo '' strftime("%Y/%m/%d (%a) %H:%M:%S")
+com! Time Date
+com! Bat echo '' bat_str
+
+
+set renderoptions=type:directx,scrlines:1
+augroup MyVimrc_Rendor
+  au!
+  "au InsertLeave * normal! <C-l>
+  au CursorHold * normal! <C-l>
+  "au VimResized * normal! <C-l>
+  "au CursorHold * let &renderoptions=&renderoptions
+augroup end
+
+
+"augroup MyVimrc_Cursor
+  "au!
+  ""au CursorHold * set cursorcolumn
+  "au CursorMoved * set nocursorcolumn
+"augroup end
+
 
 
 " TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
