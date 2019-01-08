@@ -1128,6 +1128,9 @@ nnoremap <A-b> :tabmove -1<CR>
 
 nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
 
+
+"===============================================================
+
 let s:UnshowTabLineTime = 3000
 com! -nargs=1 TabLine set showtabline=2 <Bar> set cmdheight=2 <Bar> let UnshowTabLine = timer_start(<args>, 'UnshowTabLineFunc')
 
@@ -1137,10 +1140,51 @@ function! UnshowTabLineFunc(dummy)
 endfunction
 
 nnoremap <silent> <leader>= :<C-u>set showtabline=2 <Bar> TabLine 3000<CR>
-nnoremap <C-f> :<C-u>TabLine 1700<CR>gt
-nnoremap <C-b> :<C-u>TabLine 1700<CR>gT
+"nnoremap <C-f> :<C-u>TabLine 1700<CR>gt
+"nnoremap <C-b> :<C-u>TabLine 1700<CR>gT
 
-call EscEsc_Add('set showtabline=0')
+"call EscEsc_Add('set showtabline=0')
+
+
+"===============================================================
+
+function! s:tabpage_label(n)
+  " n 番目のタブのラベルを返す
+  return tabpagenr()
+endfunction
+
+function! MakeTabLine()
+  let titles = map(range(1, tabpagenr('$')), 's:tabpage_label(v:val)')
+  let sep = ' | '  " タブ間の区切り
+  let tabpages = join(titles, sep) . sep . '%#TabLineFill#%T'
+  let info = ''  " 好きな情報を入れる
+  let info .= '%#Statusline# ' . ' '
+  let info .= '%#slfilename# ' . g:bat_str . ' '
+  let info .= '%#Statusline# ' . ' '
+  let info .= '%#slfilename# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+  let info .= '%#Statusline#'
+  let info .= '%## ' . ' '
+  "let tabpages = ' '
+  return info . '%=' . info  " タブリストを左に、情報を右に表示
+  return tabpages . '%=' . info  " タブリストを左に、情報を右に表示
+  return info . '%=' . tabpages " タブリストを左に、情報を右に表示
+endfunction
+set tabline=%!MakeTabLine()
+set showtabline=2
+
+
+function! Updatetabline(dummy)
+  set tabline=%!MakeTabLine()
+endfunction
+
+" 旧タイマの削除  vimrcを再読み込みする際、古いタイマを削除しないと、どんどん貯まっていってしまう。
+if exists('TimerTab')
+  call timer_stop(TimerTab)
+endif
+
+let UpdatetablineInterval = 1000
+let TimerTab = timer_start(UpdatetablineInterval, 'Updatetabline', {'repeat': -1})
+
 
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1180,9 +1224,9 @@ let s:stl = '\ \ '
  let s:stl .= '%##\ \ %{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}\ '
 
 let g:stl_time_org = '%##\ \ '
- let g:stl_time_org .= '%#SLFileName#\ %{g:bat_str}\ %##\ \ '
+"let g:stl_time_org .= '%#slfilename#\ %{g:bat_str}\ %##\ \ '
 "let g:stl_time_org .= '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ '
- let g:stl_time_org .= '%#SLFileName#\ %{strftime(''%X'')}\ %##\ \ '
+"let g:stl_time_org .= '%#SLFileName#\ %{strftime(''%X'')}\ %##\ \ '
 
 let g:stl_time = g:stl_time_org
 nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_time_org : '' )<CR>:call UpdateStatusline(0)<CR>
