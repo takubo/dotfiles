@@ -4,7 +4,7 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 27-Dec-2018.
+" Last Change: 08-Jan-2019.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -362,6 +362,8 @@ set pumheight=15
 
 set numberwidth=3
 
+set diffopt+=icase
+
 filetype on
 
 syntax enable
@@ -387,16 +389,6 @@ augroup MyVimrc
   au InsertEnter * set timeoutlen=300
   au InsertLeave * set timeoutlen=1100
 
-  au WinEnter * set cursorline
-  "au WinEnter * set cursorcolumn
-  au WinLeave * set nocursorline
-  au WinLeave * set nocursorcolumn
-
-  au BufEnter * set cursorline
-  "au BufEnter * set cursorcolumn
-  au BufLeave * set nocursorline
-  au BufLeave * set nocursorcolumn
-
   "au FileType c,cpp,awk set mps+=?::,=:;
 
  "au BufNewFile,BufRead,FileType *.awk so $vim/avd/avd.vim
@@ -406,46 +398,30 @@ augroup end
 
 
 nnoremap Y y$
-nnoremap <expr> y} '0y}' . col('.') . "\<Bar>"
-nnoremap y{ $y{
-nnoremap <expr> yp '0y$' . col('.') . "\<Bar>"
-nnoremap cp cw<C-r>0
-nnoremap da 0d$
+
+nnoremap cr caw
+nnoremap dr daw
+nnoremap yr yaw
+nnoremap cR ciw
+nnoremap dR diw
+nnoremap yR yiw
+
 nnoremap <silent> ZZ <Nop>
 nnoremap <silent> ZQ <Nop>
-"nnoremap <C-o> O<Esc>
-nnoremap <A-o> o<Esc>
 
-nnoremap <silent><expr> <leader>n !&number <Bar><Bar> &relativenumber ?  ':<C-u>set   number norelativenumber<CR>' : ':<C-u>set relativenumber<CR>'
-nnoremap <silent><expr> <leader>N  &number <Bar><Bar> &relativenumber ?  ':<C-u>set nonumber norelativenumber<CR>' : ':<C-u>set number<CR>'
-
-" コメント行後の新規行の自動コメント化のON/OFF
-nnoremap <silent><expr> <leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':<C-u>set formatoptions+=o<CR>:set formatoptions+=r<CR>'
+" コメント行の後の新規行の自動コメント化のON/OFF
+nnoremap <expr> <leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':<C-u>set formatoptions+=o<CR>:set formatoptions+=r<CR>'
 
 nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>' : ':<C-u>setl isk-=.<CR>'
 nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 
-nnoremap <silent><expr> yd stridx(&isk, '.') < 0 ? ':setl isk+=.<CR>' : ':set isk-=.<CR>'
-nnoremap <silent><expr> yu stridx(&isk, '_') < 0 ? ':setl isk+=_<CR>' : ':set isk-=_<CR>'
-
-"nnoremap <silent> <leader>d :<C-u>pwd<CR>
-"nnoremap <silent> <C-o> :<C-u>pwd<CR>
-nnoremap <silent> <leader>p :<C-u>disp<CR>
 nnoremap <silent> <Leader>m :<C-u>marks<CR>
 nnoremap <silent> <Leader>" :<C-u>disp<CR>
-nnoremap <silent> <Leader>k :<C-u>make<CR>
+
+nnoremap <leader>; q:
+
 "nnoremap <silent> <leader>t :<C-u>ToggleWord<CR>
-nnoremap <leader>: :<C-u>setl<Space>
-nnoremap <leader>; :<C-u>set<Space>
-nnoremap <leader>: q:
-
-nnoremap g; :<C-u>set<Space>
-nnoremap <leader>; :<C-u>setl<Space>
-nnoremap <C-z> nop
-
-"nnoremap <silent><expr> <Leader>c &cursorline ? ':<C-u>set nocursorline<CR>' : ':<C-u>set cursorline<CR>'
-nnoremap <silent><expr> <leader>C &cursorcolumn ? ':<C-u>setlocal nocursorcolumn<CR>' : ':<C-u>setlocal cursorcolumn<CR>'
 
 nnoremap  ]]  ]]f(bzt
 nnoremap g]]  ]]f(b
@@ -459,7 +435,6 @@ nnoremap g[]  []
 vnoremap af ][<ESC>V[[
 vnoremap if ][k<ESC>V[[j
 
-
 " 検索時に/, ?を楽に入力する
 cnoremap <expr> / getcmdtype() == '/' ? '\/' : '/'
 cnoremap <expr> ? getcmdtype() == '?' ? '\?' : '?'
@@ -470,36 +445,48 @@ cnoremap << \<
 cnoremap >> \>
 cnoremap <Bar><Bar> \<Bar>
 
-cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
-			\ (getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\\|' :
-			\ '<C-t>'
 
+" Cursor Move, CursorLine, CursorColumn, and Scroll {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-" Cursor Move and Scroll {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+nnoremap j  gj
+nnoremap k  gk
+nnoremap gj  j
+nnoremap gk  k
 
-nnoremap <silent> <Space> <C-f>
+vnoremap j  gj
+vnoremap k  gk
+vnoremap gj  j
+vnoremap gk  k
+
+nnoremap <silent> <Leader>c :<C-u>setl cursorline!<CR>
+nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
+
+augroup MyVimrc_Cursor
+  au WinEnter * setl cursorline
+ "au WinEnter * setl cursorcolumn
+  au WinLeave * setl nocursorline
+  au WinLeave * setl nocursorcolumn
+
+  au BufEnter * setl cursorline
+ "au BufEnter * setl cursorcolumn
+  au BufLeave * setl nocursorline
+  au BufLeave * setl nocursorcolumn
+augroup end
+
+nnoremap <silent> <Space>   <C-f>
 nnoremap <silent> <S-Space> <C-b>
-vnoremap <silent> <Space> <C-f>
+vnoremap <silent> <Space>   <C-f>
 vnoremap <silent> <S-Space> <C-b>
-nnoremap j gj
-nnoremap k gk
-nnoremap gj j
-nnoremap gk k
-vnoremap j gj
-vnoremap k gk
-vnoremap gj j
-vnoremap gk k
-
-let g:TypewriterScroll = 0
-nnoremap <Leader>H <Esc>:<C-u>let g:TypewriterScroll = !g:TypewriterScroll <Bar> call <SID>best_scrolloff() <Bar> echo g:TypewriterScroll ? 'TypewriterScroll' : 'NoTypewriterScroll'<CR>
 
 function! s:best_scrolloff()
-  if g:TypewriterScroll
-    setlocal  scrolloff=9999
-  else
-    exe "setlocal  scrolloff=" . (winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5)
-  endif
+  let &l:scrolloff = g:TypewriterScroll ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
 endfunction
+
+let g:TypewriterScroll = v:false
+nnoremap g<Space> :<C-u>let g:TypewriterScroll = !g:TypewriterScroll
+                  \ <Bar> exe g:TypewriterScroll ? 'normal! zz' : ''
+                  \ <Bar> call <SID>best_scrolloff()
+                  \ <Bar> echo g:TypewriterScroll ? 'TypewriterScroll' : 'NoTypewriterScroll'<CR>
 
 augroup MyVimrc_ScrollOff
   au!
@@ -508,7 +495,7 @@ augroup MyVimrc_ScrollOff
   au VimResized		* call <SID>best_scrolloff()
 augroup end
 
-" Cursor Move and Scroll }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+" Cursor Move, CursorLine, CursorColumn, and Scroll }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Emacs {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -544,7 +531,7 @@ cnoremap <A-b>		<S-Left>
 
 let g:EscEsc = []
 
-function! Esc_Add(str)
+function! EscEsc_Add(str)
   call add(g:EscEsc, a:str)
 endfunction
 
@@ -557,12 +544,11 @@ function! Esc_Esc()
   endfor
 endfunction
 
-" なぜか'noh'だけexeでは実行されないので、別途実行。
+" 'noh'はユーザ定義関数内では(事実上)実行出来ないので、別途実行の要あり。
 nnoremap <silent> <Esc><Esc> <Esc>:<C-u>call Esc_Esc() <Bar> noh  <Bar> echon <CR>
 
-call Esc_Add('let g:alt_stl_time = 0 | call UpdateStatusline(0)')
-call Esc_Add('call clever_f#reset()')
-call Esc_Add('noh')
+call EscEsc_Add('let g:alt_stl_time = 0 | call UpdateStatusline(0)')
+call EscEsc_Add('call clever_f#reset()')
 
 " Esc_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -870,44 +856,52 @@ nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>')
 
 " Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-nnoremap <expr> du &diff ? ':diffupdate<CR>' : ':diffthis<CR>'
-nnoremap        dc :<C-u>diffoff<CR>
-"nnoremap        dq :<C-u>diffoff<CR>
+" diff Updte
+nnoremap <expr> du &diff ? ':<c-u>diffupdate<CR>' : ':<c-u>diffthis<CR>'
 
-" diff Ignorecase  Statuslineにdiffoptが表示されるなら、silentでOK。
-nnoremap <silent> <expr> di match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
-" diff Y(whi)tespace  Statuslineにdiffoptが表示されるなら、silentでOK。
-nnoremap <silent> <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
+" diff Close
+nnoremap dc :<c-u>diffoff<CR>
 
-" diff Vision option
-nnoremap        dv :<C-u>echo &diffopt<CR>
+" diff (all window) Quit
+nnoremap <silent> dq :<C-u>call PushPos_All() <Bar> exe 'windo diffoff' <Bar> call PopPos_All() <Bar> echo 'windo diffoff'<CR>
 
-nnoremap <Ins> [c^
-nnoremap <Del> ]c^
-vnoremap <Ins> [c^
-vnoremap <Del> ]c^
-
-" diff Accept (obtain and next)
-nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
-
-" diff Reject (next)
-"nnoremap <expr> dr &diff ? '[c^' : ''
+" diff (all window and buffer) Quit
+nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> exe 'bufdo diffoff' <Bar> exe 'windo diffoff' <Bar> call PopPos_All()<CR>:echo 'bufdo diffoff <Bar> windo diffoff'<CR>
 
 " diff X(cross)
 nnoremap <silent> <expr> dx winnr('$') != 2 ? ':echoerr "dx error : Number of windows is not 2. "<CR>' :
                 \ winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
                 \ ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>'
 
-" diff (all window) Quit
-nnoremap <silent> dq :<C-u>call PushPos_All() <Bar> exe 'windo diffoff' <Bar> call PopPos_All() <Bar> echo 'windo diffoff'<CR>
+" diff toggle Ignorecase (lの字形はIに似ている)
+nnoremap <expr> dl match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
 
-" diff (all buffer and window) Quit
-nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> exe 'bufdo diffoff' <Bar> exe 'windo diffoff' <Bar> call PopPos_All()<CR>:echo 'bufdo diffoff <Bar> windo diffoff'<CR>
+" diff Y(whi)tespace
+nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
+
+" diff Visualize option
+nnoremap dv :<C-u>echo &diffopt<CR>
+
+nnoremap <Ins> [c^
+nnoremap <Del> ]c^
+vnoremap <Ins> [c^
+vnoremap <Del> ]c^
+
+" diff accept (obtain and next)
+nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
+
+" diff reject (next)
+"nnoremap <expr> dr &diff ? '[c^' : ''
 
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+nnoremap <BS> <C-w>
+
+nnoremap <expr> <BS><BS>         <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
+nnoremap <expr> <Leader><Leader> <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
 
 " ---------------
 " Window Ratio
@@ -935,7 +929,7 @@ function! s:SkipTerm(direction)
   let next_win = winnr()
 
   for i in range(winnr('$'))
-    if a:direction > 0
+    if a:direction >= 0
       "順方向
       let next_win = ( next_win == winnr('$') ? 1 : next_win + 1 )
     else
@@ -952,6 +946,7 @@ function! s:SkipTerm(direction)
   return next_win
 endfunction
 
+
 nnoremap <silent> <Tab>		<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
 nnoremap <silent> <S-Tab>	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 nnoremap <C-Tab> <C-w>w
@@ -960,15 +955,15 @@ nnoremap <S-C-Tab> <C-w>W
 tnoremap <expr> <S-C-Tab> winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
 nnoremap <silent> <C-w><C-w> <C-w>p
 
-nnoremap <silent> <up>	    <esc>3<C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <down>    <esc>3<C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <left>    <esc>4<C-w><
-nnoremap <silent> <right>   <esc>4<C-w>>
+nnoremap <silent> <A-k> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <A-j> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <A-h> <esc>3<C-w><
+nnoremap <silent> <A-l> <esc>3<C-w>>
 
 tnoremap <silent> <up>	    <C-w>2+:<C-u>
 tnoremap <silent> <down>    <C-w>2-:<C-u>
-tnoremap <silent> <left>    <C-w>4<
-tnoremap <silent> <right>   <C-w>4>
+tnoremap <silent> <left>    <C-w>3<
+tnoremap <silent> <right>   <C-w>3>
 
 nnoremap <silent> <S-up>    <esc><C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
@@ -1011,17 +1006,14 @@ nnoremap <silent> gq :<C-u>Kwbd<CR>
 
 "-------------------------------------- TODO -------------------------------
 
-nnoremap <silent> <C-q>: q:
+nnoremap <silent> <C-q>; q:
 nnoremap <silent> <C-q>/ q/
 nnoremap <silent> <C-q>? q?
 
-nnoremap <silent> Q: q:
+nnoremap <silent> Q; q:
 nnoremap <silent> Q/ q/
 nnoremap <silent> Q? q?
 
-nnoremap        <BS>             <C-w>
-nnoremap <expr> <BS><BS>         <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <Leader><Leader> <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <C-o> :<C-u>new<CR>
@@ -1049,6 +1041,17 @@ nnoremap <expr>   :      <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap          g_     <C-w>n
 nnoremap <silent> g<Bar> :<c-u>vnew<CR>
 nnoremap <silent> g:     :<C-u>vnew<CR>
+
+"nnoremap <silent> s	<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+"nnoremap <silent> S	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+
+"nnoremap <silent> f	<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+"nnoremap <silent> F	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+
+nnoremap <silent> + <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> _ <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap          -      <C-w>s
+nnoremap          g-     <C-w>n
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1121,11 +1124,23 @@ nnoremap <C-f> gt
 nnoremap <C-b> gT
 
 nnoremap <A-f> :tabmove +1<CR>
-nnoremap <A-b> :tabmove -1<CR>T
+nnoremap <A-b> :tabmove -1<CR>
 
-nnoremap <silent><expr> <leader>= !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
+nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
 
-nnoremap <C-h> :<C-u>tabs<CR>
+let s:UnshowTabLineTime = 3000
+com! -nargs=1 TabLine set showtabline=2 <Bar> set cmdheight=2 <Bar> let UnshowTabLine = timer_start(<args>, 'UnshowTabLineFunc')
+
+function! UnshowTabLineFunc(dummy)
+  set showtabline=0
+  set cmdheight=2
+endfunction
+
+nnoremap <silent> <leader>= :<C-u>set showtabline=2 <Bar> TabLine 3000<CR>
+nnoremap <C-f> :<C-u>TabLine 1700<CR>gt
+nnoremap <C-b> :<C-u>TabLine 1700<CR>gT
+
+call EscEsc_Add('set showtabline=0')
 
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1153,7 +1168,7 @@ com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 2
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
- let s:stl = '\ \ '
+let s:stl = '\ \ '
  let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ %='
 "let s:stl .= '%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
  let s:stl .= '%#SLFileName#\ '
@@ -1164,7 +1179,7 @@ com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 2
 "let s:stl .= '%#SLFileName#\ %5l\ L,\ %v\ C\ '
  let s:stl .= '%##\ \ %{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}\ '
 
- let g:stl_time_org = '%##\ \ '
+let g:stl_time_org = '%##\ \ '
  let g:stl_time_org .= '%#SLFileName#\ %{g:bat_str}\ %##\ \ '
 "let g:stl_time_org .= '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ '
  let g:stl_time_org .= '%#SLFileName#\ %{strftime(''%X'')}\ %##\ \ '
@@ -1201,11 +1216,12 @@ call UpdateStatusline(0)
 
 try
   " bat_win.pyが存在しない環境でもエラーとさせないためtryブロック内で実行。
+  " filereadable()にしようか。
 
   py3file $HOME/bin/bat_win.py
 
   " Battery (Statusline)
-  function! UpdateStlBatteryInfo(dummy)
+  function! Update_StatuslineBatteryInfo(dummy)
     call py3eval('bat_win_main()')
     let g:bat_str = g:bat_info['ACLine'] . ' ' . g:bat_info['RemainingPercent'] . ' ' . g:bat_info['RemainingTime']
   endfunction
@@ -1216,17 +1232,17 @@ try
   endif
 
   let UpdateBatteryInfoInterval = 5 * 1000
-  let TimerUbi = timer_start(UpdateBatteryInfoInterval, 'UpdateStlBatteryInfo', {'repeat': -1})
+  let TimerUbi = timer_start(UpdateBatteryInfoInterval, 'Update_StatuslineBatteryInfo', {'repeat': -1})
 
   " Battery Information
   let bat_info = {}
 
   call py3eval('bat_win_ini()')
 
-  call UpdateStlBatteryInfo(0)
+  call Update_StatuslineBatteryInfo(0)
 catch
-  "let bat_str=': 100% [13:05:24]'
   let bat_str='? ---% [--:--:--]'
+  "let bat_str=': 100% [13:05:24]'
 endtry
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1299,6 +1315,8 @@ inoremap <expr> <C-k> pumvisible() ? 'k' : '<Esc>'
 inoremap <expr> <CR>  pumvisible() ? '<C-y>' : '<C-]><C-G>u<CR>'
 inoremap <expr> <Esc> pumvisible() ? '<C-e>' : '<Esc>'
 
+inoremap <expr> gg ( pumvisible() ? '<C-Y>' : '' ) . '<Esc>:<C-u>w<CR>'
+
 " Completion }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1366,7 +1384,7 @@ endif
 " Snippets }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Configure {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+" Vim Configure {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 com! ReVimrc :so $vim/vimrc
 
@@ -1395,7 +1413,7 @@ nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g
 			\  ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) :
 			\  ( ':EditColor<CR>' )
 
-" Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+" Vim Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Other Key-Maps {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1404,9 +1422,14 @@ nnoremap <leader>w <Esc>:<C-u>w<CR>
 nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
 nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable <BAR> setl readonly<CR>' : ':<C-u>setl modifiable<CR>'
 nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
-nnoremap <silent> ya :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
+nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
 
 "if exists('loaded_mru')
+  let MRU_Window_Height = max([8, &lines / 4 ])
+  augroup MyVimrc_MRU
+    au!
+    au VimResized * let MRU_Window_Height = max([8, &lines / 4 ])
+  augroup end
   nnoremap <silent> <leader>o :<C-u>MRU<CR>
 "endif
 
@@ -1441,16 +1464,13 @@ nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>
 
 nnoremap gG G
 
-nnoremap <expr> cr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'cw'
-nnoremap <expr> dr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'dw'
-nnoremap <expr> yr (search("\\k\\%#", 'bcn') ? 'b' : '') . 'yw'
-
 nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
 
 " Other Key-Maps }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Clever-f Configuration {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 let g:clever_f_smart_case=1			"
 let g:clever_f_use_migemo=0			"
 "let g:clever_f_fix_key_direction=1		"
@@ -1461,6 +1481,7 @@ if 0
   let g:clever_f_mark_cursor = 1
   let g:clever_f_mark_char = 1
 endif
+
 " Clever-f Configuration }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1599,10 +1620,12 @@ endfunction
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-so $vim/exp.vim
+so $vim/tree.vim
 so $vim/qf.vim
 so $vim/func_name.vim
 so $vim/test.vim
+so $vim/em.vim
+"so $vim/buf.vim
 so $VIMRUNTIME/macros/matchit.vim
 
 
@@ -1659,11 +1682,6 @@ augroup MyVimrc_Rendor
 augroup end
 
 
-"augroup MyVimrc_Cursor
-  "au!
-  ""au CursorHold * set cursorcolumn
-  "au CursorMoved * set nocursorcolumn
-"augroup end
 
 
 
