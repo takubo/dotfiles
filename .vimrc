@@ -359,8 +359,6 @@ set display+=lastline
 
 set numberwidth=3
 
-set diffopt+=icase
-
 filetype on
 
 syntax enable
@@ -862,6 +860,8 @@ nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>')
 
 " Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
+set diffopt+=iwhite
+
 " diff Updte
 nnoremap <expr> du &diff ? ':<c-u>diffupdate<CR>' : ':<c-u>diffthis<CR>'
 
@@ -888,10 +888,13 @@ nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR
 " diff Visualize option
 nnoremap dv :<C-u>echo &diffopt<CR>
 
-nnoremap <Ins> [c^zz:FF2<CR>
-nnoremap <Del> ]c^zz:FF2<CR>
+nnoremap <Ins> [c^zz:FuncNameStl<CR>
+nnoremap <Del> ]c^zz:FuncNameStl<CR>
 vnoremap <Ins> [c^
 vnoremap <Del> ]c^
+nnoremap <C-b> [c^zz:FuncNameStl<CR>
+nnoremap <C-f> ]c^zz:FuncNameStl<CR>
+nnoremap U <Nop>
 
 " diff accept (obtain and next)
 nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
@@ -1110,14 +1113,15 @@ endfor
 
 " Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-nnoremap K :<C-u>ls<CR>:<C-u>b 
-nnoremap gK :<C-u>ls!<CR>:<C-u>b 
+nnoremap K :<C-u>ls<CR>:<C-u>b<Space>
+nnoremap gK :<C-u>ls!<CR>:<C-u>b<Space>
+nnoremap <leader>K :<C-u>ls<CR>:<C-u>bdel 
 
-nnoremap <silent> <C-n> :<C-u>bnext<CR>
-nnoremap <silent> <C-p> :<C-u>bprev<CR>
+nnoremap <silent> <A-n> :<C-u>bnext<CR>
+nnoremap <silent> <A-p> :<C-u>bprev<CR>
 
-nnoremap <leader>z :<C-u>bdel
-nnoremap <leader>Z :<C-u>bdel!
+nnoremap <leader>z :<C-u>bdel<Space>
+nnoremap <leader>Z :<C-u>bdel!<Space>
 
 " Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1126,79 +1130,73 @@ nnoremap <leader>Z :<C-u>bdel!
 
 nnoremap <C-t> :<C-u>tabnew<Space>
 
-nnoremap <C-f> gt
-nnoremap <C-b> gT
+nnoremap <C-n> gt
+nnoremap <C-p> gT
+"nnoremap <C-f> :<C-u>TabLine 1700<CR>gt
+"nnoremap <C-b> :<C-u>TabLine 1700<CR>gT
 
 nnoremap <A-f> :tabmove +1<CR>
 nnoremap <A-b> :tabmove -1<CR>
 
 nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
 
+" Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Tabline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 "===============================================================
 
-let s:UnshowTabLineTime = 3000
-com! -nargs=1 TabLine set showtabline=2 <Bar> let &cmdheight-=1 <Bar> let UnshowTabLine = timer_start(<args>, 'UnshowTabLineFunc')
-
-function! UnshowTabLineFunc(dummy)
-  set showtabline=0
-  let &cmdheight+=1
-endfunction
-
-nnoremap <silent> <leader>= :<C-u>set showtabline=2 <Bar> TabLine 3000<CR>
-"nnoremap <C-f> :<C-u>TabLine 1700<CR>gt
-"nnoremap <C-b> :<C-u>TabLine 1700<CR>gT
-
-"call EscEsc_Add('set showtabline=0')
-
-
-"===============================================================
-
-function! s:tabpage_label(n)
-  " t:title と言う変数があったらそれを使う
-  "let title = gettabvar(a:n, 'title')
-  "if title !=# ''
-    "return title
-  "endif
-
-  " タブページ内のバッファのリスト
-  let bufnrs = tabpagebuflist(a:n)
+function! s:tabpage_label_full(n)
+  if 0 
+    " t:title と言う変数があったらそれを使う
+    let title = gettabvar(a:n, 'title')
+    if title !=# ''
+      return title
+    endif
+  endif
 
   " カレントタブページかどうかでハイライトを切り替える
   let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
 
   let no = '[' . a:n . ']'
 
+  " タブページ内のバッファのリスト
+  let bufnrs = tabpagebuflist(a:n)
+
   " バッファが複数あったらバッファ数を表示
-  let num = len(bufnrs)
-  "if num is 1
-    "let num = ''
-  "endif
+  let num = '(' . len(bufnrs) . ')'
 
   " タブページ内に変更ありのバッファがあったら '+' を付ける
   let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '+' : ''
 
-  "let sp = (num . mod) ==# '' ? '' : ' '  " 隙間空ける
-
   " カレントバッファ
   let curbufnr = bufnrs[tabpagewinnr(a:n) - 1]  " tabpagewinnr() は 1 origin
-  "let fname = pathshorten(bufname(curbufnr))
-  "return hi . no . mod
-  let fname = pathshorten(expand('#' . curbufnr . ':p'))
+  if 0
+    let fname = pathshorten(bufname(curbufnr))
+  else
+    let fname = pathshorten(expand('#' . curbufnr . ':p'))
+  endif
   let fname = fname == '' ? 'no name' : fname
 
   let label = no . ' ' . num . mod . ' '  . fname
 
   return '%' . a:n . 'T' . hi . ' ◄ ' . label . '%T ► %#TabLineFill#'
-  "return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
+  return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
+endfunction
+
+function! s:tabpage_label(n)
+  " カレントタブページかどうかでハイライトを切り替える
+  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  return hi . ' [ ' . a:n . ' ] %#TabLineFill#'
 endfunction
 
 function! MakeTabLine()
-  "let titles = ['','']
-  let titles = map(range(1, tabpagenr('$')), 's:tabpage_label(v:val)')
-  let sep = '|'  " タブ間の区切り
-  "let tabpages = join(titles, sep) . sep . '%#TabLineFill2#%T'
+  let titles = ['','']
+  let titles = map(range(1, tabpagenr('$')), s:tabpage_label_func)
+  let sep = '  '  " タブ間の区切り
   let tabpages = join(titles, sep) . sep . '%#TabLineFill#%T'
+
   let info = ''  " 好きな情報を入れる
   let info .= '%#Statusline#  '
   let info .= '%#slfilename# ' . g:bat_str . ' '
@@ -1206,27 +1204,33 @@ function! MakeTabLine()
   let info .= '%#slfilename# ' . strftime('%Y/%m/%d (%a) %X') . ' '
   let info .= '%#Statusline#  '
   let info .= '%##'
-  "let tabpages = ' '
 
-  "let s:left = info . '    %<'
-  let s:left = '  '
+  let left = info
 
-  "let s:right = info
-  let s:right = '%=  ' . info
+  let right = info
 
-  return info . '    %<' . tabpages
-  "return info . '    %<' . tabpages . '%=  ' . info  " タブリストを左に、情報を右に表示
-
-  "return s:left . tabpages . s:right
-  "return tabpages   " タブリストを左に、情報を右に表示
-
-  "return info . '%=' . info  " タブリストを左に、情報を右に表示
-  "return tabpages . '%=' . info  " タブリストを左に、情報を右に表示
-  "return info . '%=' . tabpages " タブリストを左に、情報を右に表示
+  return left . '    %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
 endfunction
-set tabline=%!MakeTabLine()
-set showtabline=2
 
+"===============================================================
+
+function! s:toggle_tabline()
+  let s:tabline_status = ( s:tabline_status + 1 ) % 3
+  if s:tabline_status == 0
+    set showtabline=0
+  elseif s:tabline_status == 1
+    let s:tabpage_label_func = 's:tabpage_label(v:val)'
+    set showtabline=2
+  elseif s:tabline_status == 2
+    let s:tabpage_label_func = 's:tabpage_label_full(v:val)'
+    set showtabline=2
+  endif
+  call Updatetabline(0)
+endfunction
+
+nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
+
+"===============================================================
 
 function! Updatetabline(dummy)
   set tabline=%!MakeTabLine()
@@ -1240,8 +1244,14 @@ endif
 let UpdatetablineInterval = 1000
 let TimerTab = timer_start(UpdatetablineInterval, 'Updatetabline', {'repeat': -1})
 
+"===============================================================
 
-" Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+let s:tabline_status = 0  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
+call <SID>toggle_tabline()
+
+"===============================================================
+
+" Tabline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Transparency {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1271,6 +1281,7 @@ com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 2
 let s:stl = '\ \ '
  let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ %='
 "let s:stl .= '%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
+ let s:stl .= '%#SLFileName#\ %{toupper(&fenc)},%{&ff}%Y\ '
  let s:stl .= '%#SLFileName#\ '
  let s:stl .= '%{&diff?''[''.&diffopt.'']'':''''}\ '
  let s:stl .= '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
