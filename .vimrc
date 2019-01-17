@@ -4,7 +4,6 @@ scriptencoding utf-8
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
 "
-" Last Change: 08-Jan-2019.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -295,7 +294,7 @@ set clipboard=unnamed
 set cmdheight=2
 set nocompatible
 set cursorline
-"set cursorcolumn
+set cursorcolumn
 set encoding=utf-8
 " テキスト挿入中の自動折り返しを日本語に対応させる
 set formatoptions+=mM
@@ -358,8 +357,6 @@ set showtabline=0
 
 set display+=lastline
 
-set pumheight=15
-
 set numberwidth=3
 
 set diffopt+=icase
@@ -419,6 +416,12 @@ nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>
 nnoremap <silent> <Leader>m :<C-u>marks<CR>
 nnoremap <silent> <Leader>" :<C-u>disp<CR>
 
+nnoremap <silent> <leader>N :<C-u>set relativenumber!<CR>
+
+cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
+			\ (getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\\|' :
+			\ '<C-t>'
+
 nnoremap <leader>; q:
 
 "nnoremap <silent> <leader>t :<C-u>ToggleWord<CR>
@@ -458,19 +461,22 @@ vnoremap k  gk
 vnoremap gj  j
 vnoremap gk  k
 
+set noshowcmd
+
 nnoremap <silent> <Leader>c :<C-u>setl cursorline!<CR>
 nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
 
 augroup MyVimrc_Cursor
+  au!
   au WinEnter * setl cursorline
- "au WinEnter * setl cursorcolumn
+  au WinEnter * setl cursorcolumn
   au WinLeave * setl nocursorline
   au WinLeave * setl nocursorcolumn
 
   au BufEnter * setl cursorline
- "au BufEnter * setl cursorcolumn
-  au BufLeave * setl nocursorline
-  au BufLeave * setl nocursorcolumn
+  au BufEnter * setl cursorcolumn
+  "au BufLeave * setl nocursorline
+  "au BufLeave * setl nocursorcolumn
 augroup end
 
 nnoremap <silent> <Space>   <C-f>
@@ -490,7 +496,7 @@ nnoremap g<Space> :<C-u>let g:TypewriterScroll = !g:TypewriterScroll
 
 augroup MyVimrc_ScrollOff
   au!
-  au BufNewFile,BufRead	* call <SID>best_scrolloff()
+  "au BufNewFile,BufRead	* call <SID>best_scrolloff()
   au WinEnter		* call <SID>best_scrolloff()
   au VimResized		* call <SID>best_scrolloff()
 augroup end
@@ -882,8 +888,8 @@ nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR
 " diff Visualize option
 nnoremap dv :<C-u>echo &diffopt<CR>
 
-nnoremap <Ins> [c^
-nnoremap <Del> ]c^
+nnoremap <Ins> [c^zz:FF2<CR>
+nnoremap <Del> ]c^zz:FF2<CR>
 vnoremap <Ins> [c^
 vnoremap <Del> ]c^
 
@@ -991,12 +997,12 @@ nnoremap <silent> <C-Down>	<C-w>j
 nnoremap <silent> <C-Up>	<C-w>k
 
 nnoremap <silent> q <C-w><C-c>
-nnoremap <silent> <leader>q :<C-u>q<CR>
+"nnoremap <silent> <leader>q :<C-u>q<CR>
 
 nnoremap <C-w><C-t> <C-w>T
 tnoremap <C-w><C-t> <C-w>T
 
-nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 6<CR>
+nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 5<CR>
 nnoremap <silent> <S-PageDown> :<C-u>ScreenMode 4<CR>
 
 "kwbd.vim : ウィンドウレイアウトを崩さないでバッファを閉じる
@@ -1040,7 +1046,7 @@ nnoremap          :      <C-w>v
 nnoremap <expr>   :      <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
 nnoremap          g_     <C-w>n
 nnoremap <silent> g<Bar> :<c-u>vnew<CR>
-nnoremap <silent> g:     :<C-u>vnew<CR>
+"nnoremap <silent> g:     :<C-u>vnew<CR>
 
 "nnoremap <silent> s	<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
 "nnoremap <silent> S	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
@@ -1049,9 +1055,9 @@ nnoremap <silent> g:     :<C-u>vnew<CR>
 "nnoremap <silent> F	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 
 nnoremap <silent> + <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> _ <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap          -      <C-w>s
-nnoremap          g-     <C-w>n
+nnoremap <silent> - <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap          -      <C-w>s
+"nnoremap          g-     <C-w>n
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1132,11 +1138,11 @@ nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' 
 "===============================================================
 
 let s:UnshowTabLineTime = 3000
-com! -nargs=1 TabLine set showtabline=2 <Bar> set cmdheight=2 <Bar> let UnshowTabLine = timer_start(<args>, 'UnshowTabLineFunc')
+com! -nargs=1 TabLine set showtabline=2 <Bar> let &cmdheight-=1 <Bar> let UnshowTabLine = timer_start(<args>, 'UnshowTabLineFunc')
 
 function! UnshowTabLineFunc(dummy)
   set showtabline=0
-  set cmdheight=2
+  let &cmdheight+=1
 endfunction
 
 nnoremap <silent> <leader>= :<C-u>set showtabline=2 <Bar> TabLine 3000<CR>
@@ -1149,25 +1155,74 @@ nnoremap <silent> <leader>= :<C-u>set showtabline=2 <Bar> TabLine 3000<CR>
 "===============================================================
 
 function! s:tabpage_label(n)
-  " n 番目のタブのラベルを返す
-  return tabpagenr()
+  " t:title と言う変数があったらそれを使う
+  "let title = gettabvar(a:n, 'title')
+  "if title !=# ''
+    "return title
+  "endif
+
+  " タブページ内のバッファのリスト
+  let bufnrs = tabpagebuflist(a:n)
+
+  " カレントタブページかどうかでハイライトを切り替える
+  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+
+  let no = '[' . a:n . ']'
+
+  " バッファが複数あったらバッファ数を表示
+  let num = len(bufnrs)
+  "if num is 1
+    "let num = ''
+  "endif
+
+  " タブページ内に変更ありのバッファがあったら '+' を付ける
+  let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '+' : ''
+
+  "let sp = (num . mod) ==# '' ? '' : ' '  " 隙間空ける
+
+  " カレントバッファ
+  let curbufnr = bufnrs[tabpagewinnr(a:n) - 1]  " tabpagewinnr() は 1 origin
+  "let fname = pathshorten(bufname(curbufnr))
+  "return hi . no . mod
+  let fname = pathshorten(expand('#' . curbufnr . ':p'))
+  let fname = fname == '' ? 'no name' : fname
+
+  let label = no . ' ' . num . mod . ' '  . fname
+
+  return '%' . a:n . 'T' . hi . ' ◄ ' . label . '%T ► %#TabLineFill#'
+  "return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
 endfunction
 
 function! MakeTabLine()
+  "let titles = ['','']
   let titles = map(range(1, tabpagenr('$')), 's:tabpage_label(v:val)')
-  let sep = ' | '  " タブ間の区切り
+  let sep = '|'  " タブ間の区切り
+  "let tabpages = join(titles, sep) . sep . '%#TabLineFill2#%T'
   let tabpages = join(titles, sep) . sep . '%#TabLineFill#%T'
   let info = ''  " 好きな情報を入れる
-  let info .= '%#Statusline# ' . ' '
+  let info .= '%#Statusline#  '
   let info .= '%#slfilename# ' . g:bat_str . ' '
-  let info .= '%#Statusline# ' . ' '
+  let info .= '%#Statusline#  '
   let info .= '%#slfilename# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-  let info .= '%#Statusline#'
-  let info .= '%## ' . ' '
+  let info .= '%#Statusline#  '
+  let info .= '%##'
   "let tabpages = ' '
-  return info . '%=' . info  " タブリストを左に、情報を右に表示
-  return tabpages . '%=' . info  " タブリストを左に、情報を右に表示
-  return info . '%=' . tabpages " タブリストを左に、情報を右に表示
+
+  "let s:left = info . '    %<'
+  let s:left = '  '
+
+  "let s:right = info
+  let s:right = '%=  ' . info
+
+  return info . '    %<' . tabpages
+  "return info . '    %<' . tabpages . '%=  ' . info  " タブリストを左に、情報を右に表示
+
+  "return s:left . tabpages . s:right
+  "return tabpages   " タブリストを左に、情報を右に表示
+
+  "return info . '%=' . info  " タブリストを左に、情報を右に表示
+  "return tabpages . '%=' . info  " タブリストを左に、情報を右に表示
+  "return info . '%=' . tabpages " タブリストを左に、情報を右に表示
 endfunction
 set tabline=%!MakeTabLine()
 set showtabline=2
@@ -1195,7 +1250,8 @@ let g:my_transparency = 229
 let g:my_transparency = 235
 augroup MyVimrc_GUI
   au!
-  au GUIEnter * simalt ~x
+  "au GUIEnter * simalt ~x
+  au GUIEnter * ScreenMode 4
   exe 'au GUIEnter * set transparency=' . g:my_transparency
 augroup end
 
@@ -1267,7 +1323,7 @@ try
   " Battery (Statusline)
   function! Update_StatuslineBatteryInfo(dummy)
     call py3eval('bat_win_main()')
-    let g:bat_str = g:bat_info['ACLine'] . ' ' . g:bat_info['RemainingPercent'] . ' ' . g:bat_info['RemainingTime']
+    let g:bat_str = g:bat_info['ACLine'] . ' ' . g:bat_info['Charging'] . ' ' . g:bat_info['RemainingPercent'] . ' ' . g:bat_info['RemainingTime']
   endfunction
 
   " 旧タイマの削除
@@ -1285,8 +1341,8 @@ try
 
   call Update_StatuslineBatteryInfo(0)
 catch
-  let bat_str='? ---% [--:--:--]'
-  "let bat_str=': 100% [13:05:24]'
+  let bat_str='? ? ---% [--:--:--]'
+ "let bat_str='$ y 100% [13:05:24]'
 endtry
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1296,6 +1352,8 @@ endtry
 
 set complete=.,w,b,u,i,t
 set completeopt=menuone,preview
+set pumheight=25
+
 
 " 全文字キーへの補完開始トリガの割り当て
 function! SetCpmplKey(str)
@@ -1462,20 +1520,11 @@ nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g
 
 " Other Key-Maps {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-nnoremap <leader>w <Esc>:<C-u>w<CR>
+nnoremap <leader>w :<C-u>w<CR>
 nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
 nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable <BAR> setl readonly<CR>' : ':<C-u>setl modifiable<CR>'
 nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
 nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
-
-"if exists('loaded_mru')
-  let MRU_Window_Height = max([8, &lines / 4 ])
-  augroup MyVimrc_MRU
-    au!
-    au VimResized * let MRU_Window_Height = max([8, &lines / 4 ])
-  augroup end
-  nnoremap <silent> <leader>o :<C-u>MRU<CR>
-"endif
 
 "nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
@@ -1519,6 +1568,7 @@ let g:clever_f_smart_case=1			"
 let g:clever_f_use_migemo=0			"
 "let g:clever_f_fix_key_direction=1		"
 let g:clever_f_chars_match_any_signs = '\\'	" 任意の記号にマッチする文字を設定する
+let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
 if 0
   let g:clever_f_mark_cursor_color = 'gui=none guifg=black guibg=yellow'
   let g:clever_f_mark_char_color   = 'gui=none guifg=black guibg=red'
@@ -1666,9 +1716,10 @@ endfunction
 
 so $vim/tree.vim
 so $vim/qf.vim
-so $vim/func_name.vim
+so $vim/mycfi.vim
 so $vim/test.vim
 so $vim/em.vim
+"so $vim/my_multiple.vim
 "so $vim/buf.vim
 so $VIMRUNTIME/macros/matchit.vim
 
@@ -1708,26 +1759,58 @@ com! FL help function-list<CR>
 filetype plugin indent on
 
 
-nnoremap <Leader>e :so %<CR>
-
-
 com! Date echo '' strftime("%Y/%m/%d (%a) %H:%M:%S")
 com! Time Date
 com! Bat echo '' bat_str
 
 
 set renderoptions=type:directx,scrlines:1
+
+"set updatetime=300
 augroup MyVimrc_Rendor
   au!
   "au InsertLeave * normal! <C-l>
-  au CursorHold * normal! <C-l>
+  "au CursorHold * normal! <C-l>
+  "au CursorHold * call feedkeys(":\<C-u>redraw<CR>", 'nx')
+  "au CursorHold * redraw
   "au VimResized * normal! <C-l>
   "au CursorHold * let &renderoptions=&renderoptions
 augroup end
 
 
+" {{{
+hi HlWord	guifg=#4050cd	guibg=white
+hi HlWord	guibg=#4050cd	guifg=white
+hi HlWord	guibg=NONE	guifg=NONE
+hi HlWord	gui=reverse
+hi HlWord	gui=NONE
+hi HlWord	guibg=gray30	guifg=gray80
+nnoremap <leader>n :<C-u>match HlWord /\<<C-r><C-w>\>/<CR>
+call EscEsc_Add('match')
+" `}}}
 
 
+"if exists('loaded_mru')
+  "let MRU_Window_Height = min([20, &lines / 4 ])
+  "let MRU_Window_Height = max([8, &lines / 4 ])
+  let MRU_Window_Height = 25
+  augroup MyVimrc_MRU
+    au!
+    "au VimResized * let MRU_Window_Height = min([25, &lines / 3 ])
+    au VimResized * let MRU_Window_Height = max([8, &lines / 3 ])
+  augroup end
+  nnoremap <silent> <leader>o :<C-u>MRU<CR>
+"endif
+
+nnoremap <silent> <C-k> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-j> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-h> <esc>3<C-w><
+"nnoremap <silent> <C-l> <esc>3<C-w>>
+
+set mouse=
+set mousehide
+
+"set updatetime=500
 
 " TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
