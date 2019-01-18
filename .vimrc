@@ -394,12 +394,13 @@ augroup end
 
 nnoremap Y y$
 
-nnoremap cr caw
+nnoremap cr ciw
 nnoremap dr daw
-nnoremap yr yaw
-nnoremap cR ciw
-nnoremap dR diw
-nnoremap yR yiw
+nnoremap yr yiw
+
+nnoremap cs caw
+nnoremap ds diw
+nnoremap ys yaw
 
 nnoremap <silent> ZZ <Nop>
 nnoremap <silent> ZQ <Nop>
@@ -483,14 +484,14 @@ vnoremap <silent> <Space>   <C-f>
 vnoremap <silent> <S-Space> <C-b>
 
 function! s:best_scrolloff()
-  let &l:scrolloff = g:TypewriterScroll ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
+  let &l:scrolloff = g:BrowsingScroll ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
 endfunction
 
-let g:TypewriterScroll = v:false
-nnoremap g<Space> :<C-u>let g:TypewriterScroll = !g:TypewriterScroll
-                  \ <Bar> exe g:TypewriterScroll ? 'normal! zz' : ''
+let g:BrowsingScroll = v:false
+nnoremap g<Space> :<C-u>let g:BrowsingScroll = !g:BrowsingScroll
+                  \ <Bar> exe g:BrowsingScroll ? 'normal! zz' : ''
                   \ <Bar> call <SID>best_scrolloff()
-                  \ <Bar> echo g:TypewriterScroll ? 'TypewriterScroll' : 'NoTypewriterScroll'<CR>
+                  \ <Bar> echo g:BrowsingScroll ? 'BrowsingScroll' : 'NoBrowsingScroll'<CR>
 
 augroup MyVimrc_ScrollOff
   au!
@@ -1025,7 +1026,7 @@ nnoremap <silent> Q? q?
 
 nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
 nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <C-o> :<C-u>new<CR>
+"nnoremap <C-o> :<C-u>new<CR>
 
 "Unified_BS_Key	nmap     <BS>     <C-w>
 "Unified_BS_Key	nnoremap <c-BS>   <C-w>s
@@ -1113,15 +1114,15 @@ endfor
 
 " Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-nnoremap K :<C-u>ls<CR>:<C-u>b<Space>
-nnoremap gK :<C-u>ls!<CR>:<C-u>b<Space>
-nnoremap <leader>K :<C-u>ls<CR>:<C-u>bdel 
+nnoremap K         :<C-u>ls <CR>:b<Space>
+nnoremap gK        :<C-u>ls!<CR>:b<Space>
+nnoremap <leader>K :<C-u>ls <CR>:bdel<Space>
 
-nnoremap <silent> <A-n> :<C-u>bnext<CR>
-nnoremap <silent> <A-p> :<C-u>bprev<CR>
+nnoremap <silent> <Del> :<C-u>bnext<CR>
+nnoremap <silent> <Ins> :<C-u>bprev<CR>
 
-nnoremap <leader>z :<C-u>bdel<Space>
-nnoremap <leader>Z :<C-u>bdel!<Space>
+nnoremap <leader>z :<C-u>bdel
+nnoremap <leader>Z :<C-u>bdel!
 
 " Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1132,13 +1133,11 @@ nnoremap <C-t> :<C-u>tabnew<Space>
 
 nnoremap <C-n> gt
 nnoremap <C-p> gT
-"nnoremap <C-f> :<C-u>TabLine 1700<CR>gt
-"nnoremap <C-b> :<C-u>TabLine 1700<CR>gT
 
-nnoremap <A-f> :tabmove +1<CR>
-nnoremap <A-b> :tabmove -1<CR>
+nnoremap <A-n> :tabmove +1<CR>
+nnoremap <A-p> :tabmove -1<CR>
 
-nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' : ':<C-u>set showtabline=0<CR>'
+nnoremap U gt
 
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1148,14 +1147,6 @@ nnoremap <silent><expr> <leader>T !&showtabline ? ':<C-u>set showtabline=2<CR>' 
 "===============================================================
 
 function! s:tabpage_label_full(n)
-  if 0 
-    " t:title と言う変数があったらそれを使う
-    let title = gettabvar(a:n, 'title')
-    if title !=# ''
-      return title
-    endif
-  endif
-
   " カレントタブページかどうかでハイライトを切り替える
   let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
 
@@ -1172,16 +1163,12 @@ function! s:tabpage_label_full(n)
 
   " カレントバッファ
   let curbufnr = bufnrs[tabpagewinnr(a:n) - 1]  " tabpagewinnr() は 1 origin
-  if 0
-    let fname = pathshorten(bufname(curbufnr))
-  else
-    let fname = pathshorten(expand('#' . curbufnr . ':p'))
-  endif
+  let fname = pathshorten(bufname(curbufnr))
+  "let fname = pathshorten(expand('#' . curbufnr . ':p'))
   let fname = fname == '' ? 'no name' : fname
 
   let label = no . ' ' . num . mod . ' '  . fname
 
-  return '%' . a:n . 'T' . hi . ' ◄ ' . label . '%T ► %#TabLineFill#'
   return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
 endfunction
 
@@ -1192,7 +1179,6 @@ function! s:tabpage_label(n)
 endfunction
 
 function! MakeTabLine()
-  let titles = ['','']
   let titles = map(range(1, tabpagenr('$')), s:tabpage_label_func)
   let sep = '  '  " タブ間の区切り
   let tabpages = join(titles, sep) . sep . '%#TabLineFill#%T'
@@ -1206,9 +1192,7 @@ function! MakeTabLine()
   let info .= '%##'
 
   let left = info
-
   let right = info
-
   return left . '    %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
 endfunction
 
@@ -1541,7 +1525,7 @@ nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_func_name_stl#\ \ ' . expand('%:p')<CR>
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 12 <Bar> exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>') <Bar> pwd <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
-nnoremap  <C-l> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
+nnoremap  <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
 	      \ <Bar> let g:alt_stl_time = 12
 	      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%', line('$'), col('.'), line('.') * 100.0 / line('$'))
 	      \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
@@ -1733,6 +1717,7 @@ so $vim/em.vim
 "so $vim/my_multiple.vim
 "so $vim/buf.vim
 so $VIMRUNTIME/macros/matchit.vim
+so $vim/anzu.vim
 
 
 "set foldmethod=syntax
@@ -1816,12 +1801,26 @@ call EscEsc_Add('match')
 nnoremap <silent> <C-k> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> <C-j> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> <C-h> <esc>3<C-w><
-"nnoremap <silent> <C-l> <esc>3<C-w>>
+nnoremap <silent> <C-l> <esc>3<C-w>>
 
 set mouse=
 set mousehide
 
 "set updatetime=500
+
+augroup MyVimrc_Init
+  au!
+  au VimEnter * clearjumps | au! MyVimrc_Init
+augroup end
+
+
+" {{{{{ Jump Test
+nnoremap <silent> % :<C-u>keepjumps normal! %<CR>
+nnoremap <silent> G :<C-u>keepjumps normal! G<CR>
+nnoremap <silent> { :<C-u>keepjumps normal! {<CR>
+nnoremap <silent> } :<C-u>keepjumps normal! }<CR>
+" }}}}}
+
 
 " TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
