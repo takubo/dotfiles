@@ -1,3 +1,6 @@
+scriptencoding utf-8
+" vim:set ts=8 sts=2 sw=2 tw=0: (この行に関しては:help modelineを参照)
+"
 " Maintainer:	Henrique C. Alves (hcarvalhoalves@gmail.com)
 " Version:      1.1
 " Last Change:	September 23 2008
@@ -11,7 +14,7 @@ set background=dark
 hi clear
 
 if exists("syntax_on")
-	syntax reset
+  syntax reset
 endif
 
 let colors_name = "Vitamin"
@@ -19,16 +22,16 @@ let colors_name = "Vitamin"
 
 " Vim >= 7.0 specific colors
 if version >= 700
-	hi CursorLineNr	guibg=#000000 guifg=#ffff00 gui=NONE cterm=bold ctermfg=yellow cterm=underline
-	hi CursorLine	guibg=NONE guifg=NONE gui=underline ctermbg=NONE cterm=underline
-	hi CursorColumn	guibg=#000000 ctermbg=236 gui=NONE
-	hi CursorColumn	guibg=#121212 ctermbg=236 gui=NONE
-	hi MatchParen	guifg=#f6f3e8 guibg=#857b6f gui=bold ctermbg=59
-	hi Pmenu	guifg=#dcda8f guibg=#1a1a1a gui=none ctermfg=239 ctermbg=232
-	hi PmenuSel 	guifg=#000000 guibg=#cdd129 ctermfg=0 ctermbg=184
-	hi PmenuSel 	guifg=#000000 guibg=#c0504d ctermfg=0 ctermbg=184
-	hi PmenuSbar 	guifg=#000000 guibg=black ctermfg=0 ctermbg=184
-	hi PmenuThumb 	guifg=#000000 guibg=white ctermfg=0 ctermbg=184
+  hi CursorLineNr	guibg=#000000 guifg=#ffff00 gui=NONE cterm=bold ctermfg=yellow cterm=underline
+  hi CursorLine	guibg=NONE guifg=NONE gui=underline ctermbg=NONE cterm=underline
+  hi CursorColumn	guibg=#000000 ctermbg=236 gui=NONE
+  hi CursorColumn	guibg=#121212 ctermbg=236 gui=NONE
+  hi MatchParen	guifg=#f6f3e8 guibg=#857b6f gui=bold ctermbg=59
+  hi Pmenu	guifg=#dcda8f guibg=#1a1a1a gui=none ctermfg=239 ctermbg=232
+  hi PmenuSel 	guifg=#000000 guibg=#cdd129 ctermfg=0 ctermbg=184
+  hi PmenuSel 	guifg=#000000 guibg=#c0504d ctermfg=0 ctermbg=184
+  hi PmenuSbar 	guifg=#000000 guibg=black ctermfg=0 ctermbg=184
+  hi PmenuThumb 	guifg=#000000 guibg=white ctermfg=0 ctermbg=184
 endif
 
 
@@ -37,8 +40,11 @@ endif
 hi Search	guibg=#c0504d	guifg=white
 hi SignColumn	guibg=Red guifg=White
 hi FoldColumn	guibg=#444444 guifg=#ff5d28
+hi TabLineFill	guifg=#8f3338 guibg=#A4A4A4
 hi TabLineFill	guibg=#343434 guifg=#343434
-hi TabLineSel	guibg=#111111 guifg=#a63318 "gui=bold gui=underline
+hi TabLineFill	guibg=black guifg=#343434
+hi TabLineFill2	guibg=#181818 guifg=#181818
+hi TabLineSel	guibg=#111111 guifg=#a63318 gui=underline gui=bold
 hi TabLine	guifg=#ee8855 guibg=#333333
 hi Cursor 	guifg=NONE    guibg=NONE gui=reverse ctermbg=0x241
 hi Normal 	guifg=#f6f3f0 guibg=#121212 gui=none ctermfg=254 ctermbg=235
@@ -167,73 +173,73 @@ let s:hi_cmdwin = 'highlight	StatusLine	guifg=darkblue	guibg=darkyellow	gui=none
 let s:slhlcmd = ''
 
 if has('syntax')
-	augroup InsertHook
-		au!
-		au InsertEnter * call s:StatusLine('IEnter')
-		au InsertLeave * call s:StatusLine('ILeave')
-		au CmdwinEnter * call s:StatusLine('CEnter')
-		au CmdWinLeave * call s:StatusLine('CLeave')
-	augroup END
+  augroup InsertHook
+    au!
+    au InsertEnter * call s:StatusLine('IEnter')
+    au InsertLeave * call s:StatusLine('ILeave')
+    au CmdwinEnter * call s:StatusLine('CEnter')
+    au CmdWinLeave * call s:StatusLine('CLeave')
+  augroup END
 endif
 
 function! s:StatusLine(mode)
-	if a:mode == 'IEnter'
-		silent! let s:slhlcmd = 'highlight ' . s:GetHighlight('StatusLine')
-		silent exec s:hi_insert
-	elseif a:mode == 'CEnter'
-		silent! let s:slhlcmd = 'highlight ' . s:GetHighlight('StatusLine')
-		silent exec s:hi_cmdwin
-	else
-		highlight clear StatusLine
-		silent exec s:slhlcmd
-	endif
+  if a:mode == 'IEnter'
+    silent! let s:slhlcmd = 'highlight ' . s:GetHighlight('StatusLine')
+    silent exec s:hi_insert
+  elseif a:mode == 'CEnter'
+    silent! let s:slhlcmd = 'highlight ' . s:GetHighlight('StatusLine')
+    silent exec s:hi_cmdwin
+  else
+    highlight clear StatusLine
+    silent exec s:slhlcmd
+  endif
 endfunction
 
 function! s:GetHighlight(hi)
-	redir => hl
-		exec 'highlight '.a:hi
-	redir END
-	let hl = substitute(hl, '[\r\n]', '', 'g')
-	let hl = substitute(hl, 'xxx', '', '')
-	return hl
+  redir => hl
+  exec 'highlight '.a:hi
+  redir END
+  let hl = substitute(hl, '[\r\n]', '', 'g')
+  let hl = substitute(hl, 'xxx', '', '')
+  return hl
 endfunction
 
 
 """""""""""""""""""""""""""""""フォントサイズ""""""""""""""""""""""""""""""
 
 if has('win32') || has('win64')
-	let s:FontName		= "MeiryoKe_Console"
-	"let s:FontHeight	= 9.5
-	"let s:FontWidth	= 4.5
-	"let s:FontWidth	= 4.45
-	let s:FontHeight	= 9.0
-	let s:FontWidth		= 4.2
-	let s:FontHeight	= 9.0
-	let s:FontWidth		= 4.5
-	let s:FontHeight	= 8.5
-	let s:FontWidth		= 4.5
-	let s:MinFontHeight	= 2.0
-	let s:MinFontWidth	= 1.0
-	let s:FontK		= 0.5
+  let s:FontName		= "MeiryoKe_Console"
+  "let s:FontHeight	= 9.5
+  "let s:FontWidth	= 4.5
+  "let s:FontWidth	= 4.45
+  let s:FontHeight	= 9.0
+  let s:FontWidth		= 4.2
+  let s:FontHeight	= 9.0
+  let s:FontWidth		= 4.5
+  let s:FontHeight	= 8.5
+  let s:FontWidth		= 4.5
+  let s:MinFontHeight	= 2.0
+  let s:MinFontWidth	= 1.0
+  let s:FontK		= 0.5
 endif
 
 com! Font echo '' &guifont
 
 function! ResizeFont(r)
-	if a:r != 0
-		let s:CurFontHeight += a:r
-		let s:CurFontWidth  += a:r * s:FontK
-		"let s:CurFontWidth += a:r * (s:CurFontWidth / s:CurFontHeight)
-		if s:CurFontHeight < s:MinFontHeight | let s:CurFontHeight = s:MinFontHeight | endif
-		if s:CurFontWidth  < s:MinFontWidth  | let s:CurFontWidth  = s:MinFontWidth  | endif
-	else	" デフォルトサイズに戻す
-		let s:CurFontHeight = s:FontHeight
-		let s:CurFontWidth  = s:FontWidth
-	endif
-	exe "set guifont=" . s:FontName . ":h" . printf("%.2f", s:CurFontHeight) . ":w" . printf("%.2f", s:CurFontWidth)
-	let g:CurFontHeight=s:CurFontHeight
-	let g:CurFontWidth=s:CurFontWidth
-	simalt ~x
+  if a:r != 0
+    let s:CurFontHeight += a:r
+    let s:CurFontWidth  += a:r * s:FontK
+    "let s:CurFontWidth += a:r * (s:CurFontWidth / s:CurFontHeight)
+    if s:CurFontHeight < s:MinFontHeight | let s:CurFontHeight = s:MinFontHeight | endif
+    if s:CurFontWidth  < s:MinFontWidth  | let s:CurFontWidth  = s:MinFontWidth  | endif
+  else	" デフォルトサイズに戻す
+    let s:CurFontHeight = s:FontHeight
+    let s:CurFontWidth  = s:FontWidth
+  endif
+  exe "set guifont=" . s:FontName . ":h" . printf("%.2f", s:CurFontHeight) . ":w" . printf("%.2f", s:CurFontWidth)
+  let g:CurFontHeight=s:CurFontHeight
+  let g:CurFontWidth=s:CurFontWidth
+  simalt ~x
 
 endfunction
 
