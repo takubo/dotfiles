@@ -1001,7 +1001,7 @@ nnoremap <silent> <C-Down>	<C-w>j
 nnoremap <silent> <C-Up>	<C-w>k
 
 nnoremap <silent> q <C-w><C-c>
-"nnoremap <silent> <leader>q :<C-u>q<CR>
+nnoremap <silent> <leader>q :<C-u>q<CR>
 
 nnoremap <C-w><C-t> <C-w>T
 tnoremap <C-w><C-t> <C-w>T
@@ -1116,13 +1116,16 @@ endfor
 
 nnoremap K         :<C-u>ls <CR>:b<Space>
 nnoremap gK        :<C-u>ls!<CR>:b<Space>
-nnoremap <leader>K :<C-u>ls <CR>:bdel<Space>
+nnoremap <Leader>K :<C-u>ls <CR>:bdel<Space>
 
 nnoremap <silent> <Del> :<C-u>bnext<CR>
 nnoremap <silent> <Ins> :<C-u>bprev<CR>
 
-nnoremap <leader>z :<C-u>bdel
-nnoremap <leader>Z :<C-u>bdel!
+nnoremap <silent> <A-n> :<C-u>bnext<CR>
+nnoremap <silent> <A-p> :<C-u>bprev<CR>
+
+nnoremap <Leader>z :<C-u>bdel
+nnoremap <Leader>Z :<C-u>bdel!
 
 " Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1245,7 +1248,8 @@ let g:my_transparency = 235
 augroup MyVimrc_GUI
   au!
   "au GUIEnter * simalt ~x
-  au GUIEnter * ScreenMode 4
+  "au GUIEnter * ScreenMode 4
+  au GUIEnter * ScreenMode 5
   exe 'au GUIEnter * set transparency=' . g:my_transparency
 augroup end
 
@@ -1500,6 +1504,9 @@ com! TGVIMRC :tabnew $vim/gvimrc
 com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 
+com! VEditColor :exe 'vs $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+com! VColorEdit :exe 'vs $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+
 let g:vimrc_buf_name = '^' . $vim . '/vimrc$'
 let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
 let g:color_buf_name2 = '.vim$'
@@ -1508,7 +1515,7 @@ nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) >
 			\  ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
 nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ?
 			\  ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) :
-			\  ( ':EditColor<CR>' )
+			\  ( <SID>WindowRatio() >= 0 ? ':VEditColor<CR>' : ':EditColor<CR>' )
 
 " Vim Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1682,6 +1689,7 @@ function! PushPos_All()
     let g:now_win = winnr()
     let g:now_tab = tabpagenr()
 endfunction
+com! PushPosAll :call PushPos_All()
 
 " ---------------
 " PopPos_All:
@@ -1692,6 +1700,7 @@ function! PopPos_All()
     silent exe 'buffer ' . g:now_buf
     PopPos
 endfunction
+com! PopPosAll :call PopPos_All()
 
 " Push Pop Pos }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1781,8 +1790,14 @@ hi HlWord	guibg=NONE	guifg=NONE
 hi HlWord	gui=reverse
 hi HlWord	gui=NONE
 hi HlWord	guibg=gray30	guifg=gray80
-nnoremap <leader>n :<C-u>match HlWord /\<<C-r><C-w>\>/<CR>
-call EscEsc_Add('match')
+nnoremap <silent> <leader>n :<C-u>match HlWord /\<<C-r><C-w>\>/<CR>
+"call EscEsc_Add('PushPosAll')
+"call EscEsc_Add('windo match')
+"call EscEsc_Add('PopPosAll')
+augroup MyHiLight
+  au!
+  au WinLeave * match
+augroup end
 " `}}}
 
 
@@ -1815,12 +1830,20 @@ augroup end
 
 
 " {{{{{ Jump Test
-nnoremap <silent> % :<C-u>keepjumps normal! %<CR>
-nnoremap <silent> G :<C-u>keepjumps normal! G<CR>
-nnoremap <silent> { :<C-u>keepjumps normal! {<CR>
-nnoremap <silent> } :<C-u>keepjumps normal! }<CR>
+"nnoremap <silent> % :<C-u>keepjumps normal! %<CR>
+"nnoremap <silent> G :<C-u>keepjumps normal! G<CR>
+"nnoremap <silent> { :<C-u>keepjumps normal! {<CR>
+"nnoremap <silent> } :<C-u>keepjumps normal! }<CR>
 " }}}}}
 
+
+" Refactoring
+nnorema <C-d> :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:echo 'Refactoring'<CR>
+
+cnoremap jj *
+cnoremap kk _
+
+" Last
 
 " TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
@@ -1857,6 +1880,7 @@ nnoremap <silent> } :<C-u>keepjumps normal! }<CR>
 
 " Completion CScope Snippets cnext_cprev
 
+" Ctrl hjkl o ud fb np ^ ]
 " TODO }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1872,3 +1896,9 @@ nnoremap <silent> } :<C-u>keepjumps normal! }<CR>
 " - , <BS>
 " \\
 " : + |
+
+
+if filereadable('$vim/customer.vim')
+  so $vim/customer.vim
+endif
+
