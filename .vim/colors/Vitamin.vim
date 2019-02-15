@@ -22,7 +22,7 @@ let colors_name = "Vitamin"
 
 " Vim >= 7.0 specific colors
 if version >= 700
-  hi CursorLineNr	guibg=#000000 guifg=#ffff00 gui=NONE cterm=bold ctermfg=yellow cterm=underline
+  hi CursorLineNr	guibg=#000000 guifg=#ffffff gui=NONE cterm=bold ctermfg=yellow cterm=underline
   hi CursorLine	guibg=NONE guifg=NONE gui=underline ctermbg=NONE cterm=underline
   hi CursorColumn	guibg=#000000 ctermbg=236 gui=NONE
   hi CursorColumn	guibg=#121212 ctermbg=236 gui=NONE
@@ -44,6 +44,7 @@ hi TabLineFill	guifg=#8f3338 guibg=#A4A4A4
 hi TabLineFill	guibg=#343434 guifg=#343434
 hi TabLineFill	guibg=black guifg=#343434
 hi TabLineFill2	guibg=#181818 guifg=#181818
+hi TabLineSel	guibg=#111111 guifg=#a63318 gui=None
 hi TabLineSel	guibg=#111111 guifg=#a63318 gui=underline gui=bold
 hi TabLine	guifg=#ee8855 guibg=#333333
 hi Cursor 	guifg=NONE    guibg=NONE gui=reverse ctermbg=0x241
@@ -112,6 +113,18 @@ hi gold		guifg=gold
 " For Statusline
 hi SLWinNr	guibg=#ffffff guifg=#a64348 gui=bold
 hi SLFileName	guifg=#cf302d guibg=#000000
+hi SLFileNameT	guifg=#7f1f1a guibg=#000000
+hi SLFileNameF	guifg=#cfb8af guibg=#000000
+hi SLFileNameF	guifg=#cfb8af guibg=#000000
+hi SLFileNameF	guifg=#cfaf8f guibg=#000000
+hi SLFileNameF	guifg=#cfb88f guibg=#000000
+hi SLFileNameF	guifg=#cfbfaf guibg=#000000
+hi SLFileNameF	guifg=#cfafaf guibg=#000000
+hi SLFileNameF	guifg=#7f6f6f guibg=#000000
+hi SLFileNameF	guibg=black	guifg=#ff3d28	gui=none	ctermfg=202
+hi SLFileNameF	guifg=#8f7f7f guibg=#000000
+hi SLFileNameF	guibg=black	guifg=#ff5d28	gui=none	ctermfg=202
+hi SLFileNameF	guibg=black	guifg=#aaaaaa
 
 
 " gui cursor
@@ -269,3 +282,4 @@ hi hl_func_name_stl	guibg=black guifg=#85b0df	gui=none	ctermfg=184
 hi hl_buf_name_stl	guibg=black guifg=#cdd129	gui=none	ctermfg=184
 hi hl_buf_name_stl	guibg=black	guifg=white	gui=none	ctermfg=202
 hi hl_buf_name_stl	guibg=black	guifg=#ff5d28	gui=none	ctermfg=202
+
