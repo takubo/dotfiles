@@ -381,7 +381,7 @@ augroup MyVimrc
   au QuickfixCmdPost vimgrep botright cwindow
   "au QuickfixCmdPost make,grep,grepadd,vimgrep 999wincmd w
 
-  au InsertEnter * set timeoutlen=300
+  au InsertEnter * set timeoutlen=3000
   au InsertLeave * set timeoutlen=1100
 
   "au FileType c,cpp,awk set mps+=?::,=:;
@@ -394,11 +394,11 @@ augroup end
 
 nnoremap Y y$
 
-nnoremap cr ciw
+nnoremap cr caw
 nnoremap dr daw
 nnoremap yr yiw
 
-nnoremap cs caw
+nnoremap cs ciw
 nnoremap ds diw
 nnoremap ys yaw
 
@@ -499,6 +499,9 @@ augroup MyVimrc_ScrollOff
   au WinEnter		* call <SID>best_scrolloff()
   au VimResized		* call <SID>best_scrolloff()
 augroup end
+
+" ^に、|の機能を重畳
+nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
 
 " Cursor Move, CursorLine, CursorColumn, and Scroll }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -750,9 +753,10 @@ nnoremap <expr> zl &wrap ? 'L' : 'zl'
 " ---------------
 function! Unified_CR(mode)
   if v:prevcount
-    "この方法(feedkeys)なら、移動行が履歴に残る。"exe v:prevcount"だと、残らない。
-    "最後のEscは、コマンドラインに残った数字を消すため。
-    call feedkeys(':' . v:prevcount . "\<CR>:\<Esc>", 'nt')
+    " jumpする前に登録しないと、v:prevcountが上書されてしまう。
+    call histadd('cmd', v:prevcount)
+    " jumplistに残すためGを使用
+    exe 'normal! ' . v:prevcount . 'G'
     return
   elseif &ft == 'qf'
     call feedkeys("\<CR>:FF2\<CR>", 'nt')
@@ -853,9 +857,6 @@ nnoremap          <C-S-CR>     <Esc>:tags<CR>;pop
 
 nmap     <silent> <BS><CR>     <BS><BS><CR>
 
-" ^に、|の機能を重畳
-nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
-
 " Tag, Jump, and Unified CR }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -893,8 +894,8 @@ nnoremap <Ins> [c^zz:FuncNameStl<CR>
 nnoremap <Del> ]c^zz:FuncNameStl<CR>
 vnoremap <Ins> [c^
 vnoremap <Del> ]c^
-nnoremap <C-b> [c^zz:FuncNameStl<CR>
-nnoremap <C-f> ]c^zz:FuncNameStl<CR>
+nnoremap <C-p> [c^zz:FuncNameStl<CR>
+nnoremap <C-n> ]c^zz:FuncNameStl<CR>
 nnoremap U <Nop>
 
 " diff accept (obtain and next)
@@ -908,10 +909,7 @@ nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
 
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-nnoremap <BS> <C-w>
-
-nnoremap <expr> <BS><BS>         <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap <expr> <Leader><Leader> <SID>WindowRatio() <  0 ? "\<C-w>v"    : "\<C-w>s"
+set noequalalways
 
 " ---------------
 " Window Ratio
@@ -923,6 +921,8 @@ function! s:WindowRatio()
   let w = winwidth(0) + 0.0
   return (w / h - 178.0 / 78.0)
 endfunction
+
+"----------------------------------------------------------------------------------------
 
 function! s:SkipTerm(direction)
   if v:prevcount
@@ -956,19 +956,57 @@ function! s:SkipTerm(direction)
   return next_win
 endfunction
 
+"----------------------------------------------------------------------------------------
 
-nnoremap <silent> <Tab>		<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-nnoremap <silent> <S-Tab>	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
-nnoremap <C-Tab> <C-w>w
-tnoremap <expr> <C-Tab> winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
-nnoremap <S-C-Tab> <C-w>W
-tnoremap <expr> <S-C-Tab> winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
-nnoremap <silent> <C-w><C-w> <C-w>p
+nnoremap <BS> <C-w>
 
-nnoremap <silent> <A-k> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <A-j> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <A-h> <esc>3<C-w><
-nnoremap <silent> <A-l> <esc>3<C-w>>
+"----------------------------------------------------------------------------------------
+
+nnoremap <expr>   <BS><BS>         <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+nnoremap          _                <C-w>s
+nnoremap          <Bar>            <C-w>v
+nnoremap          g_               <C-w>n
+nnoremap <silent> g<Bar>           :<C-u>vnew<CR>
+
+nnoremap <expr>   <Leader><Leader> <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s"
+nnoremap <expr>   <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <expr>   <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+
+"nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
+
+"----------------------------------------------------------------------------------------
+
+nnoremap <silent>  <Tab>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+nnoremap <silent>  <S-Tab>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+nnoremap           <C-Tab>    <C-w>w
+tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
+nnoremap           <S-C-Tab>  <C-w>W
+tnoremap <expr>    <S-C-Tab>  winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
+nnoremap           -          <C-w>p
+
+nnoremap <silent>  <C-w><C-w> <C-w>p
+nnoremap           g<Tab>     <C-w>p
+nnoremap <silent>  <C-Left>   <C-w>h
+nnoremap <silent>  <C-Right>  <C-w>l
+nnoremap <silent>  <C-Down>   <C-w>j
+nnoremap <silent>  <C-Up>     <C-w>k
+tnoremap <silent>  <C-Left>   <C-w>h
+tnoremap <silent>  <C-Right>  <C-w>l
+tnoremap <silent>  <C-Down>   <C-w>j
+tnoremap <silent>  <C-Up>     <C-w>k
+
+"----------------------------------------------------------------------------------------
+"TODO
+
+nnoremap <silent> <A-k>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <A-j>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <A-h>     <esc>3<C-w><
+nnoremap <silent> <A-l>     <esc>3<C-w>>
+
+nnoremap <silent> <C-k>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-j>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-h>     <esc>3<C-w><
+nnoremap <silent> <C-l>     <esc>3<C-w>>
 
 tnoremap <silent> <up>	    <C-w>2+:<C-u>
 tnoremap <silent> <down>    <C-w>2-:<C-u>
@@ -990,78 +1028,35 @@ nnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <C-left> 1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
 nnoremap <silent> <C-right> <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
 
+"----------------------------------------------------------------------------------------
+
 nnoremap <silent> <A-up>    <C-w>K:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <A-down>  <C-w>J:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <A-left>  <C-w>H:<C-u>call		<SID>best_scrolloff()<CR>
 nnoremap <silent> <A-right> <C-w>L:<C-u>call		<SID>best_scrolloff()<CR>
 
-nnoremap <silent> <C-Left>	<C-w>h
-nnoremap <silent> <C-Right>	<C-w>l
-nnoremap <silent> <C-Down>	<C-w>j
-nnoremap <silent> <C-Up>	<C-w>k
+"----------------------------------------------------------------------------------------
 
-nnoremap <silent> q <C-w><C-c>
-nnoremap <silent> <leader>q :<C-u>q<CR>
+nnoremap <silent> q         <C-w><C-c>
+nnoremap <silent> <Leader>q :<C-u>q<CR>
 
-nnoremap <C-w><C-t> <C-w>T
-tnoremap <C-w><C-t> <C-w>T
-
-nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 5<CR>
-nnoremap <silent> <S-PageDown> :<C-u>ScreenMode 4<CR>
-
-"kwbd.vim : ウィンドウレイアウトを崩さないでバッファを閉じる
-" http://nanasi.jp/articles/vim/kwbd_vim.html
-com! Kwbd let kwbd_bn = bufnr("%") | enew | exe "bdel ".kwbd_bn | unlet kwbd_bn
-nnoremap <silent> gq :<C-u>Kwbd<CR>
-
-"-------------------------------------- TODO -------------------------------
+"----------------------------------------------------------------------------------------
 
 nnoremap <silent> <C-q>; q:
 nnoremap <silent> <C-q>/ q/
 nnoremap <silent> <C-q>? q?
 
-nnoremap <silent> Q; q:
-nnoremap <silent> Q/ q/
-nnoremap <silent> Q? q?
+"----------------------------------------------------------------------------------------
 
-nnoremap <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
-"nnoremap <C-o> :<C-u>new<CR>
+nnoremap <C-w><C-t> :<C-u>tab split<CR>
+tnoremap <C-w><C-t> <C-w>T
 
-"Unified_BS_Key	nmap     <BS>     <C-w>
-"Unified_BS_Key	nnoremap <c-BS>   <C-w>s
-"Unified_BS_Key	nnoremap <silent> <s-c-BS> <esc>:<C-u>new<cr>
-"Unified_BS_Key	nnoremap <expr>   <BS><BS> <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
+"----------------------------------------------------------------------------------------
 
-"Unified_BS_Key	nnoremap <expr>   <BS><CR>     <SID>WindowRatio() >= 0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
-"Unified_BS_Key	nnoremap <expr>   <C-BS><C-CR> <SID>WindowRatio() <  0 ? "\<C-w>v\<C-]>" : "\<C-w>\<C-]>"
-
-"nnoremap <expr> , <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
-nnoremap <Bar> <C-w>v
-"nnoremap -     <C-w>s
-nnoremap -      <C-w>p
-nnoremap g<Tab> <C-w>p
-"nnoremap `     <C-w>p
-"nnoremap ,      <C-w>p
-
-nnoremap          _      <C-w>s
-nnoremap          <Bar>  <C-w>v
-nnoremap          :      <C-w>v
-nnoremap <expr>   :      <SID>WindowRatio() >= 0 ? "\<C-w>v"    : "\<C-w>s"
-nnoremap          g_     <C-w>n
-nnoremap <silent> g<Bar> :<c-u>vnew<CR>
-"nnoremap <silent> g:     :<C-u>vnew<CR>
-
-"nnoremap <silent> s	<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-"nnoremap <silent> S	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
-
-"nnoremap <silent> f	<Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-"nnoremap <silent> F	<Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
-
-nnoremap <silent> + <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> - <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap          -      <C-w>s
-"nnoremap          g-     <C-w>n
+"kwbd.vim : ウィンドウレイアウトを崩さないでバッファを閉じる
+" http://nanasi.jp/articles/vim/kwbd_vim.html
+com! Kwbd let s:kwbd_bn = bufnr('%') | enew | exe 'bdel '. s:kwbd_bn | unlet s:kwbd_bn
+nnoremap <silent> <C-q><C-q> :<C-u>Kwbd<CR>
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1134,11 +1129,11 @@ nnoremap <Leader>Z :<C-u>bdel!
 
 nnoremap <C-t> :<C-u>tabnew<Space>
 
-nnoremap <C-n> gt
-nnoremap <C-p> gT
+nnoremap <C-f> gt
+nnoremap <C-b> gT
 
-nnoremap <A-n> :tabmove +1<CR>
-nnoremap <A-p> :tabmove -1<CR>
+nnoremap <A-f> :tabmove +1<CR>
+nnoremap <A-b> :tabmove -1<CR>
 
 nnoremap U gt
 
@@ -1151,7 +1146,8 @@ nnoremap U gt
 
 function! s:tabpage_label_full(n)
   " カレントタブページかどうかでハイライトを切り替える
-  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#SLFileNameF#'
 
   let no = '[' . a:n . ']'
 
@@ -1172,12 +1168,14 @@ function! s:tabpage_label_full(n)
 
   let label = no . ' ' . num . mod . ' '  . fname
 
+  "return '%' . a:n . 'T' . hi . ' < ' . label . '%T > %#TabLineFill#'
   return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
 endfunction
 
 function! s:tabpage_label(n)
   " カレントタブページかどうかでハイライトを切り替える
-  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#SLFileNameF#'
   return hi . ' [ ' . a:n . ' ] %#TabLineFill#'
 endfunction
 
@@ -1233,7 +1231,7 @@ let TimerTab = timer_start(UpdatetablineInterval, 'Updatetabline', {'repeat': -1
 
 "===============================================================
 
-let s:tabline_status = 0  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
+let s:tabline_status = 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
 call <SID>toggle_tabline()
 
 "===============================================================
@@ -1252,6 +1250,8 @@ augroup MyVimrc_GUI
   au GUIEnter * ScreenMode 5
   exe 'au GUIEnter * set transparency=' . g:my_transparency
 augroup end
+nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 5<CR>
+nnoremap <silent> <S-PageDown> :<C-u>ScreenMode 4<CR>
 
 nnoremap <silent><expr> <PageUp>   ':<C-u>se transparency=' .    ( &transparency + 1      ) . '<Bar> Transparency <CR>'
 nnoremap <silent><expr> <PageDown> ':<C-u>se transparency=' . max([&transparency - 1,   1]) . '<Bar> Transparency <CR>'   | " transparencyは、0以下を設定すると255になってしまう。
@@ -1267,11 +1267,18 @@ com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 2
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let s:stl = '\ \ '
- let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ %='
+"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ %='
+"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileName#\ %F\ %##\ \ \ %='
+"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileName#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}\ %##\ \ \ \ %<%#SLFileName#\ %{expand(''%:t'')}\ %##\ \ \ %='
+"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileName#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}\ %##\ \ \ \ %<%#SLFileNameF#\ %{expand(''%:t'')}\ %##\ \ \ %='
+ let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%{&autoread?''[AR]'':''''}%h%w\ %'
+ let s:stl .= '<%#SLFileNameF#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}%{expand(''%:t'')==''''?''\ '':''/''}%##%<%#SLFileName#%{expand(''%:t'')}\ %##\ \ \ %='
+"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileNameT#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}\ %##\ \ \ %<%#SLFileName#\ %{expand(''%:t'')}\ %##\ \ \ %='
+"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileNameT#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}/%<%#SLFileName#%{expand(''%:t'')}\ %##\ \ \ %='
 "let s:stl .= '%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
- let s:stl .= '%#SLFileName#\ %{toupper(&fenc)},%{&ff}%Y\ '
- let s:stl .= '%#SLFileName#\ '
- let s:stl .= '%{&diff?''[''.&diffopt.'']'':''''}\ '
+"let s:stl .= '%#SLFileNameF#\ %{&fenc==''''?''[]'':toupper(&fenc[0]).&fenc[1:]},%{&ff}%Y\ '
+ let s:stl .= '%#SLFileNameF#\ %{&fenc==''''?''[]'':&fenc},%{&ff}%Y\ '
+ let s:stl .= '%#SLFileName#\ %{&diff?''[''.&diffopt.'']'':''''}\ '
  let s:stl .= '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
  let s:stl .= '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ %{&iminsert?''j'':''e''}\ '
  let s:stl .= '%##%3p%%\ [%L]\ '
@@ -1571,11 +1578,12 @@ let g:clever_f_use_migemo=0			"
 "let g:clever_f_fix_key_direction=1		"
 let g:clever_f_chars_match_any_signs = '\\'	" 任意の記号にマッチする文字を設定する
 let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
-if 0
-  let g:clever_f_mark_cursor_color = 'gui=none guifg=black guibg=yellow'
-  let g:clever_f_mark_char_color   = 'gui=none guifg=black guibg=red'
+if 1
+  hi MyCfC guifg=yellow guibg=black
+  let g:clever_f_mark_cursor_color = 'MyCfC'
+  "let g:clever_f_mark_char_color   = 'MyCfC'
   let g:clever_f_mark_cursor = 1
-  let g:clever_f_mark_char = 1
+  "let g:clever_f_mark_char = 1
 endif
 
 " Clever-f Configuration }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1705,6 +1713,46 @@ com! PopPosAll :call PopPos_All()
 " Push Pop Pos }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+" Commnad Output Capture {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+command!
+      \ -nargs=+ -bang
+      \ -complete=command
+      \ CmdOutCapture
+      \ call s:cmd_out_capture([<f-args>], <bang>0)
+
+function! s:cmd_out_capture(args, banged)
+  new
+  silent put =CmdOut(join(a:args))
+  1,2delete _
+endfunction
+
+command!
+      \ -nargs=+ -bang
+      \ -complete=command
+      \ CmdOutYank
+      \ call s:cmd_out_yank([<f-args>], <bang>0)
+
+function! s:cmd_out_yank(args, banged)
+  silent let @* = CmdOut(join(a:args))
+endfunction
+
+function! CmdOut(cmd)
+  redir => result
+  silent execute a:cmd
+  redir END
+  return result
+endfunction
+
+function! CmdOutLine(args)
+  return split(CmdOut(a:args), '\n')
+endfunction
+
+" }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+
+
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 augroup MyVimrc_Em
   au!
@@ -1727,6 +1775,7 @@ so $vim/em.vim
 "so $vim/buf.vim
 so $VIMRUNTIME/macros/matchit.vim
 so $vim/anzu.vim
+so $vim/BrowserJump.vim
 
 
 "set foldmethod=syntax
@@ -1813,11 +1862,6 @@ augroup end
   nnoremap <silent> <leader>o :<C-u>MRU<CR>
 "endif
 
-nnoremap <silent> <C-k> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-j> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-h> <esc>3<C-w><
-nnoremap <silent> <C-l> <esc>3<C-w>>
-
 set mouse=
 set mousehide
 
@@ -1842,6 +1886,8 @@ nnorema <C-d> :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:ech
 
 cnoremap jj *
 cnoremap kk _
+
+nnoremap Q K
 
 " Last
 
@@ -1898,7 +1944,7 @@ cnoremap kk _
 " : + |
 
 
-if filereadable('$vim/customer.vim')
+if filereadable('customer.vim')
   so $vim/customer.vim
 endif
 
