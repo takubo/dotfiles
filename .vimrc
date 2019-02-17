@@ -478,8 +478,21 @@ augroup MyVimrc_Cursor
   "au BufLeave * setl nocursorcolumn
 augroup end
 
-nnoremap <silent> <Space>   <C-f>
-nnoremap <silent> <S-Space> <C-b>
+if 0
+  nnoremap <silent> <Space>   <C-f>
+  nnoremap <silent> <S-Space> <C-b>
+else
+  let g:comfortable_motion_no_default_key_mappings = v:true
+  let g:comfortable_motion_friction = 90.0
+  let g:comfortable_motion_air_drag = 6.0
+  let g:comfortable_motion_impulse_multiplier = 3.8  " Feel free to increase/decrease this value.
+  nnoremap <silent> <Space>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+  nnoremap <silent> <S-Space> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+  "nnoremap <silent> <Space>   :call comfortable_motion#flick(100)<CR>
+  "nnoremap <silent> <S-Space> :call comfortable_motion#flick(-100)<CR>
+  "let g:comfortable_motion_scroll_down_key = "j"
+  "let g:comfortable_motion_scroll_up_key = "k"
+endif
 vnoremap <silent> <Space>   <C-f>
 vnoremap <silent> <S-Space> <C-b>
 
@@ -634,6 +647,29 @@ endif
 " 入力 カーソル下の単語 クリップボード 前回
 " Enter要 不要
 
+function! s:search_str_num()
+  let g:save_lang=$LANG
+  let $LANG='C'
+  PushPos
+  exe '%s!' . @/ . '!!gn'
+  PopPos
+  let $LANG=g:save_lang
+endfunction
+function! s:search_str_num()
+  let g:save_lang=$LANG
+  let $LANG='C'
+  PushPos
+  let num = CmdOut("silent exe '%s!' . @/ . '!!gn'")
+  PopPos
+  echo '/' . @/ num
+  let $LANG=g:save_lang
+endfunction
+com! SearchStrNum call <SID>search_str_num()
+nnoremap <silent> <leader>n :<C-u>call <SID>search_str_num()<CR>
+
+nnoremap <silent> n n:SearchStrNum<CR>
+nnoremap <silent> N N:SearchStrNum<CR>
+
 " Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -678,7 +714,7 @@ nnoremap <silent> <Leader>0 :<C-u>let c_jk_local = !c_jk_local<CR>
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-let s:root_file = '.git'
+let g:prj_root_file = '.git'
 
 set grepprg=$HOME/bin/ag\ --line-numbers
 set grepprg=/usr/bin/grep\ -an
@@ -696,7 +732,7 @@ function! CS(str)
   let pwd = getcwd()
 
   for i in range(7)
-    if glob(s:root_file) != ''  " root_fileファイルの存在確認
+    if glob(g:prj_root_file) != ''  " prj_root_fileファイルの存在確認
       try
         if exists("*CS_Local")
           call CS_Local(a:str)
@@ -1193,7 +1229,7 @@ function! MakeTabLine()
   let info .= '%##'
 
   let left = info
-  let right = info
+  let right = "%#SLFileName# %{'Diff['.&diffopt.']'} " . info
   return left . '    %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
 endfunction
 
@@ -1266,53 +1302,46 @@ com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 2
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-let s:stl = '\ \ '
-"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %#SLFileName#\ %t\ %<%##\ %F\ \ \ \ %='
-"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileName#\ %F\ %##\ \ \ %='
-"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileName#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}\ %##\ \ \ \ %<%#SLFileName#\ %{expand(''%:t'')}\ %##\ \ \ %='
-"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileName#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}\ %##\ \ \ \ %<%#SLFileNameF#\ %{expand(''%:t'')}\ %##\ \ \ %='
- let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%{&autoread?''[AR]'':''''}%h%w\ %'
- let s:stl .= '<%#SLFileNameF#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}%{expand(''%:t'')==''''?''\ '':''/''}%##%<%#SLFileName#%{expand(''%:t'')}\ %##\ \ \ %='
-"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileNameT#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}\ %##\ \ \ %<%#SLFileName#\ %{expand(''%:t'')}\ %##\ \ \ %='
-"let s:stl .= '%#SLFileName#[\ %{winnr()}\ ]%##\ (\ %n\ )\ %m\%r%##%h%w\ %<%#SLFileNameT#\ %{substitute(expand(''%:p''),''/[^/]\\+$'','''','''')}/%<%#SLFileName#%{expand(''%:t'')}\ %##\ \ \ %='
-"let s:stl .= '%#SLFileName#\ %{toupper(&fenc)},%{toupper(&ff[0])}%Y\ '
-"let s:stl .= '%#SLFileNameF#\ %{&fenc==''''?''[]'':toupper(&fenc[0]).&fenc[1:]},%{&ff}%Y\ '
- let s:stl .= '%#SLFileNameF#\ %{&fenc==''''?''[]'':&fenc},%{&ff}%Y\ '
- let s:stl .= '%#SLFileName#\ %{&diff?''[''.&diffopt.'']'':''''}\ '
- let s:stl .= '%1{stridx(&isk,''.'')<0?''\ '':''.''}\ %1{stridx(&isk,''_'')<0?''\ '':''_''}\ '
- let s:stl .= '%1{c_jk_local!=0?''@'':''\ ''}\ %1{&whichwrap=~''h''?''>'':''=''}\ %1{g:MigemoIsSlash?''\\'':''/''}\ %{&iminsert?''j'':''e''}\ '
- let s:stl .= '%##%3p%%\ [%L]\ '
-"let s:stl .= '%#SLFileName#\ %5l\ L,\ %v\ C\ '
- let s:stl .= '%##\ \ %{repeat(''\ '',winwidth(0)-(exists(''b:buf_name_len'')?b:buf_name_len:6)+(g:stl_time==''''?72:0))}\ '
-
-let g:stl_time_org = '%##\ \ '
-"let g:stl_time_org .= '%#slfilename#\ %{g:bat_str}\ %##\ \ '
-"let g:stl_time_org .= '%##\ %{strftime(''%Y/%m/%d(%a)'')}\ '
-"let g:stl_time_org .= '%#SLFileName#\ %{strftime(''%X'')}\ %##\ \ '
-
-let g:stl_time = g:stl_time_org
-nnoremap <silent> <Leader>- :<C-u>let g:stl_time = ( g:stl_time == '' ? g:stl_time_org : '' )<CR>:call UpdateStatusline(0)<CR>
+let g:stl = "  "
+"let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
+"let g:stl .= "%<"
+"let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
+ let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##%#SLFileName# %t "
+ let g:stl .= "%## %m%r%{&autoread?'[AR]':''}%h%w"
+ let g:stl .= "%<"
+ let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
+"let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
+ let g:stl .= "%="
+ let g:stl .= "%## %{&fenc==''?'$':&fenc},%{&ff}%Y "
+"let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
+ let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
+ let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
+ let g:stl .= "%## %3p%% [%5L] "
+"let g:stl .= "%## %5l L, %3v C "
+ let g:stl .= "%##  %{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))} "
+ let g:stl .= "%##  "
 
 augroup MyVimrc_StatusLine
   au!
-  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter * 
+  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter *
      \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
 augroup end
 
 let g:alt_stl_time = 0
+
 function! UpdateStatusline(dummy)
   if g:alt_stl_time > 0 | let g:alt_stl_time -= 1 | endif
-  if !g:alt_stl_time | exe 'set statusline=' . s:stl . g:stl_time | endif
+  if !g:alt_stl_time | set statusline=%!g:stl | endif
 endfunction
 
-" 旧タイマの削除  vimrcを再読み込みする際、古いタイマを削除しないと、どんどん貯まっていってしまう。
-if exists('TimerUsl')
-  call timer_stop(TimerUsl)
-endif
-
 let UpdateStatuslineInterval = 1000
+
+" 旧タイマの削除  vimrcを再読み込みする際、古いタイマを削除しないと、どんどん貯まっていってしまう。
+if exists('TimerUsl') | call timer_stop(TimerUsl) | endif
+
 let TimerUsl = timer_start(UpdateStatuslineInterval, 'UpdateStatusline', {'repeat': -1})
 
+" 初期設定のために1回は呼び出す。
 call UpdateStatusline(0)
 
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1324,7 +1353,7 @@ try
   " bat_win.pyが存在しない環境でもエラーとさせないためtryブロック内で実行。
   " filereadable()にしようか。
 
-  py3file $HOME/bin/bat_win.py
+  py3file $HOME/system_py/bat_win.py
 
   " Battery (Statusline)
   function! Update_StatuslineBatteryInfo(dummy)
@@ -1353,6 +1382,25 @@ endtry
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
+
+" Mru {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+if exists('loaded_mru') && 0
+  "let MRU_Window_Height = min([20, &lines / 4 ])
+  "let MRU_Window_Height = max([8, &lines / 4 ])
+  let MRU_Window_Height = 25
+  augroup MyVimrc_MRU
+    au!
+    "au VimResized * let MRU_Window_Height = min([25, &lines / 3 ])
+    au VimResized * let MRU_Window_Height = max([8, &lines / 3 ])
+  augroup end
+  nnoremap <silent> <leader>o :<C-u>MRU<CR>
+else
+  command! -nargs=* MRU exe 'browse filter %\c' . substitute(<q-args>, '[ *]', '.*', 'g') . '% oldfiles'
+  nnoremap <Leader>o :<C-u>MRU<Space>
+  " nnoremap <Leader>o  :<C-u>/ oldfiles<Home>browse filter /\c
+endif
+" Mru }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+"
 
 " Completion {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
@@ -1748,7 +1796,11 @@ function! CmdOutLine(args)
   return split(CmdOut(a:args), '\n')
 endfunction
 
-" }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+" Commnad Output Capture }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Util {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+" Util }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 
@@ -1766,16 +1818,16 @@ endfunction
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-so $vim/tree.vim
+"so $vim/PrjTree.vim
 so $vim/qf.vim
 so $vim/mycfi.vim
 so $vim/test.vim
-so $vim/em.vim
+"so $vim/em.vim
 "so $vim/my_multiple.vim
 "so $vim/buf.vim
 so $VIMRUNTIME/macros/matchit.vim
 so $vim/anzu.vim
-so $vim/BrowserJump.vim
+"so $vim/BrowserJump.vim
 
 
 "set foldmethod=syntax
@@ -1839,7 +1891,7 @@ hi HlWord	guibg=NONE	guifg=NONE
 hi HlWord	gui=reverse
 hi HlWord	gui=NONE
 hi HlWord	guibg=gray30	guifg=gray80
-nnoremap <silent> <leader>n :<C-u>match HlWord /\<<C-r><C-w>\>/<CR>
+nnoremap <silent> <leader>` :<C-u>match HlWord /\<<C-r><C-w>\>/<CR>
 "call EscEsc_Add('PushPosAll')
 "call EscEsc_Add('windo match')
 "call EscEsc_Add('PopPosAll')
@@ -1849,18 +1901,6 @@ augroup MyHiLight
 augroup end
 " `}}}
 
-
-"if exists('loaded_mru')
-  "let MRU_Window_Height = min([20, &lines / 4 ])
-  "let MRU_Window_Height = max([8, &lines / 4 ])
-  let MRU_Window_Height = 25
-  augroup MyVimrc_MRU
-    au!
-    "au VimResized * let MRU_Window_Height = min([25, &lines / 3 ])
-    au VimResized * let MRU_Window_Height = max([8, &lines / 3 ])
-  augroup end
-  nnoremap <silent> <leader>o :<C-u>MRU<CR>
-"endif
 
 set mouse=
 set mousehide
@@ -1947,4 +1987,3 @@ nnoremap Q K
 if filereadable('customer.vim')
   so $vim/customer.vim
 endif
-
