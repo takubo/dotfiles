@@ -425,13 +425,13 @@ nnoremap <leader>; q:
 
 "nnoremap <silent> <leader>t :<C-u>ToggleWord<CR>
 
-nnoremap  ]]  ]]f(bzt
+"nnoremap  ]]  ]]f(bzt
 nnoremap g]]  ]]f(b
-nnoremap  [[  [[f(bzt
+"nnoremap  [[  [[f(bzt
 nnoremap g[[  [[f(b
-nnoremap  ][  ][zb
+"nnoremap  ][  ][zb
 nnoremap g][  ][
-nnoremap  []  []zb
+"nnoremap  []  []zb
 nnoremap g[]  []
 
 vnoremap af ][<ESC>V[[
@@ -448,8 +448,11 @@ cnoremap >> \>
 cnoremap <Bar><Bar> \<Bar>
 
 
+
 " Cursor Move, CursorLine, CursorColumn, and Scroll {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
+
+""" vertical move {{{
 nnoremap j  gj
 nnoremap k  gk
 nnoremap gj  j
@@ -461,10 +464,37 @@ vnoremap gj  j
 vnoremap gk  k
 
 set noshowcmd
+""" }}}
 
-nnoremap <silent> <Leader>c :<C-u>setl cursorline!<CR>
-nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
 
+""" horizontal move {{{
+" ^に、|の機能を重畳
+nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
+""" }}}
+
+
+""" scroll move {{{
+if 0
+  nnoremap <silent> <Space>   <C-f>
+  nnoremap <silent> <S-Space> <C-b>
+else
+  let g:comfortable_motion_no_default_key_mappings = v:true
+  let g:comfortable_motion_friction = 90.0
+  let g:comfortable_motion_air_drag = 6.0
+  let g:comfortable_motion_impulse_multiplier = 3.8
+  nnoremap <silent> <Space>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+  nnoremap <silent> <S-Space> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+  "let g:comfortable_motion_scroll_down_key = "\<C-e>"
+  "let g:comfortable_motion_scroll_up_key = "\<C-y>"
+  "let g:comfortable_motion_scroll_down_key = "j"
+  "let g:comfortable_motion_scroll_up_key = "k"
+endif
+vnoremap <silent> <Space>   <C-f>
+vnoremap <silent> <S-Space> <C-b>
+""" }}}
+
+
+""" cursorline cursorcolumn {{{
 augroup MyVimrc_Cursor
   au!
   au WinEnter * setl cursorline
@@ -474,49 +504,34 @@ augroup MyVimrc_Cursor
 
   au BufEnter * setl cursorline
   au BufEnter * setl cursorcolumn
-  "au BufLeave * setl nocursorline
-  "au BufLeave * setl nocursorcolumn
 augroup end
 
-if 0
-  nnoremap <silent> <Space>   <C-f>
-  nnoremap <silent> <S-Space> <C-b>
-else
-  let g:comfortable_motion_no_default_key_mappings = v:true
-  let g:comfortable_motion_friction = 90.0
-  let g:comfortable_motion_air_drag = 6.0
-  let g:comfortable_motion_impulse_multiplier = 3.8  " Feel free to increase/decrease this value.
-  nnoremap <silent> <Space>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-  nnoremap <silent> <S-Space> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
-  "nnoremap <silent> <Space>   :call comfortable_motion#flick(100)<CR>
-  "nnoremap <silent> <S-Space> :call comfortable_motion#flick(-100)<CR>
-  "let g:comfortable_motion_scroll_down_key = "j"
-  "let g:comfortable_motion_scroll_up_key = "k"
-endif
-vnoremap <silent> <Space>   <C-f>
-vnoremap <silent> <S-Space> <C-b>
+nnoremap <silent> <Leader>c :<C-u>setl cursorline!<CR>
+nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
+""" }}}
 
+
+""" scrolloff {{{
 function! s:best_scrolloff()
   let &l:scrolloff = g:BrowsingScroll ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
 endfunction
 
 let g:BrowsingScroll = v:false
-nnoremap g<Space> :<C-u>let g:BrowsingScroll = !g:BrowsingScroll
+nnoremap <Leader>j :<C-u> let g:BrowsingScroll = !g:BrowsingScroll
                   \ <Bar> exe g:BrowsingScroll ? 'normal! zz' : ''
                   \ <Bar> call <SID>best_scrolloff()
                   \ <Bar> echo g:BrowsingScroll ? 'BrowsingScroll' : 'NoBrowsingScroll'<CR>
 
 augroup MyVimrc_ScrollOff
   au!
-  "au BufNewFile,BufRead	* call <SID>best_scrolloff()
-  au WinEnter		* call <SID>best_scrolloff()
-  au VimResized		* call <SID>best_scrolloff()
+  au WinEnter   * call <SID>best_scrolloff()
+  au VimResized * call <SID>best_scrolloff()
 augroup end
+""" }}}
 
-" ^に、|の機能を重畳
-nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
 
 " Cursor Move, CursorLine, CursorColumn, and Scroll }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Emacs {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1012,8 +1027,10 @@ nnoremap <expr>   <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":ne
 
 "----------------------------------------------------------------------------------------
 
+if 0
 nnoremap <silent>  <Tab>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
 nnoremap <silent>  <S-Tab>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+endif
 nnoremap           <C-Tab>    <C-w>w
 tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
 nnoremap           <S-C-Tab>  <C-w>W
@@ -1039,10 +1056,20 @@ nnoremap <silent> <A-j>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> <A-h>     <esc>3<C-w><
 nnoremap <silent> <A-l>     <esc>3<C-w>>
 
-nnoremap <silent> <C-k>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-j>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-h>     <esc>3<C-w><
-nnoremap <silent> <C-l>     <esc>3<C-w>>
+if 0
+  nnoremap <silent> <C-k>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+  nnoremap <silent> <C-j>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+  nnoremap <silent> <C-h>     <esc>3<C-w><
+  nnoremap <silent> <C-l>     <esc>3<C-w>>
+else
+  nnoremap <silent> <C-k> <esc><C-w>k
+  nnoremap <silent> <C-j> <esc><C-w>j
+  nnoremap <silent> <C-h> <esc><C-w>h
+  nnoremap <silent> <C-l> <esc><C-w>l
+
+  nnoremap <silent> <C-n> <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+  nnoremap <silent> <C-p> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+endif
 
 tnoremap <silent> <up>	    <C-w>2+:<C-u>
 tnoremap <silent> <down>    <C-w>2-:<C-u>
@@ -1183,7 +1210,7 @@ nnoremap U gt
 function! s:tabpage_label_full(n)
   " カレントタブページかどうかでハイライトを切り替える
   "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#SLFileNameF#'
+  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
 
   let no = '[' . a:n . ']'
 
@@ -1200,7 +1227,7 @@ function! s:tabpage_label_full(n)
   let curbufnr = bufnrs[tabpagewinnr(a:n) - 1]  " tabpagewinnr() は 1 origin
   let fname = pathshorten(bufname(curbufnr))
   "let fname = pathshorten(expand('#' . curbufnr . ':p'))
-  let fname = fname == '' ? 'no name' : fname
+  let fname = fname == '' ? 'No Name' : fname
 
   let label = no . ' ' . num . mod . ' '  . fname
 
@@ -1211,7 +1238,7 @@ endfunction
 function! s:tabpage_label(n)
   " カレントタブページかどうかでハイライトを切り替える
   "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#SLFileNameF#'
+  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
   return hi . ' [ ' . a:n . ' ] %#TabLineFill#'
 endfunction
 
@@ -1220,17 +1247,37 @@ function! MakeTabLine()
   let sep = '  '  " タブ間の区切り
   let tabpages = join(titles, sep) . sep . '%#TabLineFill#%T'
 
-  let info = ''  " 好きな情報を入れる
-  let info .= '%#Statusline#  '
-  let info .= '%#slfilename# ' . g:bat_str . ' '
-  let info .= '%#Statusline#  '
-  let info .= '%#slfilename# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-  let info .= '%#Statusline#  '
-  let info .= '%##'
+  if 0
+    let info = ''  " 好きな情報を入れる
+    let info .= '%#Statusline#  '
+    let info .= '%#SLFileName# ' . g:bat_str . ' '
+    let info .= '%#Statusline#  '
+    let info .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+    let info .= '%#Statusline#  '
+    let info .= '%##'
+  else
+    let info = ''  " 好きな情報を入れる
+    let info .= '%#Statusline#  '
+    let info .= '%#SLFileName# ' . g:bat_str . ' '
+    let info .= '%#Statusline#  '
+    let info .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+    let info .= '%#Statusline#  '
+    let info .= '%##'
+  endif
+
 
   let left = info
-  let right = "%#SLFileName# %{'Diff['.&diffopt.']'} " . info
-  return left . '    %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
+  "let left = ''
+  "let left = '%#Statusline#    %##'
+
+  let right = "%#Statusline#  "
+  "let right = "%#hl_func_name_stl#  %{cfi#format('%20s ()', repeat(' ', 20) . '- ()')} "
+  "let right .= "%#Statusline#  %{cfi#format('%20s', repeat('-', 20))} "
+  "let right .= "%#Statusline# %{cfi#format('%s ()', repeat('-', 10))} "
+  let right .= "%#Statusline#" . "%#SLFileName# %{'[ '.&diffopt.' ]'} " . info
+
+  return left . '  %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
+  "return left . '    %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
 endfunction
 
 "===============================================================
@@ -1306,17 +1353,21 @@ let g:stl = "  "
 "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
 "let g:stl .= "%<"
 "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
- let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##%#SLFileName# %t "
- let g:stl .= "%## %m%r%{&autoread?'[AR]':''}%h%w"
+ let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##%#SLFileName# %t %## "
+ let g:stl .= "%##%m%r%{&autoread?'[AR]':''}%h%w"
+"let g:stl .= "%## %#hl_func_name_stl#  %{cfi#format('%s ()', repeat(' ', 0) . '- ()')} %#Statusline#"
+"let g:stl .= "%## %#hl_func_name_stl#%{cfi#format(' %s ', repeat(' ', 0))}%## " " '- ()'
  let g:stl .= "%<"
- let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
+"let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
+ let g:stl .= "%## %F "
 "let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
  let g:stl .= "%="
- let g:stl .= "%## %{&fenc==''?'$':&fenc},%{&ff}%Y "
+ let g:stl .= "%## %{&fenc==''?'.':TitleCase(&fenc)} %{TitleCase(&ff)} %{&ft==''?'.':TitleCase(&ft)} "
 "let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
  let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
- let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
- let g:stl .= "%## %3p%% [%5L] "
+ let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'Jp':'En'} "
+"let g:stl .= "%## %3p%% [%5L] "
+ let g:stl .= "%## %3p%%"
 "let g:stl .= "%## %5l L, %3v C "
  let g:stl .= "%##  %{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))} "
  let g:stl .= "%##  "
@@ -1587,11 +1638,11 @@ nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_func_name_stl#\ \ ' . expand('%:p')<CR>
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 12 <Bar> exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>') <Bar> pwd <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
-nnoremap  <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
-	      \ <Bar> let g:alt_stl_time = 12
-	      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%', line('$'), col('.'), line('.') * 100.0 / line('$'))
-	      \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
-	     "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
+nnoremap <silent> <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
+                      \ <Bar> let g:alt_stl_time = 12
+                      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%', line('$'), col('.'), line('.') * 100.0 / line('$'))
+                      \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
+                     "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
 
 " US Keyboard {{{
 nnoremap ; :
@@ -1800,6 +1851,9 @@ endfunction
 
 
 " Util {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+function! TitleCase(str)
+  return toupper(a:str[0]) . a:str[1:]
+endfunction
 " Util }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1911,6 +1965,10 @@ augroup MyVimrc_Init
   au!
   au VimEnter * clearjumps | au! MyVimrc_Init
 augroup end
+
+
+nnoremap <expr> <Leader><Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
+nnoremap <expr> g<Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
 
 
 " {{{{{ Jump Test
