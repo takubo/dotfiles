@@ -1212,7 +1212,9 @@ nnoremap U gt
 function! s:tabpage_label_full(n)
   " カレントタブページかどうかでハイライトを切り替える
   "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
+  "let hi = a:n is tabpagenr() ? '%#SLFileName#' : '%#TabLine#'
 
   let no = '[' . a:n . ']'
 
@@ -1246,8 +1248,8 @@ endfunction
 
 function! MakeTabLine()
   let titles = map(range(1, tabpagenr('$')), s:tabpage_label_func)
-  let sep = '  '  " タブ間の区切り
-  let tabpages = join(titles, sep) . sep . '%#TabLineFill#%T'
+  let sep = '%#SLFileName# | '  " タブ間の区切り
+  let tabpages = sep . join(titles, sep) . sep . '%#TabLineFill#%T'
 
   if 0
     let info = ''  " 好きな情報を入れる
@@ -1263,12 +1265,18 @@ function! MakeTabLine()
     let info .= '%#SLFileName# ' . g:bat_str . ' '
     let info .= '%#Statusline#  '
     let info .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-    let info .= '%#Statusline#  '
+    let info .= '%#Statusline# '
     let info .= '%##'
   endif
 
+  let linfo = ''  " 好きな情報を入れる
+  let linfo .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
+  let linfo .= '%#Statusline#  '
+  let linfo .= '%#SLFileName# ' . g:bat_str . ' '
+  let linfo .= '%#Statusline#  '
+  let linfo .= '%##  '
 
-  let left = info
+  let left = linfo
   "let left = ''
   "let left = '%#Statusline#    %##'
 
@@ -1356,7 +1364,7 @@ let g:stl = "  "
 "let g:stl .= "%<"
 "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
 "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##%#SLFileName# %t %## "
- let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##"
+ let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
 "let g:stl .= "%#SLFileName# %t %## "
  let g:stl .= "%##%m%r%{&autoread?'[AR]':''}%h%w"
 "let g:stl .= "%## %#hl_func_name_stl#  %{cfi#format('%s ()', repeat(' ', 0) . '- ()')} %#Statusline#"
@@ -1658,6 +1666,7 @@ nnoremap <silent> <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
                       \ <Bar> let g:alt_stl_time = 12
                       \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
                       \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
+                     "\ <Bar> exe 'set statusline=%#SLFileName#\ \ %F'<CR>
                      "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
 
 " US Keyboard {{{
@@ -2004,6 +2013,35 @@ cnoremap kk _
 nnoremap Q K
 
 " Last
+
+" {{{{{ winkey
+
+"unlock g:www
+let g:www = 'uivompqdacx'
+let g:www = 'vompqdacx'
+"lock g:www
+
+for i in range(len(g:www))
+  exe "nnoremap <nowait> y" . g:www[i] . " " . i . "\<C-w>\<C-w>"
+endfor
+nnoremap <silent> <nowait> yu :<C-u>split<CR>
+nnoremap <silent> <nowait> yi :<C-u>vsplit<CR>
+nnoremap <silent> <nowait> yj :<C-u>new<CR>
+nnoremap <silent> <nowait> yl :<C-u>vnew<CR>
+
+nmap <C-e> <Esc>
+nmap <C-e><C-e> <Esc><Esc>
+vmap <C-e> <Esc>
+cmap <C-e> <Esc>
+
+
+""" y
+""" s
+""" r
+""" 
+""" ;',.
+""" jk/
+" }}}}}
 
 " TODO {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
