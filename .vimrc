@@ -1167,6 +1167,8 @@ for k in split('0123456789abcdefghijklmnopqrstuvwxyz', '\zs')
   exec 'tnoremap <A-' . k . '> <Esc>' . k
 endfor
 
+nmap <expr> o &buftype == 'terminal' ? 'i' : 'o'
+
 " Terminal }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1353,29 +1355,43 @@ let g:stl = "  "
 "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
 "let g:stl .= "%<"
 "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
- let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##%#SLFileName# %t %## "
+"let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##%#SLFileName# %t %## "
+ let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##"
+"let g:stl .= "%#SLFileName# %t %## "
  let g:stl .= "%##%m%r%{&autoread?'[AR]':''}%h%w"
 "let g:stl .= "%## %#hl_func_name_stl#  %{cfi#format('%s ()', repeat(' ', 0) . '- ()')} %#Statusline#"
 "let g:stl .= "%## %#hl_func_name_stl#%{cfi#format(' %s ', repeat(' ', 0))}%## " " '- ()'
  let g:stl .= "%<"
 "let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
- let g:stl .= "%## %F "
+"let g:stl .= "%## %F "
+"let g:stl .= "%#SLFileName# %F %{repeat(' ',winwidth(0)-130-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))}%##"
+ let g:stl .= "%#SLFileName# %F %##"
+"let g:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-120-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))} "
+"let g:stl .= "%#SLFileName#  %{repeat('-',winwidth(0)-110-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))} "
 "let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
- let g:stl .= "%="
- let g:stl .= "%## %{&fenc==''?'.':TitleCase(&fenc)} %{TitleCase(&ff)} %{&ft==''?'.':TitleCase(&ft)} "
+ let g:stl .= "    %= "
+ let g:stl .= "%## %{&fenc==''?'.':&fenc}  %{&ff}  %{&ft==''?'.':&ft}  "
 "let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
  let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
- let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'Jp':'En'} "
+ let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'Jpn ':'Code'} "
 "let g:stl .= "%## %3p%% [%5L] "
- let g:stl .= "%## %3p%%"
+ let g:stl .= "%## %3p%% @ %-5L  "
+"let g:stl .= "%## %3p%%"
 "let g:stl .= "%## %5l L, %3v C "
- let g:stl .= "%##  %{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))} "
- let g:stl .= "%##  "
+"let g:stl .= "%##  %{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))} "
+"let g:stl .= "%##  "
+ let g:stl .= "%#SLFileName# %{repeat('-',winwidth(0)-178)} "
+"let g:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-180)} "
+ let g:stl .= "%## -------- "
+"let g:stl .= "%#SLFileName#  "
+"let g:stl .= "%##  %{repeat(' ',winwidth(0)-180)} "
+"let g:stl .= "%##  "
 
 augroup MyVimrc_StatusLine
   au!
   au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter *
-     \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
+     \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+142, 240])
+    "\ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
 augroup end
 
 let g:alt_stl_time = 0
@@ -1640,7 +1656,7 @@ nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 12 <Bar> exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>') <Bar> pwd <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
 nnoremap <silent> <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
                       \ <Bar> let g:alt_stl_time = 12
-                      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%', line('$'), col('.'), line('.') * 100.0 / line('$'))
+                      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
                       \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
                      "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
 
