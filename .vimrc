@@ -482,8 +482,10 @@ else
   let g:comfortable_motion_friction = 90.0
   let g:comfortable_motion_air_drag = 6.0
   let g:comfortable_motion_impulse_multiplier = 3.8
-  nnoremap <silent> <Space>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-  nnoremap <silent> <S-Space> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+  "nnoremap <silent> <Space>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+  "nnoremap <silent> <S-Space> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+  nnoremap <silent> <C-j>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+  nnoremap <silent> <C-k> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
   "let g:comfortable_motion_scroll_down_key = "\<C-e>"
   "let g:comfortable_motion_scroll_up_key = "\<C-y>"
   "let g:comfortable_motion_scroll_down_key = "j"
@@ -785,15 +787,19 @@ nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
 " Tag, Jump, and Unified CR {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 " Browse
-noremap H <C-o>
-noremap L <C-i>
+nnoremap H <C-o>
+nnoremap L <C-i>
 
 " 補償
-nnoremap zh H
-nnoremap zl L
+noremap zh H
+noremap zl L
 "nnoremap zm M
-nnoremap <expr> zh &wrap ? 'H' : 'zh'
-nnoremap <expr> zl &wrap ? 'L' : 'zl'
+"nnoremap <expr> zh &wrap ? 'H' : 'zh'
+"nnoremap <expr> zl &wrap ? 'L' : 'zl'
+
+" 補償の補償
+noremap <C-@> zh
+noremap <C-^> zl
 
 " ---------------
 " Unified CR
@@ -916,10 +922,10 @@ nmap     <silent> <BS><CR>     <BS><BS><CR>
 set diffopt+=iwhite
 
 " diff Updte
-nnoremap <expr> du &diff ? ':<c-u>diffupdate<CR>' : ':<c-u>diffthis<CR>'
+nnoremap <expr> du &diff ? ':<C-u>diffupdate<CR>' : ':<C-u>diffthis<CR>'
 
 " diff Close
-nnoremap dc :<c-u>diffoff<CR>
+nnoremap dc :<C-u>diffoff<CR>
 
 " diff (all window) Quit
 nnoremap <silent> dq :<C-u>call PushPos_All() <Bar> exe 'windo diffoff' <Bar> call PopPos_All() <Bar> echo 'windo diffoff'<CR>
@@ -928,9 +934,12 @@ nnoremap <silent> dq :<C-u>call PushPos_All() <Bar> exe 'windo diffoff' <Bar> ca
 nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> exe 'bufdo diffoff' <Bar> exe 'windo diffoff' <Bar> call PopPos_All()<CR>:echo 'bufdo diffoff <Bar> windo diffoff'<CR>
 
 " diff X(cross)
-nnoremap <silent> <expr> dx winnr('$') != 2 ? ':echoerr "dx error : Number of windows is not 2. "<CR>' :
-                \ winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
-                \ ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>'
+"nnoremap <silent> <expr> dx winnr('$') != 2 ? ':echoerr "dx error : Number of windows is not 2. "<CR>' :
+                "\ winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
+                "\ ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>'
+
+" Toggle Scrollbind
+nnoremap dx :<C-u>setl scrollbind!<CR>
 
 " diff toggle Ignorecase (lの字形はIに似ている)
 nnoremap <expr> dl match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
@@ -950,7 +959,13 @@ nnoremap <C-n> ]c^zz:FuncNameStl<CR>
 nnoremap U <Nop>
 
 " diff accept (obtain and next)
-nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
+"nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
+
+" diff TODO
+nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
+                       \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
+                       \ ':<C-u>diffthis<CR>'
+nmap d<CR> d<Space>
 
 " diff reject (next)
 "nnoremap <expr> dr &diff ? '[c^' : ''
@@ -1013,15 +1028,17 @@ nnoremap <BS> <C-w>
 
 "----------------------------------------------------------------------------------------
 
-nnoremap <expr>   <BS><BS>         <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s"
-nnoremap          _                <C-w>s
-nnoremap          <Bar>            <C-w>v
-nnoremap          g_               <C-w>n
+nnoremap <silent> <expr> <BS><BS>  ( <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
+"nnoremap <silent> _                <C-w>s:diffoff<CR>
+"nnoremap <silent> <Bar>            <C-w>v:diffoff<CR>
+nnoremap <silent> _                <C-w>s:setl noscrollbind<CR>
+nnoremap <silent> <Bar>            <C-w>v:setl noscrollbind<CR>
+nnoremap <silent> g_               <C-w>n
 nnoremap <silent> g<Bar>           :<C-u>vnew<CR>
 
-nnoremap <expr>   <Leader><Leader> <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s"
-nnoremap <expr>   <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap <expr>   <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
+nnoremap          <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+nnoremap          <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
 
 "nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
 
@@ -1051,10 +1068,20 @@ tnoremap <silent>  <C-Up>     <C-w>k
 "----------------------------------------------------------------------------------------
 "TODO
 
-nnoremap <silent> <A-k>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <A-j>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <A-k>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <A-j>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> <A-h>     <esc>3<C-w><
 nnoremap <silent> <A-l>     <esc>3<C-w>>
+
+nnoremap <silent> +         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> _         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> g_        <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> (         <esc>3<C-w><
+nnoremap <silent> g(        <esc>1<C-w>|
+nnoremap <silent> )         <esc>3<C-w>>
+nnoremap <silent> g)        <esc><C-w>|
+
 
 if 0
   nnoremap <silent> <C-k>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
@@ -1062,13 +1089,15 @@ if 0
   nnoremap <silent> <C-h>     <esc>3<C-w><
   nnoremap <silent> <C-l>     <esc>3<C-w>>
 else
-  nnoremap <silent> <C-k> <esc><C-w>k
-  nnoremap <silent> <C-j> <esc><C-w>j
+  "nnoremap <silent> <C-k> <esc><C-w>k
+  "nnoremap <silent> <C-j> <esc><C-w>j
   nnoremap <silent> <C-h> <esc><C-w>h
   nnoremap <silent> <C-l> <esc><C-w>l
 
-  nnoremap <silent> <C-n> <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-  nnoremap <silent> <C-p> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+  nnoremap <silent> <Space>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+  nnoremap <silent> <S-Space>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+  "nnoremap <silent> <C-n> <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+  "nnoremap <silent> <C-p> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 endif
 
 tnoremap <silent> <up>	    <C-w>2+:<C-u>
@@ -1366,7 +1395,7 @@ let g:stl = "  "
 "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %##%#SLFileName# %t %## "
  let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
 "let g:stl .= "%#SLFileName# %t %## "
- let g:stl .= "%##%m%r%{&autoread?'[AR]':''}%h%w"
+ let g:stl .= "%##%m%r%{(&autoread||&l:autoread==1)?'[AR]':''}%h%w "
 "let g:stl .= "%## %#hl_func_name_stl#  %{cfi#format('%s ()', repeat(' ', 0) . '- ()')} %#Statusline#"
 "let g:stl .= "%## %#hl_func_name_stl#%{cfi#format(' %s ', repeat(' ', 0))}%## " " '- ()'
  let g:stl .= "%<"
@@ -1380,8 +1409,9 @@ let g:stl = "  "
  let g:stl .= "    %= "
  let g:stl .= "%## %{&fenc==''?'.':&fenc}  %{&ff}  %{&ft==''?'.':&ft}  "
 "let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
+ let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
  let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
- let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'Jpn ':'Code'} "
+ let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'M':'F'} %{&iminsert?'Jpn ':'Code'} "
 "let g:stl .= "%## %3p%% [%5L] "
  let g:stl .= "%## %3p%% @ %-5L  "
 "let g:stl .= "%## %3p%%"
@@ -1642,6 +1672,7 @@ let g:color_buf_name1 = '^' . $vimruntime . '/colors/'
 let g:color_buf_name2 = '.vim$'
 nnoremap <expr> <Leader>v  ( len(win_findbuf(buffer_number(g:vimrc_buf_name))) > 0 ) && win_id2win(reverse(win_findbuf(buffer_number(g:vimrc_buf_name)))[0]) > 0 ?
 			\  ( win_id2win(reverse(win_findbuf(buffer_number(g:vimrc_buf_name)))[0]) . '<C-w><C-w>' ) :
+			\  ( bufname('')=='' && &buftype=='' && !&modified ) ? ':EVIMRC<CR>' :
 			\  ( <SID>WindowRatio() >= 0 ? ':VVIMRC<CR>' : ':VIMRC<CR>' )
 nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))) > 0 ) ?
 			\  ( win_id2win(win_findbuf(buffer_number(g:color_buf_name1 . g:colors_name . g:color_buf_name2))[0]) . '<C-w><C-w>' ) :
@@ -1701,7 +1732,8 @@ let g:clever_f_smart_case=1			"
 let g:clever_f_use_migemo=0			"
 "let g:clever_f_fix_key_direction=1		"
 let g:clever_f_chars_match_any_signs = '\\'	" 任意の記号にマッチする文字を設定する
-let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
+"let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
+"let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
 if 1
   hi MyCfC guifg=yellow guibg=black
   let g:clever_f_mark_cursor_color = 'MyCfC'
@@ -1709,6 +1741,13 @@ if 1
   let g:clever_f_mark_cursor = 1
   "let g:clever_f_mark_char = 1
 endif
+
+"nnoremap <Leader>k :<C-u>let g:clever_f_use_migemo = !g:clever_f_use_migemo<CR>
+nnoremap <Leader>k :<C-u>call <SID>clever_f_use_migemo_toggle()<CR>
+function! s:clever_f_use_migemo_toggle()
+  let g:clever_f_use_migemo = !g:clever_f_use_migemo
+  echo g:clever_f_use_migemo ? 'clever_f_use_migemo' : 'No clever_f_use_migemo'
+endfunction
 
 " Clever-f Configuration }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1749,6 +1788,13 @@ endfunc
 " 数値比較用の関数 lhs のほうが大きければ正数，小さければ負数，lhs と rhs が等しければ 0 を返す
 function! CompNr(lhs, rhs)
     return a:lhs - a:rhs
+endfunction
+"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+function! GetKey()
+  return nr2char(getchar())
 endfunction
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -2005,7 +2051,10 @@ nnoremap <expr> g<Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
 
 
 " Refactoring
-nnorema <C-d> :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:echo 'Refactoring'<CR>
+"nnorema <silent> <C-d> :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:echo 'Refactoring'<CR>
+nnorema <silent> <C-d> :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:let @/='<C-r><C-w>'<CR>
+"nnorema <silent> <C-d> :<C-u>call PushPos() <Bar> g$.$s    /<C-r>//<C-r><C-w>/g <Bar> call PopPos() <Bar> echo 'Refactoring'<CR>
+"nnorema <silent> <C-d> :<C-u>g$.$s    /<C-r>//<C-r><C-w>/g<CR><C-o>:echo 'Refactoring'<CR>
 
 cnoremap jj *
 cnoremap kk _
@@ -2029,10 +2078,10 @@ nnoremap <silent> <nowait> yi :<C-u>vsplit<CR>
 nnoremap <silent> <nowait> yj :<C-u>new<CR>
 nnoremap <silent> <nowait> yl :<C-u>vnew<CR>
 
-nmap <C-e> <Esc>
-nmap <C-e><C-e> <Esc><Esc>
-vmap <C-e> <Esc>
-cmap <C-e> <Esc>
+"nmap <C-e> <Esc>
+"nmap <C-e><C-e> <Esc><Esc>
+"vmap <C-e> <Esc>
+"cmap <C-e> <Esc>
 
 
 """ y
@@ -2099,3 +2148,12 @@ cmap <C-e> <Esc>
 if filereadable('customer.vim')
   so $vim/customer.vim
 endif
+
+
+nnoremap <silent> T [c^zz:FuncNameStl<CR>
+nnoremap <silent> t ]c^zz:FuncNameStl<CR>
+
+nnoremap <silent> M [c^zz:FuncNameStl<CR>
+nnoremap <silent> m ]c^zz:FuncNameStl<CR>
+
+com! AR :setl autoread!
