@@ -4,7 +4,6 @@ scriptencoding utf-8
 " An example for a Japanese version gvimrc file.
 " 日本語版のデフォルトGUI設定ファイル(gvimrc) - Vim 7.4
 "
-" Last Change: 19-Jul-2017.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -196,8 +195,6 @@ inoremap <expr> ｊｊ pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
 inoremap <expr>   ｊ pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
 inoremap <expr> っｊ pumvisible() ? '<C-N><C-N>' : '<Esc>:w<CR>'
 
-nnoremap <expr> <Leader>j  ':set iminsert=' . (&iminsert ? 0 : 2) . '<CR>'
-
 "highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=#ffffff
 highlight ZenkakuSpace cterm=underline ctermfg=lightblue guibg=#333377
 au BufNewFile,BufRead * match ZenkakuSpace /　/
@@ -264,8 +261,8 @@ nnoremap <C-x> :call C_X()<CR>
 nnoremap <expr> <C-a> search('\%#[\U2460-\U2473]', 'bcn') ? C_A() : "<C-a>"
 nnoremap <expr> <C-x> search('\%#[\U2460-\U2473]', 'bcn') ? C_X() : "<C-x>"
 
-inoremap (( （
-inoremap )) ）
+"inoremap (( （
+"inoremap )) ）
 
 "nmap 　 <Space>
 
