@@ -45,8 +45,7 @@ hi TabLineFill	guibg=#343434 guifg=#343434
 hi TabLineFill	guibg=black guifg=#343434
 hi TabLineFill2	guibg=#181818 guifg=#181818
 hi TabLineSel	guibg=#111111 guifg=#a63318 gui=None
-hi TabLineSel	guibg=#111111 guifg=#a63318 gui=underline gui=bold
-hi TabLine	guifg=#ee8855 guibg=#333333
+hi TabLineSel	guibg=#111111 guifg=#a63318 gui=underline
 hi Cursor 	guifg=NONE    guibg=NONE gui=reverse ctermbg=0x241
 hi Normal 	guifg=#f6f3f0 guibg=#121212 gui=none ctermfg=254 ctermbg=235
 hi SpecialKey	guifg=#242424 guibg=#121212 gui=none
@@ -80,9 +79,10 @@ hi StatusLineTerm	guifg=#efd3b8 guibg=#d0330b gui=none  | "italic
 "hi StatusLineTermNC	guifg=#efd3b8 guibg=#480d01 gui=none  | "italic
 hi StatusLineTermNC	guifg=#efd3b8 guibg=#701a06 gui=none  | "italic
 hi StatusLineTermNC	guifg=#8f7368 guibg=#6d2006 gui=none  | "italic
-hi StatusLineNC	guifg=#5c5a4f guibg=#300a03 gui=none  |  "none
 hi StatusLineNC	guifg=#343434 guibg=#300a03 gui=none  |  "none
 hi StatusLineNC	guifg=#444444 guibg=#300a03 gui=none  |  "none
+hi StatusLineNC	guifg=#cfb398 guibg=#300a03 gui=none  |  "none
+hi StatusLineNC	guifg=#5c5a4f guibg=#300a03 gui=none  |  "none
 "hi StatusLine	guifg=#695753 guibg=#500f05 gui=none  |  "none
 "hi StatusLineNC	guifg=#5c5a4f guibg=#200501 gui=none  |  "none
 hi StatusLineDate	guifg=#5c5a4f guibg=#7f1f1a
@@ -114,17 +114,18 @@ hi gold		guifg=gold
 hi SLWinNr	guibg=#ffffff guifg=#a64348 gui=bold
 hi SLFileName	guifg=#cf302d guibg=#000000
 hi SLFileNameT	guifg=#7f1f1a guibg=#000000
-hi SLFileNameF	guifg=#cfb8af guibg=#000000
-hi SLFileNameF	guifg=#cfb8af guibg=#000000
-hi SLFileNameF	guifg=#cfaf8f guibg=#000000
-hi SLFileNameF	guifg=#cfb88f guibg=#000000
-hi SLFileNameF	guifg=#cfbfaf guibg=#000000
-hi SLFileNameF	guifg=#cfafaf guibg=#000000
-hi SLFileNameF	guifg=#7f6f6f guibg=#000000
-hi SLFileNameF	guibg=black	guifg=#ff3d28	gui=none	ctermfg=202
-hi SLFileNameF	guifg=#8f7f7f guibg=#000000
-hi SLFileNameF	guibg=black	guifg=#ff5d28	gui=none	ctermfg=202
-hi SLFileNameF	guibg=black	guifg=#aaaaaa
+hi TabLine	guifg=#cfb8af guibg=#000000
+hi TabLine	guifg=#cfb8af guibg=#000000
+hi TabLine	guifg=#cfaf8f guibg=#000000
+hi TabLine	guifg=#cfb88f guibg=#000000
+hi TabLine	guifg=#cfbfaf guibg=#000000
+hi TabLine	guifg=#cfafaf guibg=#000000
+hi TabLine	guifg=#7f6f6f guibg=#000000
+hi TabLine	guibg=black	guifg=#ff3d28	gui=none	ctermfg=202
+hi TabLine	guifg=#8f7f7f guibg=#000000
+hi TabLine	guibg=black	guifg=#ff5d28	gui=none	ctermfg=202
+hi TabLine	guibg=black	guifg=#aaaaaa
+"hi TabLine	guifg=#ee8855 guibg=#333333 gui=underline
 
 
 " gui cursor
@@ -282,4 +283,3 @@ hi hl_func_name_stl	guibg=black guifg=#85b0df	gui=none	ctermfg=184
 hi hl_buf_name_stl	guibg=black guifg=#cdd129	gui=none	ctermfg=184
 hi hl_buf_name_stl	guibg=black	guifg=white	gui=none	ctermfg=202
 hi hl_buf_name_stl	guibg=black	guifg=#ff5d28	gui=none	ctermfg=202
-
