@@ -1394,22 +1394,30 @@ com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 2
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let g:stl = "  "
-let g:stl = "  "
 "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
 "let g:stl .= "%<"
 "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
+"let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
  let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
- let g:stl .= "%##%m%r%{&autoread?'[AR]':''}%h%w "
+ let g:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
+"let g:stl .= "%##%#SLFileName# %t "
  let g:stl .= "%##%#SLFileName# %F "
  let g:stl .= "%<"
 "let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
 "let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
  let g:stl .= "%#SLFileName#%="
- let g:stl .= "%## %5{&fenc==''?'$':&fenc}  %4{&ff}  %4{&ft==''?'none':&ft} "
+"let g:stl .= "%## %5{&fenc==''?'$':&fenc}  %4{&ff}  %4{&ft==''?'none':&ft} "
+ let g:stl .= "%## %-4{&ft==''?'none':&ft}  %-5{&fenc==''?'-':&fenc}  %4{&ff} "
 "let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
- let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
- let g:stl .= "%1{c_jk_local!=0?'@':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
+"let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
+ let g:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
+"let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
+"let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
+ let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %{&iminsert?'Jpn ':'Code'} "
+"let g:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
  let g:stl .= "%## %3p%% [%5L] "
+"let g:stl .= "%## %3p%% @ %-5L  "
+"let g:stl .= "%## %3p%%  %-5L  "
 "let g:stl .= "%## %5l L, %3v C "
 "let g:stl .= "%#SLFileName#%{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))}"
  let g:stl .= "%#SLFileName# %{repeat(' ',winwidth(0)-178)} "
@@ -2147,8 +2155,10 @@ nnoremap <silent> t ]c^zz:FuncNameStl<CR>
 "nnoremap <silent> M [c^zz:FuncNameStl<CR>
 "nnoremap <silent> m ]c^zz:FuncNameStl<CR>
 "例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
-nnoremap <expr><silent> M ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
-nnoremap <expr><silent> m ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <silent> m :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> M :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> <Leader>m :<C-u>exe (c_jk_local ? ":lfirst" : "cfirst")<CR>:FuncNameStl<CR>
+nnoremap <silent> <Leader>M :<C-u>exe (c_jk_local ? ":llast" : "clast")<CR>:FuncNameStl<CR>
 nnoremap <silent> <Leader>0 :<C-u>let c_jk_local = !c_jk_local<CR>
 
 com! AR :setl autoread!
