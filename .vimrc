@@ -515,17 +515,22 @@ nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
 
 """ scrolloff {{{
 function! s:best_scrolloff()
-  let &l:scrolloff = g:BrowsingScroll ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
+  let &l:scrolloff = (g:BrowsingScroll || w:BrowsingScroll) ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
 endfunction
 
 let g:BrowsingScroll = v:false
-nnoremap g<Space>  :<C-u> let g:BrowsingScroll = !g:BrowsingScroll
+nnoremap z<Space>  :<C-u> let g:BrowsingScroll = !g:BrowsingScroll
                   \ <Bar> exe g:BrowsingScroll ? 'normal! zz' : ''
                   \ <Bar> call <SID>best_scrolloff()
                   \ <Bar> echo g:BrowsingScroll ? 'BrowsingScroll' : 'NoBrowsingScroll'<CR>
+nnoremap g<Space>  :<C-u> let w:BrowsingScroll = !w:BrowsingScroll
+                  \ <Bar> exe w:BrowsingScroll ? 'normal! zz' : ''
+                  \ <Bar> call <SID>best_scrolloff()
+                  \ <Bar> echo w:BrowsingScroll ? 'Local BrowsingScroll' : 'Local NoBrowsingScroll'<CR>
 
 augroup MyVimrc_ScrollOff
   au!
+  au WinNew     * let w:BrowsingScroll = v:false
   au WinEnter   * call <SID>best_scrolloff()
   au VimResized * call <SID>best_scrolloff()
 augroup end
@@ -2024,6 +2029,7 @@ augroup end
 
 
 nnoremap <expr> <Leader><Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
+nnoremap <expr> <Leader>j       ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
 "nnoremap <expr>       g<Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
 
 
@@ -2140,5 +2146,9 @@ nnoremap <silent> t ]c^zz:FuncNameStl<CR>
 
 "nnoremap <silent> M [c^zz:FuncNameStl<CR>
 "nnoremap <silent> m ]c^zz:FuncNameStl<CR>
+"例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
+nnoremap <expr><silent> M ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <expr><silent> m ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
+nnoremap <silent> <Leader>0 :<C-u>let c_jk_local = !c_jk_local<CR>
 
 com! AR :setl autoread!
