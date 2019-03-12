@@ -534,6 +534,8 @@ augroup MyVimrc_ScrollOff
   au WinEnter   * call <SID>best_scrolloff()
   au VimResized * call <SID>best_scrolloff()
 augroup end
+" 最初のWindowに対しては、WinNewが効かないので、別途設定。
+let w:BrowsingScroll = v:false
 """ }}}
 
 
@@ -1245,10 +1247,9 @@ nnoremap U gt
 
 function! s:tabpage_label_full(n)
   " カレントタブページかどうかでハイライトを切り替える
-  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
+  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
   "let hi = a:n is tabpagenr() ? '%#SLFileName#' : '%#TabLine#'
+  "let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
 
   let no = '[' . a:n . ']'
 
@@ -1270,7 +1271,8 @@ function! s:tabpage_label_full(n)
   let label = no . ' ' . num . mod . ' '  . fname
 
   "return '%' . a:n . 'T' . hi . ' < ' . label . '%T > %#TabLineFill#'
-  return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
+  return '%' . a:n . 'T' . hi . '  ' . label . '%T  %#TabLineFill#'
+  "return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
 endfunction
 
 function! s:tabpage_label(n)
@@ -1298,19 +1300,22 @@ function! MakeTabLine()
     let info .= '%#Statusline#  '
     let info .= '%#SLFileName# ' . g:bat_str . ' '
     let info .= '%#Statusline#  '
-    let info .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+"   let info .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+    let info .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
     let info .= '%#Statusline# '
     let info .= '%##'
   endif
 
-  let linfo = ''  " 好きな情報を入れる
-  let linfo .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
-  let linfo .= '%#Statusline#  '
-  let linfo .= '%#SLFileName# ' . g:bat_str . ' '
-  let linfo .= '%#Statusline#  '
-  let linfo .= '%##  '
+  let l_info = ''  " 好きな情報を入れる
+  let l_info .= '%#Statusline#  '
+ "let l_info .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
+  let l_info .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
+  let l_info .= '%#Statusline#  '
+  let l_info .= '%#SLFileName# ' . g:bat_str . ' '
+  let l_info .= '%#Statusline#  '
+  let l_info .= '%##  '
 
-  let left = linfo
+  let left = l_info
   "let left = ''
   "let left = '%#Statusline#    %##'
 
@@ -1400,8 +1405,8 @@ let g:stl = "  "
 "let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
  let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
  let g:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
-"let g:stl .= "%##%#SLFileName# %t "
- let g:stl .= "%##%#SLFileName# %F "
+ let g:stl .= "%##%#SLFileName# %t "
+"let g:stl .= "%##%#SLFileName# %F "
  let g:stl .= "%<"
 "let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
 "let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
@@ -1413,7 +1418,7 @@ let g:stl = "  "
  let g:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
 "let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
 "let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
- let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %{&iminsert?'Jpn ':'Code'} "
+ let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %4{&iminsert?'Jpn':'Code'} "
 "let g:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
  let g:stl .= "%## %3p%% [%5L] "
 "let g:stl .= "%## %3p%% @ %-5L  "
@@ -2159,6 +2164,9 @@ nnoremap <silent> m :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> 
 nnoremap <silent> M :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
 nnoremap <silent> <Leader>m :<C-u>exe (c_jk_local ? ":lfirst" : "cfirst")<CR>:FuncNameStl<CR>
 nnoremap <silent> <Leader>M :<C-u>exe (c_jk_local ? ":llast" : "clast")<CR>:FuncNameStl<CR>
-nnoremap <silent> <Leader>0 :<C-u>let c_jk_local = !c_jk_local<CR>
+nnoremap <silent> <A-m> :<C-u>let c_jk_local = !c_jk_local<CR>
 
 com! AR :setl autoread!
+
+
+nnoremap <Leader>g :<C-u>vim "\<<C-r><C-w>\>" *.c<CR>
