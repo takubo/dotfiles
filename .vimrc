@@ -1,5 +1,6 @@
 scriptencoding utf-8
-" vim:set ts=8 sts=2 sw=2 tw=0: (この行に関しては:help modelineを参照)
+" vim:set ts=8 sts=2 sw=2 tw=0:
+" (この行に関しては:help modelineを参照)
 "
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim 7.4
@@ -720,7 +721,7 @@ cnoremap <expr> <C-g> match(getcmdline(), '\(g.\..s\\|s\)    /') == 0 ? '<End>/g
 " Substitute }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Grep {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+" Grep, Quickfix & Locationlist {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 "nnoremap <C-g> :<C-u>vim "\<<C-R><C-W>\>" *.c *.h<CR>
 nnoremap <C-g> :<C-u>vim "" <Left><Left>
@@ -729,10 +730,13 @@ nnoremap <leader>g :<C-u>vim "\<<C-R><C-W>\>"
 nnoremap <leader>G :<C-u>vim "<C-R><C-W>" 
 
 let c_jk_local = 0
+
 "例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
-nnoremap <expr><silent> <A-k> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lprev" : "cprev") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
-nnoremap <expr><silent> <A-j> ":\<C-u>try \<Bar> " . (c_jk_local ? ":lnext" : "cnext") . "\<Bar> catch \<Bar> endtry" . "\<CR>"
-nnoremap <silent> <Leader>0 :<C-u>let c_jk_local = !c_jk_local<CR>
+nnoremap <silent> m :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> M :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> <Leader>m :<C-u>exe (c_jk_local ? ":lfirst" : "cfirst")<CR>:FuncNameStl<CR>
+nnoremap <silent> <Leader>M :<C-u>exe (c_jk_local ? ":llast" : "clast")<CR>:FuncNameStl<CR>
+nnoremap <silent> <A-m> :<C-u>let c_jk_local = !c_jk_local<CR>
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -788,7 +792,7 @@ nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-" Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+" Grep, Quickfix & Locationlist }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Tag, Jump, and Unified CR {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -957,22 +961,19 @@ nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR
 " diff Visualize option
 nnoremap dv :<C-u>echo &diffopt<CR>
 
-nnoremap <Ins> [c^zz:FuncNameStl<CR>
-nnoremap <Del> ]c^zz:FuncNameStl<CR>
-vnoremap <Ins> [c^
-vnoremap <Del> ]c^
-nnoremap <C-p> [c^zz:FuncNameStl<CR>
-nnoremap <C-n> ]c^zz:FuncNameStl<CR>
-nnoremap U <Nop>
-
-" diff accept (obtain and next)
-"nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
-
-" diff TODO
+" diff Special
 nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
                        \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
                        \ ':<C-u>diffthis<CR>'
 nmap d<CR> d<Space>
+
+" Next Hunk
+nnoremap <silent> t ]c^zz:FuncNameStl<CR>
+" Previouse Hunk
+nnoremap <silent> T [c^zz:FuncNameStl<CR>
+
+" diff accept (obtain and next)
+"nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
 
 " diff reject (next)
 "nnoremap <expr> dr &diff ? '[c^' : ''
@@ -1075,10 +1076,10 @@ tnoremap <silent>  <C-Up>     <C-w>k
 "----------------------------------------------------------------------------------------
 "TODO
 
-nnoremap <silent> <A-k>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <A-j>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <A-h>     <esc>3<C-w><
-nnoremap <silent> <A-l>     <esc>3<C-w>>
+nnoremap <silent> <C-k>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-j>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-h>     <esc>3<C-w><
+nnoremap <silent> <C-l>     <esc>3<C-w>>
 
 nnoremap <silent> +         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
@@ -1098,8 +1099,8 @@ if 0
 else
   "nnoremap <silent> <C-k> <esc><C-w>k
   "nnoremap <silent> <C-j> <esc><C-w>j
-  nnoremap <silent> <C-h> <esc><C-w>h
-  nnoremap <silent> <C-l> <esc><C-w>l
+  "nnoremap <silent> <C-h> <esc><C-w>h
+  "nnoremap <silent> <C-l> <esc><C-w>l
 
   nnoremap <silent> <Space>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
   nnoremap <silent> <S-Space>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
@@ -1245,11 +1246,15 @@ nnoremap U gt
 
 "===============================================================
 
-function! s:tabpage_label_full(n)
+function! s:tabpage_label(n)
   " カレントタブページかどうかでハイライトを切り替える
   let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
   "let hi = a:n is tabpagenr() ? '%#SLFileName#' : '%#TabLine#'
   "let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
+
+  if s:tabline_status == 1
+    return hi . ' [ ' . a:n . ' ] %#TabLineFill#'
+  endif
 
   let no = '[' . a:n . ']'
 
@@ -1262,6 +1267,14 @@ function! s:tabpage_label_full(n)
   " タブページ内に変更ありのバッファがあったら '+' を付ける
   let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '+' : ''
 
+  if s:tabline_status == 2
+    return hi . ' [ ' . a:n . ' ' . mod . ' ] %#TabLineFill#'
+  endif
+  if s:tabline_status == 3
+    return hi . ' [ ' . a:n . ' ' . num . ' ' . mod . ' ] %#TabLineFill#'
+  endif
+
+
   " カレントバッファ
   let curbufnr = bufnrs[tabpagewinnr(a:n) - 1]  " tabpagewinnr() は 1 origin
   let fname = pathshorten(bufname(curbufnr))
@@ -1270,20 +1283,16 @@ function! s:tabpage_label_full(n)
 
   let label = no . ' ' . num . mod . ' '  . fname
 
-  "return '%' . a:n . 'T' . hi . ' < ' . label . '%T > %#TabLineFill#'
   return '%' . a:n . 'T' . hi . '  ' . label . '%T  %#TabLineFill#'
+  "return '%' . a:n . 'T' . hi . ' < ' . label . '%T > %#TabLineFill#'
   "return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
 endfunction
 
-function! s:tabpage_label(n)
-  " カレントタブページかどうかでハイライトを切り替える
-  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  return hi . ' [ ' . a:n . ' ] %#TabLineFill#'
+function! s:tabpage_label_tmp(n)
 endfunction
 
 function! MakeTabLine()
-  let titles = map(range(1, tabpagenr('$')), s:tabpage_label_func)
+  let titles = map(range(1, tabpagenr('$')), 's:tabpage_label(v:val)')
   let sep = '%#SLFileName# | '  " タブ間の区切り
   let tabpages = sep . join(titles, sep) . sep . '%#TabLineFill#%T'
 
@@ -1331,24 +1340,6 @@ endfunction
 
 "===============================================================
 
-function! s:toggle_tabline()
-  let s:tabline_status = ( s:tabline_status + 1 ) % 3
-  if s:tabline_status == 0
-    set showtabline=0
-  elseif s:tabline_status == 1
-    let s:tabpage_label_func = 's:tabpage_label(v:val)'
-    set showtabline=2
-  elseif s:tabline_status == 2
-    let s:tabpage_label_func = 's:tabpage_label_full(v:val)'
-    set showtabline=2
-  endif
-  call Updatetabline(0)
-endfunction
-
-nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
-
-"===============================================================
-
 function! Updatetabline(dummy)
   set tabline=%!MakeTabLine()
 endfunction
@@ -1363,8 +1354,20 @@ let TimerTab = timer_start(UpdatetablineInterval, 'Updatetabline', {'repeat': -1
 
 "===============================================================
 
-let s:tabline_status = 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
+function! s:toggle_tabline()
+  let s:tabline_status = ( s:tabline_status + 1 ) % 5
+  if s:tabline_status == 0
+    set showtabline=0
+  else
+    set showtabline=2
+  endif
+  call Updatetabline(0)
+endfunction
+
+let s:tabline_status = 3 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
 call <SID>toggle_tabline()
+
+nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 
 "===============================================================
 
@@ -2154,19 +2157,8 @@ if filereadable('customer.vim')
 endif
 
 
-nnoremap <silent> T [c^zz:FuncNameStl<CR>
-nnoremap <silent> t ]c^zz:FuncNameStl<CR>
-
-"nnoremap <silent> M [c^zz:FuncNameStl<CR>
-"nnoremap <silent> m ]c^zz:FuncNameStl<CR>
-"例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
-nnoremap <silent> m :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
-nnoremap <silent> M :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
-nnoremap <silent> <Leader>m :<C-u>exe (c_jk_local ? ":lfirst" : "cfirst")<CR>:FuncNameStl<CR>
-nnoremap <silent> <Leader>M :<C-u>exe (c_jk_local ? ":llast" : "clast")<CR>:FuncNameStl<CR>
-nnoremap <silent> <A-m> :<C-u>let c_jk_local = !c_jk_local<CR>
-
 com! AR :setl autoread!
 
+nnoremap U <Nop>
 
 nnoremap <Leader>g :<C-u>vim "\<<C-r><C-w>\>" *.c<CR>
