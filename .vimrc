@@ -302,7 +302,10 @@ set formatoptions+=mM
 set gp=grep\ -n
 set guicursor=n-v-c:block-Cursor/lCursor,ve:ver35-Cursor,o:hor50-Cursor,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor,a:blinkon0
 set hidden
-set hlsearch
+if !&hlsearch
+  " ReVimrcする度にハイライトされるのを避ける。
+  set hlsearch
+endif
 set history=10000
 " 検索時に大文字小文字を無視 (noignorecase:無視しない)
 set ignorecase
@@ -364,9 +367,7 @@ filetype on
 
 syntax enable
 
-let g:font_init_done = v:false
 colorscheme Vitamin
-let g:font_init_done = v:true
 " TODO hi CursorLine ctermbg=NONE guibg=NONE
 
 augroup MyVimrc_DynamicColorshemeChage
@@ -524,7 +525,8 @@ nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
 
 """ scrolloff {{{
 function! s:best_scrolloff()
-  let &l:scrolloff = (g:BrowsingScroll || w:BrowsingScroll) ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
+  " Quickfixでは、なぜかWinNewが聞かないので、exists()で変数の存在を確認せねばならない。
+  let &l:scrolloff = (g:BrowsingScroll || (exists('w:BrowsingScroll') && w:BrowsingScroll)) ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
 endfunction
 
 let g:BrowsingScroll = v:false
@@ -975,10 +977,14 @@ nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
                        \ ':<C-u>diffthis<CR>'
 nmap d<CR> d<Space>
 
-" Next Hunk
-nnoremap <silent> t ]c^zz:FuncNameStl<CR>
-" Previouse Hunk
-nnoremap <silent> T [c^zz:FuncNameStl<CR>
+" Next Hunk & Previouse Hunk
+if exists(':FuncNameStl')
+  nnoremap <silent> t ]c^zz:FuncNameStl<CR>
+  nnoremap <silent> T [c^zz:FuncNameStl<CR>
+else
+  nnoremap <silent> t ]c^zz
+  nnoremap <silent> T [c^zz
+endif
 
 " diff accept (obtain and next)
 "nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
@@ -1969,14 +1975,14 @@ endfunction
 
 
 "so $vim/PrjTree.vim
-so $vim/qf.vim
-so $vim/mycfi.vim
-so $vim/test.vim
+"so $vim/qf.vim
+"so $vim/mycfi.vim
+"so $vim/test.vim
 "so $vim/em.vim
 "so $vim/my_multiple.vim
 "so $vim/buf.vim
-so $VIMRUNTIME/macros/matchit.vim
-so $vim/anzu.vim
+"so $VIMRUNTIME/macros/matchit.vim
+"so $vim/anzu.vim
 "so $vim/BrowserJump.vim
 
 
@@ -2063,9 +2069,9 @@ augroup MyVimrc_Init
 augroup end
 
 
-nnoremap <expr> <Leader><Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . " <Bar> colorscheme " . (&iminsert ? "desert_new" : "Vitamin") . "<CR>"
-nnoremap <expr> <Leader>j       ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . " <Bar> colorscheme " . (&iminsert ? "desert_new" : "Vitamin") . "<CR>"
-"nnoremap <expr>       g<Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . " <Bar> colorscheme " . (&iminsert ? "desert_new" : "Vitamin") . "<CR>"
+nnoremap <Leader><Space> :<C-u>let &iminsert = (&iminsert ? 0 : 2) <Bar> exe "colorscheme " . (&iminsert ? "desert_new" : "Vitamin") <CR>
+nnoremap <Leader>j       :<C-u>let &iminsert = (&iminsert ? 0 : 2) <Bar> exe "colorscheme " . (&iminsert ? "desert_new" : "Vitamin") <CR>
+nnoremap        g<Space> :<C-u>let &iminsert = (&iminsert ? 0 : 2) <Bar> exe "colorscheme " . (&iminsert ? "desert_new" : "Vitamin") <CR>
 
 
 " {{{{{ Jump Test
@@ -2181,3 +2187,4 @@ com! AR :setl autoread!
 nnoremap U <Nop>
 
 nnoremap <Leader>g :<C-u>vim "\<<C-r><C-w>\>" *.c<CR>
+
