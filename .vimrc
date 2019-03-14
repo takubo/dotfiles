@@ -364,8 +364,16 @@ filetype on
 
 syntax enable
 
+let g:font_init_done = v:false
 colorscheme Vitamin
+let g:font_init_done = v:true
 " TODO hi CursorLine ctermbg=NONE guibg=NONE
+
+augroup MyVimrc_DynamicColorshemeChage
+  au!
+  au WinEnter * exe 'colorscheme ' (&iminsert ? 'desert_new' : 'Vitamin')
+  au BufEnter * exe 'colorscheme ' (&iminsert ? 'desert_new' : 'Vitamin')
+augroup end
 
 
 set timeoutlen=1100
@@ -1364,7 +1372,7 @@ function! s:toggle_tabline()
   call Updatetabline(0)
 endfunction
 
-let s:tabline_status = 3 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
+let s:tabline_status = 4 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
 call <SID>toggle_tabline()
 
 nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
@@ -2055,9 +2063,9 @@ augroup MyVimrc_Init
 augroup end
 
 
-nnoremap <expr> <Leader><Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
-nnoremap <expr> <Leader>j       ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
-"nnoremap <expr>       g<Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . "<CR>"
+nnoremap <expr> <Leader><Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . " <Bar> colorscheme " . (&iminsert ? "desert_new" : "Vitamin") . "<CR>"
+nnoremap <expr> <Leader>j       ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . " <Bar> colorscheme " . (&iminsert ? "desert_new" : "Vitamin") . "<CR>"
+"nnoremap <expr>       g<Space> ":\<C-u>set iminsert=" . (&iminsert ? 0 : 2) . " <Bar> colorscheme " . (&iminsert ? "desert_new" : "Vitamin") . "<CR>"
 
 
 " {{{{{ Jump Test
