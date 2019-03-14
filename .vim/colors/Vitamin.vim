@@ -54,6 +54,7 @@ hi Normal 	guifg=#f6f3f0 guibg=#181818 gui=none ctermfg=254 ctermbg=235
 hi Normal 	guifg=#f6f3f0 guibg=#1C1C1C gui=none ctermfg=254 ctermbg=235
 hi Normal 	guifg=#f6f3f0 guibg=#222222 gui=none ctermfg=254 ctermbg=235
 hi Normal 	guifg=#f6f3f0 guibg=#202020 gui=none ctermfg=254 ctermbg=235
+"hi Normal 	guifg=#f6f3f0 guibg=grey20 gui=none ctermfg=254 ctermbg=235
 hi SpecialKey	guifg=#2D2D2D guibg=#222222 gui=none
 hi NonText 	guifg=#808080 guibg=#303030 gui=none ctermfg=242 ctermbg=237
 hi LineNr 	guifg=#5c5a4f guibg=#000000 gui=none ctermfg=239 ctermbg=232
@@ -162,6 +163,7 @@ set transparency=244
 "hi DiffChange	guifg=NONE	guibg=#191919	gui=none	ctermfg=NONE	ctermbg=235
 hi DiffChange	guibg=#755332	guifg=NONE	gui=NONE	term=bold	ctermbg=5
 hi DiffChange	guibg=#453020	guifg=NONE	gui=NONE	term=bold	ctermbg=5
+hi DiffChange	guibg=#303030	guifg=NONE	gui=NONE	term=NONE	ctermbg=NONE
 hi DiffChange	guibg=NONE	guifg=NONE	gui=NONE	term=NONE	ctermbg=NONE
 hi DiffText	guibg=#b505b5	guifg=NONE	gui=NONE	term=reverse	ctermbg=12	cterm=bold
 hi DiffText	guibg=#850585	guifg=NONE	gui=NONE	term=reverse	ctermbg=12	cterm=bold
@@ -175,9 +177,12 @@ hi DiffText	guibg=#303088	guifg=NONE	gui=NONE	term=reverse	ctermbg=12	cterm=bold
 hi DiffAdd	guibg=#111138	guifg=NONE	gui=NONE	term=bold	ctermbg=1
 hi DiffAdd	guibg=#381111	guifg=NONE	gui=NONE	term=bold	ctermbg=1
 hi DiffAdd	guibg=#301111	guifg=NONE	gui=NONE	term=bold	ctermbg=1
+hi DiffAdd	guibg=#281111	guifg=NONE	gui=NONE	term=bold	ctermbg=1
+hi DiffAdd	guibg=#241010	guifg=NONE	gui=NONE	term=bold	ctermbg=1
+hi DiffAdd	guibg=#200a0a	guifg=NONE	gui=NONE	term=bold	ctermbg=1
 hi DiffDelete	guibg=#112311	guifg=#2a2a2a	gui=NONE	term=bold	ctermbg=3	ctermfg=9
 hi DiffDelete	guibg=#111138	guifg=#2a2a2a	gui=NONE	term=bold	ctermbg=1
-hi DiffDelete	guibg=#111130	guifg=#2a2a2a	gui=NONE	term=bold	ctermbg=1
+hi DiffDelete	guibg=#111130	guifg=#1a1a4a	gui=NONE	term=bold	ctermbg=1
 
 
 """""""""""""""""""""""""""""""挿入モード時、ステータスラインの色を変更""""""""""""""""""""""""""""""
@@ -266,7 +271,10 @@ nnoremap <S-End>	:<C-u>call ResizeFont(-99999)<CR>:Font<CR>
 
 " initialize
 "exe 'set guifont=' . s:FontName . ':h' . s:FontHeight . ':w' s:FontWidth
-call ResizeFont(0)
+if !exists('g:font_init_done')
+  call ResizeFont(0)
+endif
+let g:font_init_done = v:true
 
 
 " func_name
