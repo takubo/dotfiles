@@ -593,7 +593,7 @@ endfunction
 " 'noh'はユーザ定義関数内では(事実上)実行出来ないので、別途実行の要あり。
 nnoremap <silent> <Esc><Esc> <Esc>:<C-u>call Esc_Esc() <Bar> noh  <Bar> echon <CR>
 
-call EscEsc_Add('let g:alt_stl_time = 0 | call UpdateStatusline(0)')
+call EscEsc_Add('call RestoreDefaultStatusline(0)')
 call EscEsc_Add('call clever_f#reset()')
 
 " Esc_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -1079,7 +1079,7 @@ tnoremap <silent>  <C-Up>     <C-w>k
 nnoremap <silent> <C-k>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> <C-j>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> <C-h>     <esc>3<C-w><
-nnoremap <silent> <C-l>     <esc>3<C-w>>
+"nnoremap <silent> <C-l>     <esc>3<C-w>>
 
 nnoremap <silent> +         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
@@ -1401,59 +1401,67 @@ com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 2
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-let g:stl = "  "
-"let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
-"let g:stl .= "%<"
-"let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
-"let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
- let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
- let g:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
- let g:stl .= "%##%#SLFileName# %t "
-"let g:stl .= "%##%#SLFileName# %F "
- let g:stl .= "%<"
-"let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
-"let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
- let g:stl .= "%#SLFileName#%="
-"let g:stl .= "%## %5{&fenc==''?'$':&fenc}  %4{&ff}  %4{&ft==''?'none':&ft} "
- let g:stl .= "%## %-4{&ft==''?'none':&ft}  %-5{&fenc==''?'-':&fenc}  %4{&ff} "
-"let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
-"let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
- let g:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
-"let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
-"let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
- let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %4{&iminsert?'Jpn':'Code'} "
-"let g:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
- let g:stl .= "%## %3p%% [%5L] "
-"let g:stl .= "%## %3p%% @ %-5L  "
-"let g:stl .= "%## %3p%%  %-5L  "
-"let g:stl .= "%## %5l L, %3v C "
-"let g:stl .= "%#SLFileName#%{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))}"
- let g:stl .= "%#SLFileName# %{repeat(' ',winwidth(0)-178)} "
- let g:stl .= "%#SLFileName#"
+function! SetDefaultStatusline(arg)
+
+  let g:stl = "  "
+  "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
+  "let g:stl .= "%<"
+  "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
+  "let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
+  let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
+  let g:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
+  let g:stl .= "%##%#SLFileName# %t "
+  "let g:stl .= "%##%#SLFileName# %F "
+  let g:stl .= "%<"
+  "let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
+  "let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
+  let g:stl .= "%#SLFileName#%="
+  "let g:stl .= "%## %5{&fenc==''?'$':&fenc}  %4{&ff}  %4{&ft==''?'none':&ft} "
+  "let g:stl .= "%## %-4{&ft==''?'-   ':&ft}  %-5{&fenc==''?'  -  ':&fenc}  %4{&ff} "
+  let g:stl .= "%## %-4{&ft==''?'    ':&ft}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
+  "let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
+  "let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
+  let g:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
+  "let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
+  "let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
+  let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %4{&iminsert?'Jpn':'Code'} "
+  "let g:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
+  let g:stl .= "%## %3p%% [%5L] "
+  "let g:stl .= "%## %3p%% @ %-5L  "
+  "let g:stl .= "%## %3p%%  %-5L  "
+  "let g:stl .= "%## %5l L, %3v C "
+  "let g:stl .= "%#SLFileName#%{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))}"
+  let g:stl .= "%#SLFileName# %{repeat(' ',winwidth(0)-178)} "
+  let g:stl .= "%#SLFileName#"
+
+  call RestoreDefaultStatusline(0)
+endfunction
 
 augroup MyVimrc_StatusLine
   au!
   au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter *
      \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+142, 240])
-    "\ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+130, 240])
 augroup end
 
-let g:alt_stl_time = 0
+function! RestoreDefaultStatusline(dummy)
+  " タイマの削除
+  if exists('g:TimerUsl') | call timer_stop(g:TimerUsl) | unlet g:TimerUsl | endif
 
-function! UpdateStatusline(dummy)
-  if g:alt_stl_time > 0 | let g:alt_stl_time -= 1 | endif
-  if !g:alt_stl_time | set statusline=%!g:stl | endif
+  set statusline=%!g:stl
 endfunction
 
-let UpdateStatuslineInterval = 1000
+function! SetAltStatusline(stl, local, time)
+  " 旧タイマの削除
+  if exists('g:TimerUsl') | call timer_stop(g:TimerUsl) | unlet g:TimerUsl | endif
 
-" 旧タイマの削除  vimrcを再読み込みする際、古いタイマを削除しないと、どんどん貯まっていってしまう。
-if exists('TimerUsl') | call timer_stop(TimerUsl) | endif
+  let g:ttt_stl = a:stl
+  exe 'set' . a:local . ' stl=%!g:ttt_stl'
 
-let TimerUsl = timer_start(UpdateStatuslineInterval, 'UpdateStatusline', {'repeat': -1})
+  let g:TimerUsl = timer_start(a:time, 'RestoreDefaultStatusline', {'repeat': 0})
+endfunction
 
 " 初期設定のために1回は呼び出す。
-call UpdateStatusline(0)
+call SetDefaultStatusline(0)
 
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1699,12 +1707,15 @@ nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 "nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_func_name_stl#\ \ ' . expand('%:p')<CR>
 "nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 12 <Bar> exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>') <Bar> pwd <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
-nnoremap <silent> <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
-                      \ <Bar> let g:alt_stl_time = 12
-                      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
-                      \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
-                     "\ <Bar> exe 'set statusline=%#SLFileName#\ \ %F'<CR>
-                     "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
+"nnoremap <silent> <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
+"                      \ <Bar> let g:alt_stl_time = 12
+"                      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
+"                      \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
+"                     "\ <Bar> exe 'set statusline=%#SLFileName#\ \ %F'<CR>
+"                     "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
+nnoremap <silent> <C-o> :<C-u>pwd
+                      \ <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
+                      \ <Bar> call SetAltStatusline('%#hl_buf_name_stl#  %F', '', 10000)<CR>
 
 " US Keyboard {{{
 nnoremap ; :
