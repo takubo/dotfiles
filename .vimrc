@@ -406,6 +406,16 @@ augroup end
 
 nnoremap Y y$
 
+" US Keyboard {{{
+nnoremap ; :
+vnoremap ; :
+cnoremap <expr> ; getcmdline() =~# '^:*$' ? ':' : ';'
+cnoremap <expr> : getcmdline() =~# '^:*$' ? ';' : ':'
+" US Keyboard }}}
+
+nnoremap <silent> ZZ <Nop>
+nnoremap <silent> ZQ <Nop>
+
 nnoremap cr caw
 nnoremap dr daw
 nnoremap yr yiw
@@ -414,8 +424,16 @@ nnoremap cs ciw
 nnoremap ds diw
 nnoremap ys yaw
 
-nnoremap <silent> ZZ <Nop>
-nnoremap <silent> ZQ <Nop>
+" 検索時に/, ?を楽に入力する
+cnoremap <expr> / getcmdtype() == '/' ? '\/' : '/'
+cnoremap <expr> ? getcmdtype() == '?' ? '\?' : '?'
+
+cnoremap (( \(
+cnoremap )) \)
+cnoremap << \<
+cnoremap >> \>
+cnoremap <Bar><Bar> \<Bar>
+
 
 " コメント行の後の新規行の自動コメント化のON/OFF
 nnoremap <expr> <leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':<C-u>set formatoptions+=o<CR>:set formatoptions+=r<CR>'
@@ -424,10 +442,10 @@ nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>
 nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 
-nnoremap <silent> <Leader>m :<C-u>marks<CR>
 nnoremap <silent> <Leader>" :<C-u>disp<CR>
 
-nnoremap <silent> <leader>N :<C-u>set relativenumber!<CR>
+nnoremap <silent> <Leader>@ :<C-u>set relativenumber!<CR>
+"nnoremap <silent> <Leader>@ :<C-u>let &l:number = &l:number && &l:relativenumber ? 0 : 1<CR>:let &l:relativenumber = &l:number && !&l:relativenumber ? 1 : 0<CR>
 
 cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
 			\ (getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\\|' :
@@ -449,15 +467,6 @@ nnoremap g[]  []
 vnoremap af ][<ESC>V[[
 vnoremap if ][k<ESC>V[[j
 
-" 検索時に/, ?を楽に入力する
-cnoremap <expr> / getcmdtype() == '/' ? '\/' : '/'
-cnoremap <expr> ? getcmdtype() == '?' ? '\?' : '?'
-
-cnoremap (( \(
-cnoremap )) \)
-cnoremap << \<
-cnoremap >> \>
-cnoremap <Bar><Bar> \<Bar>
 
 " Orthodox }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -567,7 +576,8 @@ cnoremap <A-f>		<S-Right>
 "cnoremap <Esc>f		<S-Right>
 " 前の単語へ移動
 cnoremap <A-b>		<S-Left>
-"cnoremap <Esc><b>	<S-Left>
+" 単語削除
+"cnoremap <A-d>		TODO
 " Emacs }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -688,7 +698,7 @@ function! s:search_str_num()
   let $LANG=g:save_lang
 endfunction
 com! SearchStrNum call <SID>search_str_num()
-nnoremap <silent> <leader>n :<C-u>call <SID>search_str_num()<CR>
+"nnoremap <silent> <leader>n :<C-u>call <SID>search_str_num()<CR>
 
 nnoremap <silent> n n:SearchStrNum<CR>
 nnoremap <silent> N N:SearchStrNum<CR>
@@ -719,7 +729,7 @@ cnoremap <expr> <C-g> match(getcmdline(), '\(g.\..s\\|s\)    /') == 0 ? '<End>/g
 " Substitute }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Grep, Quickfix & Locationlist {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+" Grep {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 "nnoremap <C-g> :<C-u>vim "\<<C-R><C-W>\>" *.c *.h<CR>
 nnoremap <C-g> :<C-u>vim "" <Left><Left>
@@ -727,18 +737,7 @@ nnoremap <leader>g :<C-u>vim "\<<C-R><C-W>\>"
 "nnoremap <leader>G :<C-u>vim "<C-R><C-W>" *.c *.h<CR>
 nnoremap <leader>G :<C-u>vim "<C-R><C-W>" 
 
-let c_jk_local = 0
-
-"例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
-nnoremap <silent> m         :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
-nnoremap <silent> M         :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
-nnoremap <silent> <Leader>m :<C-u>exe (c_jk_local ? ":lfirst" : "cfirst")<CR>:FuncNameStl<CR>
-nnoremap <silent> <Leader>M :<C-u>exe (c_jk_local ? ":llast" : "clast")<CR>:FuncNameStl<CR>
-nnoremap <silent> <A-m>     :<C-u>let c_jk_local = !c_jk_local<CR>
-
-
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 
 let g:prj_root_file = '.git'
 
@@ -789,8 +788,22 @@ nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
 
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+" Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
-" Grep, Quickfix & Locationlist }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+" Quickfix & Locationlist {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+let c_jk_local = 0
+
+"例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
+nnoremap <silent> m         :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> M         :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> <Leader>m :<C-u>exe (c_jk_local ? ":lfirst" : "cfirst")<CR>:FuncNameStl<CR>
+nnoremap <silent> <Leader>M :<C-u>exe (c_jk_local ? ":llast" : "clast")<CR>:FuncNameStl<CR>
+nnoremap <silent> <A-m>     :<C-u>let c_jk_local = !c_jk_local<CR>
+
+" Quickfix & Locationlist }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Tag, Jump, and Unified CR {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -930,9 +943,6 @@ nmap     <silent> <BS><CR>     <BS><BS><CR>
 
 set diffopt+=iwhite
 
-" diff Updte
-nnoremap <expr> du &diff ? ':<C-u>diffupdate<CR>' : ':<C-u>diffthis<CR>'
-
 " diff Close
 nnoremap dc :<C-u>diffoff<CR>
 
@@ -942,16 +952,11 @@ nnoremap <silent> dq :<C-u>call PushPos_All() <Bar> exe 'windo diffoff' <Bar> ca
 " diff (all window and buffer) Quit
 nnoremap <silent> dQ :<C-u>call PushPos_All() <Bar> exe 'bufdo diffoff' <Bar> exe 'windo diffoff' <Bar> call PopPos_All()<CR>:echo 'bufdo diffoff <Bar> windo diffoff'<CR>
 
-" diff X(cross)
-"nnoremap <silent> <expr> dx winnr('$') != 2 ? ':echoerr "dx error : Number of windows is not 2. "<CR>' :
-                "\ winbufnr(1) == winbufnr(2) ? ':echoerr "Buffers are same."<CR>' :
-                "\ ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>'
-
 " Toggle Scrollbind
 nnoremap dx :<C-u>setl scrollbind!<CR>
 
-" diff toggle Ignorecase (lの字形はIに似ている)
-nnoremap <expr> dl match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
+" diff toggle ignorecase (uはVisualモードでの、toggle case.)
+nnoremap <expr> du match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>'  : ':<C-u>set diffopt-=icase<CR>'
 
 " diff Y(whi)tespace
 nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
@@ -965,29 +970,39 @@ nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
                        \ ':<C-u>diffthis<CR>'
 nmap d<CR> d<Space>
 
-" Next Hunk & Previouse Hunk
-if exists(':FuncNameStl') == 2
+" diff accept (obtain and next or Previouse) (dotは、repeat.)
+nnoremap d. do1gs]c^
+nnoremap dp do1gs[c^
+
+if 1 " exists(':FuncNameStl') == 2
+  " Next Hunk
   nnoremap <silent> t ]c^zz:FuncNameStl<CR>
+
+  " Previouse Hunk
   nnoremap <silent> T [c^zz:FuncNameStl<CR>
-  "nmap <silent> <Leader>t gg]c[c^zz:FuncNameStl<CR>
-  "nmap <silent> <Leader>T  G[c]c^zz:FuncNameStl<CR>
-  " 最初にgg/G/[c/]cすると、FuncNameStlが実行されない不具合あり。対策として、t/Tをmap。
-  nmap     <silent> <Leader>t ggtT
-  nmap     <silent> <Leader>T  GTt
+
+  " Top Hunk
+  nmap      <silent> <Leader>t ggtT
+  "nnoremap <silent> <Leader>t gg]c[c^zz:FuncNameStl<CR>
+
+  " Bottom Hunk
+  nmap      <silent> <Leader>T  GTt
+  "nnoremap <silent> <Leader>T  G[c]c^zz:FuncNameStl<CR>
+
+  " 最初にgg/G/[c/]cすると、FuncNameStlが実行されない不具合あり。対策として、t/Tをnmap。
 else
+  " Next Hunk
   nnoremap <silent> t ]c^zz
+
+  " Previouse Hunk
   nnoremap <silent> T [c^zz
-  nmap     <silent> <Leader>t ggtT
-  nmap     <silent> <Leader>T  GTt
-  "nnoremap <silent> <Leader>t gg]c[c^zz
-  "nnoremap <silent> <Leader>T  G[c]c^zz
+
+  " Top Hunk
+  nnoremap <silent> <Leader>t gg]c[c^zz
+
+  " Bottom Hunk
+  nnoremap <silent> <Leader>T  G[c]c^zz
 endif
-
-" diff accept (obtain and next)
-"nnoremap <expr> d<Space> &diff ? 'do[c^' : 'normal! d<Space>'
-
-" diff reject (next)
-"nnoremap <expr> dr &diff ? '[c^' : ''
 
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1207,9 +1222,6 @@ nnoremap K         :<C-u>ls <CR>:b<Space>
 nnoremap gK        :<C-u>ls!<CR>:b<Space>
 nnoremap <Leader>K :<C-u>ls <CR>:bdel<Space>
 
-nnoremap <silent> <Del> :<C-u>bnext<CR>
-nnoremap <silent> <Ins> :<C-u>bprev<CR>
-
 nnoremap <silent> <A-n> :<C-u>bnext<CR>
 nnoremap <silent> <A-p> :<C-u>bprev<CR>
 
@@ -1228,8 +1240,6 @@ nnoremap <C-b> gT
 
 nnoremap <A-f> :tabmove +1<CR>
 nnoremap <A-b> :tabmove -1<CR>
-
-"nnoremap U gt
 
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1366,31 +1376,6 @@ nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 " Tabline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Transparency {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
-
-let g:my_transparency = 229
-let g:my_transparency = 235
-augroup MyVimrc_GUI
-  au!
-  "au GUIEnter * simalt ~x
-  "au GUIEnter * ScreenMode 4
-  au GUIEnter * ScreenMode 5
-  exe 'au GUIEnter * set transparency=' . g:my_transparency
-augroup end
-nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 5<CR>
-nnoremap <silent> <S-PageDown> :<C-u>ScreenMode 4<CR>
-
-nnoremap <silent><expr> <PageUp>   ':<C-u>se transparency=' .    ( &transparency + 1      ) . '<Bar> Transparency <CR>'
-nnoremap <silent><expr> <PageDown> ':<C-u>se transparency=' . max([&transparency - 1,   1]) . '<Bar> Transparency <CR>'   | " transparencyは、0以下を設定すると255になってしまう。
-
-nnoremap <silent>       <C-PageUp>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <Bar> Transparency <CR>
-nnoremap <silent>       <C-PageDown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <Bar> Transparency <CR>
-
-com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 255.0)
-
-" Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 function! SetDefaultStatusline(arg)
@@ -1496,6 +1481,7 @@ endtry
 
 
 " Mru {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 if exists('loaded_mru') && 0
   "let MRU_Window_Height = min([20, &lines / 4 ])
   "let MRU_Window_Height = max([8, &lines / 4 ])
@@ -1511,6 +1497,7 @@ else
   nnoremap <Leader>o :<C-u>MRU<Space>
   " nnoremap <Leader>o  :<C-u>/ oldfiles<Home>browse filter /\c
 endif
+
 " Mru }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 "
 
@@ -1696,26 +1683,11 @@ nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable <BAR>
 nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
 nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
 
-"nnoremap <silent> <C-o> :<C-u>echoh hl_func_name<CR>:pwd<CR>:exe 'set statusline=\ \ ' . expand('%:p')<CR>:echoh None<CR>
-"nnoremap <silent> <C-o> :<C-u>pwd<CR>:exe 'set statusline=%#SLFileName#\ \ ' . expand('%:p')<CR>
-"nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 5<CR>:normal! <C-l><CR>:pwd<CR>:exe 'set statusline=%#hl_func_name_stl#\ \ ' . expand('%:p')<CR>
-"nnoremap <silent> <C-l> :<C-u>let g:alt_stl_time = 12 <Bar> exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>') <Bar> pwd <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
 "nnoremap <silent> <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
 "                      \ <Bar> let g:alt_stl_time = 12
-"                      \ <Bar> pwd <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
-"                      \ <Bar> exe 'set statusline=%#hl_buf_name_stl#\ \ %F'<CR>
-"                     "\ <Bar> exe 'set statusline=%#SLFileName#\ \ %F'<CR>
-"                     "\ . '\ \ \ \ %#SLFileName#\ %5l\ L,\ %v\ C\ ' . '\ \ \ \ %3p%%\ [%L]\ '<CR>
 nnoremap <silent> <C-o> :<C-u>pwd
                       \ <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
                       \ <Bar> call SetAltStatusline('%#hl_buf_name_stl#  %F', '', 10000)<CR>
-
-" US Keyboard {{{
-nnoremap ; :
-vnoremap ; :
-cnoremap <expr> ; getcmdline() =~# '^:*$' ? ':' : ';'
-cnoremap <expr> : getcmdline() =~# '^:*$' ? ';' : ':'
-" US Keyboard }}}
 
 
 "nnoremap <C-Tab> <C-w>p
@@ -1760,6 +1732,31 @@ function! s:clever_f_use_migemo_toggle()
 endfunction
 
 " Clever-f Configuration }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+" Transparency {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+let g:my_transparency = 229
+let g:my_transparency = 235
+augroup MyVimrc_GUI
+  au!
+  "au GUIEnter * simalt ~x
+  "au GUIEnter * ScreenMode 4
+  au GUIEnter * ScreenMode 5
+  exe 'au GUIEnter * set transparency=' . g:my_transparency
+augroup end
+nnoremap <silent> <S-PageUp>   :<C-u>ScreenMode 5<CR>
+nnoremap <silent> <S-PageDown> :<C-u>ScreenMode 4<CR>
+
+nnoremap <silent><expr> <PageUp>   ':<C-u>se transparency=' .    ( &transparency + 1      ) . '<Bar> Transparency <CR>'
+nnoremap <silent><expr> <PageDown> ':<C-u>se transparency=' . max([&transparency - 1,   1]) . '<Bar> Transparency <CR>'   | " transparencyは、0以下を設定すると255になってしまう。
+
+nnoremap <silent>       <C-PageUp>   :exe 'se transparency=' . (&transparency == g:my_transparency ? 255 : g:my_transparency) <Bar> Transparency <CR>
+nnoremap <silent>       <C-PageDown> :exe 'se transparency=' . (&transparency == g:my_transparency ?  50 : g:my_transparency) <Bar> Transparency <CR>
+
+com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 255.0)
+
+" Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
