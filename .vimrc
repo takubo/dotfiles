@@ -465,74 +465,57 @@ cnoremap <Bar><Bar> \<Bar>
 
 " Cursor Move, CursorLine, CursorColumn, and Scroll {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
+"----------------------------------------------------------------------------------------
+" Vertical Move
 
-""" vertical move {{{
+set noshowcmd
+
 nnoremap j  gj
 nnoremap k  gk
-nnoremap gj  j
-nnoremap gk  k
 
 vnoremap j  gj
 vnoremap k  gk
-vnoremap gj  j
-vnoremap gk  k
 
-set noshowcmd
-""" }}}
+"----------------------------------------------------------------------------------------
+" Horizontal Move
 
-
-""" horizontal move {{{
 " ^に、|の機能を重畳
 nnoremap <silent> ^ <Esc>:exe v:prevcount ? ('normal! ' . v:prevcount . '<Bar>') : 'normal! ^'<CR>
-""" }}}
 
-
-""" scroll move {{{
-if 0
-  nnoremap <silent> <Space>   <C-f>
-  nnoremap <silent> <S-Space> <C-b>
-else
-  let g:comfortable_motion_no_default_key_mappings = v:true
-  let g:comfortable_motion_friction = 90.0
-  let g:comfortable_motion_air_drag = 6.0
-  let g:comfortable_motion_impulse_multiplier = 3.8
-  "nnoremap <silent> <Space>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-  "nnoremap <silent> <S-Space> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
-  nnoremap <silent> gj :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-  nnoremap <silent> gk :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
-  "nnoremap <silent> <C-j>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-  "nnoremap <silent> <C-k> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
-  "let g:comfortable_motion_scroll_down_key = "\<C-e>"
-  "let g:comfortable_motion_scroll_up_key = "\<C-y>"
-  "let g:comfortable_motion_scroll_down_key = "j"
-  "let g:comfortable_motion_scroll_up_key = "k"
-endif
-vnoremap <silent> <Space>   <C-f>
-vnoremap <silent> <S-Space> <C-b>
+"----------------------------------------------------------------------------------------
+" Scroll
 
 nnoremap <silent> <C-j> <C-d>
 nnoremap <silent> <C-k> <C-u>
-""" }}}
 
+vnoremap <silent> <Space>   <C-d>
+vnoremap <silent> <S-Space> <C-u>
 
-""" cursorline cursorcolumn {{{
+let g:comfortable_motion_friction = 90.0
+let g:comfortable_motion_air_drag = 6.0
+let g:comfortable_motion_impulse_multiplier = 3.8
+nnoremap <silent> gj :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+nnoremap <silent> gk :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+
+vnoremap gj <C-d>
+vnoremap gk <C-u>
+
+"----------------------------------------------------------------------------------------
+" Cursorline & Cursorcolumn
+
 augroup MyVimrc_Cursor
   au!
-  au WinEnter * setl cursorline
-  au WinEnter * setl cursorcolumn
-  au WinLeave * setl nocursorline
-  au WinLeave * setl nocursorcolumn
-
-  au BufEnter * setl cursorline
-  au BufEnter * setl cursorcolumn
+  au WinEnter * setl cursorline   cursorcolumn
+  au BufEnter * setl cursorline   cursorcolumn
+  au WinLeave * setl nocursorline nocursorcolumn
 augroup end
 
 nnoremap <silent> <Leader>c :<C-u>setl cursorline!<CR>
 nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
-""" }}}
 
+"----------------------------------------------------------------------------------------
+" Scrolloff
 
-""" scrolloff {{{
 function! s:best_scrolloff()
   " Quickfixでは、なぜかWinNewが聞かないので、exists()で変数の存在を確認せねばならない。
   let &l:scrolloff = (g:BrowsingScroll || (exists('w:BrowsingScroll') && w:BrowsingScroll)) ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
@@ -556,8 +539,6 @@ augroup MyVimrc_ScrollOff
 augroup end
 " 最初のWindowに対しては、WinNewが効かないので、別途設定。
 let w:BrowsingScroll = v:false
-""" }}}
-
 
 " Cursor Move, CursorLine, CursorColumn, and Scroll }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -565,7 +546,6 @@ let w:BrowsingScroll = v:false
 
 " Emacs {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 " コマンドラインでのキーバインドを Emacs スタイルにする
-
 " 行頭へ移動
 cnoremap <C-a>		<Home>
 " 一文字戻る
@@ -588,7 +568,6 @@ cnoremap <A-f>		<S-Right>
 " 前の単語へ移動
 cnoremap <A-b>		<S-Left>
 "cnoremap <Esc><b>	<S-Left>
-
 " Emacs }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1129,6 +1108,8 @@ tnoremap <silent>  <C-Right>  <C-w>l
 tnoremap <silent>  <C-Down>   <C-w>j
 tnoremap <silent>  <C-Up>     <C-w>k
 
+" y quopdiixcvm.
+" y hjkl
 "----------------------------------------------------------------------------------------
 " Resize
 
@@ -1688,7 +1669,7 @@ com! VGVIMRC :vsp $vim/gvimrc
 com! TGVIMRC :tabnew $vim/gvimrc
 
 com! EditColor :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
-com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
+"com! ColorEdit :exe 'sp $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 
 com! VEditColor :exe 'vs $VIMRUNTIME/colors/' . g:colors_name . '.vim'
 com! VColorEdit :exe 'vs $VIMRUNTIME/colors/' . g:colors_name . '.vim'
@@ -2082,7 +2063,7 @@ nnoremap        g<Space> :<C-u>let &iminsert = (&iminsert ? 0 : 2) <Bar> exe "co
 
 " Refactoring
 "nnorema <silent> <C-d> :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:echo 'Refactoring'<CR>
-nnorema <silent> <C-d> :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:let @/='<C-r><C-w>'<CR>
+nnorema <silent> <Leader>d :<C-u>PushPos<CR>:g$.$s    /<C-r>//<C-r><C-w>/g<CR>:PopPos<CR>:let @/='<C-r><C-w>'<CR>
 "nnorema <silent> <C-d> :<C-u>call PushPos() <Bar> g$.$s    /<C-r>//<C-r><C-w>/g <Bar> call PopPos() <Bar> echo 'Refactoring'<CR>
 "nnorema <silent> <C-d> :<C-u>g$.$s    /<C-r>//<C-r><C-w>/g<CR><C-o>:echo 'Refactoring'<CR>
 
@@ -2185,3 +2166,11 @@ com! AR :setl autoread!
 "nnoremap U <Nop>
 
 nnoremap <Leader>g :<C-u>vim "\<<C-r><C-w>\>" *.c<CR>
+
+nnoremap <C-@> g-
+nnoremap <C-^> g+
+nnoremap <C-]> g;
+nnoremap <C-\> g,
+
+" @^
+" - ]\ jk ey du np hqio
