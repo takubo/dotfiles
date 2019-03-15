@@ -402,6 +402,8 @@ augroup MyVimrc
 augroup end
 
 
+" Orthodox {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 nnoremap Y y$
 
 nnoremap cr caw
@@ -457,6 +459,8 @@ cnoremap << \<
 cnoremap >> \>
 cnoremap <Bar><Bar> \<Bar>
 
+" Orthodox }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Cursor Move, CursorLine, CursorColumn, and Scroll {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -494,8 +498,10 @@ else
   let g:comfortable_motion_impulse_multiplier = 3.8
   "nnoremap <silent> <Space>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
   "nnoremap <silent> <S-Space> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
-  nnoremap <silent> <C-j>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-  nnoremap <silent> <C-k> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+  nnoremap <silent> gj :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+  nnoremap <silent> gk :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+  "nnoremap <silent> <C-j>   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+  "nnoremap <silent> <C-k> :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
   "let g:comfortable_motion_scroll_down_key = "\<C-e>"
   "let g:comfortable_motion_scroll_up_key = "\<C-y>"
   "let g:comfortable_motion_scroll_down_key = "j"
@@ -503,6 +509,9 @@ else
 endif
 vnoremap <silent> <Space>   <C-f>
 vnoremap <silent> <S-Space> <C-b>
+
+nnoremap <silent> <C-j> <C-d>
+nnoremap <silent> <C-k> <C-u>
 """ }}}
 
 
@@ -742,11 +751,11 @@ nnoremap <leader>G :<C-u>vim "<C-R><C-W>"
 let c_jk_local = 0
 
 "例外をキャッチしないと、最初と最後の要素の次に移動しようとして例外で落ちる。
-nnoremap <silent> m :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
-nnoremap <silent> M :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> m         :<C-u>try <Bar> exe (c_jk_local ? ":lnext" : "cnext") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
+nnoremap <silent> M         :<C-u>try <Bar> exe (c_jk_local ? ":lprev" : "cprev") <Bar> catch <Bar> endtry<CR>:FuncNameStl<CR>
 nnoremap <silent> <Leader>m :<C-u>exe (c_jk_local ? ":lfirst" : "cfirst")<CR>:FuncNameStl<CR>
 nnoremap <silent> <Leader>M :<C-u>exe (c_jk_local ? ":llast" : "clast")<CR>:FuncNameStl<CR>
-nnoremap <silent> <A-m> :<C-u>let c_jk_local = !c_jk_local<CR>
+nnoremap <silent> <A-m>     :<C-u>let c_jk_local = !c_jk_local<CR>
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -978,12 +987,21 @@ nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
 nmap d<CR> d<Space>
 
 " Next Hunk & Previouse Hunk
-if exists(':FuncNameStl')
+if exists(':FuncNameStl') == 2
   nnoremap <silent> t ]c^zz:FuncNameStl<CR>
   nnoremap <silent> T [c^zz:FuncNameStl<CR>
+  "nmap <silent> <Leader>t gg]c[c^zz:FuncNameStl<CR>
+  "nmap <silent> <Leader>T  G[c]c^zz:FuncNameStl<CR>
+  " 最初にgg/G/[c/]cすると、FuncNameStlが実行されない不具合あり。対策として、t/Tをmap。
+  nmap     <silent> <Leader>t ggtT
+  nmap     <silent> <Leader>T  GTt
 else
   nnoremap <silent> t ]c^zz
   nnoremap <silent> T [c^zz
+  nmap     <silent> <Leader>t ggtT
+  nmap     <silent> <Leader>T  GTt
+  "nnoremap <silent> <Leader>t gg]c[c^zz
+  "nnoremap <silent> <Leader>T  G[c]c^zz
 endif
 
 " diff accept (obtain and next)
@@ -999,11 +1017,11 @@ endif
 
 set noequalalways
 
-" ---------------
+"----------------------------------------------------------------------------------------
 " Window Ratio
+"
 "   正方形 w:h = 178:78
 "   横長なほど、大きい値が返る。
-" ---------------
 function! s:WindowRatio()
   let h = winheight(0) + 0.0
   let w = winwidth(0) + 0.0
@@ -1011,73 +1029,105 @@ function! s:WindowRatio()
 endfunction
 
 "----------------------------------------------------------------------------------------
+" Skip Terminal
 
 function! s:SkipTerm(direction)
-  if v:prevcount
-    return v:prevcount
-  endif
+  if v:prevcount | return v:prevcount | endif
 
-  "windowが2つしかないなら、もう一方へ移動することは自明なので、
-  "terminalであっても、<Tab>での移動を許す。
-  if winnr('$') == 2
-    return winnr() == 1 ? 2 : 1
-  endif
+  "windowが2つしかないなら、もう一方へ移動することは自明なので、terminalであっても移動を許す。
+  if winnr('$') == 2 | return winnr() == 1 ? 2 : 1 | endif
 
   let terms = term_list()
   let next_win = winnr()
 
   for i in range(winnr('$'))
     if a:direction >= 0
-      "順方向
-      let next_win = ( next_win == winnr('$') ? 1 : next_win + 1 )
+      let next_win = ( next_win == winnr('$') ? 1 : next_win + 1 )  "順方向
     else
-      "逆方向
-      let next_win = ( next_win == 1 ? winnr('$') : next_win - 1 )
+      let next_win = ( next_win == 1 ? winnr('$') : next_win - 1 )  "逆方向
     endif
-
     let nr = winbufnr(next_win)
-    if count(terms, nr) < 1 || term_getstatus(nr) =~# 'normal'
-      break
-    endif
+    if count(terms, nr) < 1 || term_getstatus(nr) =~# 'normal' | return next_win | endif
   endfor
-
-  return next_win
 endfunction
 
 "----------------------------------------------------------------------------------------
+" Trigger
 
 nnoremap <BS> <C-w>
 
 "----------------------------------------------------------------------------------------
+" Close
 
-nnoremap <silent> <expr> <BS><BS>  ( <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
-"nnoremap <silent> _                <C-w>s:diffoff<CR>
-"nnoremap <silent> <Bar>            <C-w>v:diffoff<CR>
-nnoremap <silent> _                <C-w>s:setl noscrollbind<CR>
-nnoremap <silent> <Bar>            <C-w>v:setl noscrollbind<CR>
-nnoremap <silent> g_               <C-w>n
-nnoremap <silent> g<Bar>           :<C-u>vnew<CR>
+nnoremap <silent> q         <C-w><C-c>
+nnoremap <silent> <Leader>q :<C-u>q<CR>
 
-nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
-nnoremap          <expr> <S-BS>           <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-nnoremap          <expr> <C-BS>           <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+" 補償
+nnoremap <silent> <C-q>; q:
+nnoremap <silent> <C-q>/ q/
+nnoremap <silent> <C-q>? q?
 
-"nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
+" ウィンドウレイアウトを崩さないでバッファを閉じる   (http://nanasi.jp/articles/vim/kwbd_vim.html)
+com! Kwbd let s:kwbd_bn = bufnr('%') | enew | exe 'bdel '. s:kwbd_bn | unlet s:kwbd_bn
+nnoremap <silent> <C-q><C-q> :<C-u>Kwbd<CR>
 
 "----------------------------------------------------------------------------------------
+" Reopen in Tab
 
-if 0
-nnoremap <silent>  <Tab>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-nnoremap <silent>  <S-Tab>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
-endif
-nnoremap           <C-Tab>    <C-w>w
+nnoremap <C-w><C-t> :<C-u>tab split<CR>
+tnoremap <C-w><C-t> <C-w>T
+
+"----------------------------------------------------------------------------------------
+" Split
+
+" Ration (Auto)
+nnoremap <silent> <expr> <BS><BS>         ( <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
+nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
+"nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
+"nnoremap          <expr> <S-BS>             <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
+"nnoremap          <expr> <C-BS>             <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
+
+" Force (Manual)
+"nnoremap <silent> <C-_>            <C-w>s:setl noscrollbind<CR>
+"nnoremap <silent> <C-\>            <C-w>v:setl noscrollbind<CR>
+"nnoremap <silent> g<C-_>           <C-w>n
+"nnoremap <silent> g<C-\>           :<C-u>vnew<CR>
+"nnoremap <silent> -                <C-w>s:setl noscrollbind<CR>
+"nnoremap <silent> g-               <C-w>n
+nnoremap U                         <C-w>s
+nnoremap gU                        <C-w>n
+nnoremap <silent> <Bar>            <C-w>v:setl noscrollbind<CR>
+nnoremap <silent> g<Bar>           :<C-u>vnew<CR>
+
+"----------------------------------------------------------------------------------------
+" Focus
+
+" Basic
+nnoremap <silent> <Space>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+nnoremap <silent> <S-Space>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+
+" Previouse
+nnoremap <C-w><C-w> <C-w>p
+"nnoremap g<Tab>     <C-w>p
+nnoremap -          <C-w>p
+
+" Terminal (Tab)
+nnoremap           <Tab>      <C-w>p
+nnoremap           <C-Tab>    <C-w>p
+" Windowが１つしかないなら、Tabを抜ける。
 tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
-nnoremap           <S-C-Tab>  <C-w>W
-tnoremap <expr>    <S-C-Tab>  winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
-nnoremap           -          <C-w>p
 
-nnoremap <silent>  <C-w><C-w> <C-w>p
-nnoremap           g<Tab>     <C-w>p
+"nnoremap           <C-Tab>    <C-w>w
+"tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
+"nnoremap           <S-C-Tab>  <C-w>W
+"tnoremap <expr>    <S-C-Tab>  winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
+"nnoremap <silent>  <Tab>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+"nnoremap <silent>  <S-Tab>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+
+nnoremap <silent>  <Left>     <C-w>h
+nnoremap <silent>  <Right>    <C-w>l
+nnoremap <silent>  <Down>     <C-w>j
+nnoremap <silent>  <Up>       <C-w>k
 nnoremap <silent>  <C-Left>   <C-w>h
 nnoremap <silent>  <C-Right>  <C-w>l
 nnoremap <silent>  <C-Down>   <C-w>j
@@ -1086,91 +1136,63 @@ tnoremap <silent>  <C-Left>   <C-w>h
 tnoremap <silent>  <C-Right>  <C-w>l
 tnoremap <silent>  <C-Down>   <C-w>j
 tnoremap <silent>  <C-Up>     <C-w>k
+"nnoremap <silent> <C-k> <esc><C-w>k
+"nnoremap <silent> <C-j> <esc><C-w>j
+"nnoremap <silent> <C-h> <esc><C-w>h
+"nnoremap <silent> <C-l> <esc><C-w>l
+
+"nnoremap <silent> <C-n> <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+"nnoremap <silent> <C-p> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 
 "----------------------------------------------------------------------------------------
-"TODO
-
-nnoremap <silent> <C-k>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-j>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-h>     <esc>3<C-w><
-"nnoremap <silent> <C-l>     <esc>3<C-w>>
+" Resize
 
 nnoremap <silent> +         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> _         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> g_        <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> _         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> g_        <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> (         <esc>3<C-w><
 nnoremap <silent> g(        <esc>1<C-w>|
 nnoremap <silent> )         <esc>3<C-w>>
 nnoremap <silent> g)        <esc><C-w>|
-
-
-if 0
-  nnoremap <silent> <C-k>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-  nnoremap <silent> <C-j>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-  nnoremap <silent> <C-h>     <esc>3<C-w><
-  nnoremap <silent> <C-l>     <esc>3<C-w>>
-else
-  "nnoremap <silent> <C-k> <esc><C-w>k
-  "nnoremap <silent> <C-j> <esc><C-w>j
-  "nnoremap <silent> <C-h> <esc><C-w>h
-  "nnoremap <silent> <C-l> <esc><C-w>l
-
-  nnoremap <silent> <Space>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-  nnoremap <silent> <S-Space>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
-  "nnoremap <silent> <C-n> <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-  "nnoremap <silent> <C-p> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
-endif
 
 tnoremap <silent> <up>	    <C-w>2+:<C-u>
 tnoremap <silent> <down>    <C-w>2-:<C-u>
 tnoremap <silent> <left>    <C-w>3<
 tnoremap <silent> <right>   <C-w>3>
 
-nnoremap <silent> <S-up>    <esc><C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <S-left>  <esc><C-w><
-nnoremap <silent> <S-right> <esc><C-w>>
-
 tnoremap <silent> <S-up>    <C-w>+:<C-u>
 tnoremap <silent> <S-down>  <C-w>-:<C-u>
 tnoremap <silent> <S-left>  <C-w><
 tnoremap <silent> <S-right> <C-w>>
 
-nnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <C-left> 1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
-nnoremap <silent> <C-right> <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
+"nnoremap <silent> <C-k>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> <C-j>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> <C-h>     <esc>3<C-w><
+"nnoremap <silent> <C-l>     <esc>3<C-w>>
+
+"nnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+"nnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+"nnoremap <silent> <C-left> 1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
+"nnoremap <silent> <C-right> <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
+
+"nnoremap <silent> <S-up>    <esc><C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
+"nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
+"nnoremap <silent> <S-left>  <esc><C-w><
+"nnoremap <silent> <S-right> <esc><C-w>>
 
 "----------------------------------------------------------------------------------------
+" Move
 
-nnoremap <silent> <A-up>    <C-w>K:<C-u>call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <A-down>  <C-w>J:<C-u>call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <A-left>  <C-w>H:<C-u>call		<SID>best_scrolloff()<CR>
-nnoremap <silent> <A-right> <C-w>L:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-h> <C-w>H:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-j> <C-w>J:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-k> <C-w>K:<C-u>call		<SID>best_scrolloff()<CR>
+nnoremap <silent> <A-l> <C-w>L:<C-u>call		<SID>best_scrolloff()<CR>
 
-"----------------------------------------------------------------------------------------
-
-nnoremap <silent> q         <C-w><C-c>
-nnoremap <silent> <Leader>q :<C-u>q<CR>
-
-"----------------------------------------------------------------------------------------
-
-nnoremap <silent> <C-q>; q:
-nnoremap <silent> <C-q>/ q/
-nnoremap <silent> <C-q>? q?
-
-"----------------------------------------------------------------------------------------
-
-nnoremap <C-w><C-t> :<C-u>tab split<CR>
-tnoremap <C-w><C-t> <C-w>T
-
-"----------------------------------------------------------------------------------------
-
-"kwbd.vim : ウィンドウレイアウトを崩さないでバッファを閉じる
-" http://nanasi.jp/articles/vim/kwbd_vim.html
-com! Kwbd let s:kwbd_bn = bufnr('%') | enew | exe 'bdel '. s:kwbd_bn | unlet s:kwbd_bn
-nnoremap <silent> <C-q><C-q> :<C-u>Kwbd<CR>
+tnoremap <silent> <A-left>  <C-w>H:<C-u>call		<SID>best_scrolloff()<CR>
+tnoremap <silent> <A-down>  <C-w>J:<C-u>call		<SID>best_scrolloff()<CR>
+tnoremap <silent> <A-up>    <C-w>K:<C-u>call		<SID>best_scrolloff()<CR>
+tnoremap <silent> <A-right> <C-w>L:<C-u>call		<SID>best_scrolloff()<CR>
 
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1251,7 +1273,7 @@ nnoremap <C-b> gT
 nnoremap <A-f> :tabmove +1<CR>
 nnoremap <A-b> :tabmove -1<CR>
 
-nnoremap U gt
+"nnoremap U gt
 
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1432,7 +1454,8 @@ function! SetDefaultStatusline(arg)
   let g:stl .= "%#SLFileName#%="
   "let g:stl .= "%## %5{&fenc==''?'$':&fenc}  %4{&ff}  %4{&ft==''?'none':&ft} "
   "let g:stl .= "%## %-4{&ft==''?'-   ':&ft}  %-5{&fenc==''?'  -  ':&fenc}  %4{&ff} "
-  let g:stl .= "%## %-4{&ft==''?'    ':&ft}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
+  "let g:stl .= "%## %-4{&ft==''?'    ':TitleCase(&ft)}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
+  let g:stl .= "%## %-5{&fenc==''?'     ':&fenc}  %4{&ff}  %-4{&ft==''?'    ':TitleCase(&ft)} "
   "let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
   "let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
   let g:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
@@ -2184,7 +2207,6 @@ endif
 
 com! AR :setl autoread!
 
-nnoremap U <Nop>
+"nnoremap U <Nop>
 
 nnoremap <Leader>g :<C-u>vim "\<<C-r><C-w>\>" *.c<CR>
-
