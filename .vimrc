@@ -1084,14 +1084,8 @@ tnoremap <C-w><C-t> <C-w>T
 nnoremap <silent> <expr> <BS><BS>         ( <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
 nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
 "nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
-"nnoremap          <expr> <S-BS>             <SID>WindowRatio() >= 0 ? ":vnew\<CR>" : ":new\<CR>"
-"nnoremap          <expr> <C-BS>             <SID>WindowRatio() <  0 ? ":vnew\<CR>" : ":new\<CR>"
 
 " Force (Manual)
-"nnoremap <silent> <C-_>            <C-w>s:setl noscrollbind<CR>
-"nnoremap <silent> <C-\>            <C-w>v:setl noscrollbind<CR>
-"nnoremap <silent> g<C-_>           <C-w>n
-"nnoremap <silent> g<C-\>           :<C-u>vnew<CR>
 "nnoremap <silent> -                <C-w>s:setl noscrollbind<CR>
 "nnoremap <silent> g-               <C-w>n
 nnoremap U                         <C-w>s
@@ -1107,9 +1101,7 @@ nnoremap <silent> <Space>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
 nnoremap <silent> <S-Space>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 
 " Previouse
-nnoremap <C-w><C-w> <C-w>p
-"nnoremap g<Tab>     <C-w>p
-nnoremap -          <C-w>p
+nnoremap -         <C-w>p
 
 " Terminal (Tab)
 nnoremap           <Tab>      <C-w>p
@@ -1117,12 +1109,12 @@ nnoremap           <C-Tab>    <C-w>p
 " Windowが１つしかないなら、Tabを抜ける。
 tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
 
-"nnoremap           <C-Tab>    <C-w>w
-"tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
-"nnoremap           <S-C-Tab>  <C-w>W
-"tnoremap <expr>    <S-C-Tab>  winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
 "nnoremap <silent>  <Tab>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
 "nnoremap <silent>  <S-Tab>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+"nnoremap           <C-Tab>    <C-w>w
+"nnoremap           <S-C-Tab>  <C-w>W
+"tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
+"tnoremap <expr>    <S-C-Tab>  winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
 
 nnoremap <silent>  <Left>     <C-w>h
 nnoremap <silent>  <Right>    <C-w>l
@@ -1136,13 +1128,6 @@ tnoremap <silent>  <C-Left>   <C-w>h
 tnoremap <silent>  <C-Right>  <C-w>l
 tnoremap <silent>  <C-Down>   <C-w>j
 tnoremap <silent>  <C-Up>     <C-w>k
-"nnoremap <silent> <C-k> <esc><C-w>k
-"nnoremap <silent> <C-j> <esc><C-w>j
-"nnoremap <silent> <C-h> <esc><C-w>h
-"nnoremap <silent> <C-l> <esc><C-w>l
-
-"nnoremap <silent> <C-n> <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-"nnoremap <silent> <C-p> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 
 "----------------------------------------------------------------------------------------
 " Resize
@@ -1166,20 +1151,10 @@ tnoremap <silent> <S-down>  <C-w>-:<C-u>
 tnoremap <silent> <S-left>  <C-w><
 tnoremap <silent> <S-right> <C-w>>
 
-"nnoremap <silent> <C-k>     <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> <C-j>     <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> <C-h>     <esc>3<C-w><
-"nnoremap <silent> <C-l>     <esc>3<C-w>>
-
-"nnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
-"nnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
-"nnoremap <silent> <C-left> 1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
-"nnoremap <silent> <C-right> <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
-
-"nnoremap <silent> <S-up>    <esc><C-w>+:<C-u>call	<SID>best_scrolloff()<CR>
-"nnoremap <silent> <S-down>  <esc><C-w>-:<C-u>call	<SID>best_scrolloff()<CR>
-"nnoremap <silent> <S-left>  <esc><C-w><
-"nnoremap <silent> <S-right> <esc><C-w>>
+tnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+tnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+tnoremap <silent> <C-left> 1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <C-right> <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
 
 "----------------------------------------------------------------------------------------
 " Move
