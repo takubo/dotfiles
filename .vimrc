@@ -363,6 +363,8 @@ set display+=lastline
 
 set numberwidth=3
 
+set visualbell t_vb=
+
 filetype on
 
 syntax enable
@@ -1248,11 +1250,11 @@ nnoremap <A-b> :tabmove -1<CR>
 
 "===============================================================
 
-function! s:tabpage_label(n)
+function! s:make_tabpage_label(n)
   " カレントタブページかどうかでハイライトを切り替える
-  let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
+  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
   "let hi = a:n is tabpagenr() ? '%#SLFileName#' : '%#TabLine#'
-  "let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
+  let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
 
   if s:tabline_status == 1
     return hi . ' [ ' . a:n . ' ] %#TabLineFill#'
@@ -1276,7 +1278,6 @@ function! s:tabpage_label(n)
     return hi . ' [ ' . a:n . ' ' . num . ' ' . mod . ' ] %#TabLineFill#'
   endif
 
-
   " カレントバッファ
   let curbufnr = bufnrs[tabpagewinnr(a:n) - 1]  " tabpagewinnr() は 1 origin
   let fname = pathshorten(bufname(curbufnr))
@@ -1286,73 +1287,64 @@ function! s:tabpage_label(n)
   let label = no . ' ' . num . mod . ' '  . fname
 
   return '%' . a:n . 'T' . hi . '  ' . label . '%T  %#TabLineFill#'
-  "return '%' . a:n . 'T' . hi . ' < ' . label . '%T > %#TabLineFill#'
-  "return '%' . a:n . 'T' . hi . ' ◀ ' . label . '%T ▶ %#TabLineFill#'
 endfunction
 
-function! s:tabpage_label_tmp(n)
-endfunction
-
-function! MakeTabLine()
-  let titles = map(range(1, tabpagenr('$')), 's:tabpage_label(v:val)')
+function! TabLineStr()
+  let tab_labels = map(range(1, tabpagenr('$')), 's:make_tabpage_label(v:val)')
   let sep = '%#SLFileName# | '  " タブ間の区切り
-  let tabpages = sep . join(titles, sep) . sep . '%#TabLineFill#%T'
+  let tabpages = sep . join(tab_labels, sep) . sep . '%#TabLineFill#%T'
 
+  let left = ''
+  let left .= '%#Statusline#  '
+  let left .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . '   '
+ "let left .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
+ "let left .= '%#Statusline#  '
+  let left .= '%#SLFileName# ' . g:bat_str . ' '
+  let left .= '%#Statusline#  '
+  let left .= '%##  '
+
+  let right = ''
   if 0
-    let info = ''  " 好きな情報を入れる
-    let info .= '%#Statusline#  '
-    let info .= '%#SLFileName# ' . g:bat_str . ' '
-    let info .= '%#Statusline#  '
-    let info .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-    let info .= '%#Statusline#  '
-    let info .= '%##'
+    let right = "%#hl_func_name_stl#  %{cfi#format('%20s ()', repeat(' ', 20) . '- ()')} "
+    let right .= "%#Statusline#  %{cfi#format('%20s', repeat('-', 20))} "
+    let right .= "%#Statusline# %{cfi#format('%s ()', repeat('-', 10))} "
   else
-    let info = ''  " 好きな情報を入れる
-    let info .= '%#Statusline#  '
-    let info .= '%#SLFileName# ' . g:bat_str . ' '
-    let info .= '%#Statusline#  '
-"   let info .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-    let info .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-    let info .= '%#Statusline# '
-    let info .= '%##'
+    let right .= "%#Statusline#  "
+    let right .= "%#Statusline#" . "%#SLFileName# %{'[ '.&diffopt.' ]'} "
+  endif
+  if 0
+    let right .= '%#Statusline#  '
+    let right .= '%#SLFileName# ' . g:bat_str . ' '
+    let right .= '%#Statusline#  '
+    let right .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+    let right .= '%#Statusline#  '
+    let right .= '%##'
+  else
+    let right .= '%#Statusline#  '
+   "let right .= '%#SLFileName# ' . g:bat_str . ' '
+    let right .= '%#Statusline#  '
+    let right .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+   "let right .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+    let right .= '%#Statusline# '
+    let right .= '%##'
   endif
 
-  let l_info = ''  " 好きな情報を入れる
-  let l_info .= '%#Statusline#  '
- "let l_info .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
-  let l_info .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
-  let l_info .= '%#Statusline#  '
-  let l_info .= '%#SLFileName# ' . g:bat_str . ' '
-  let l_info .= '%#Statusline#  '
-  let l_info .= '%##  '
-
-  let left = l_info
-  "let left = ''
-  "let left = '%#Statusline#    %##'
-
-  let right = "%#Statusline#  "
-  "let right = "%#hl_func_name_stl#  %{cfi#format('%20s ()', repeat(' ', 20) . '- ()')} "
-  "let right .= "%#Statusline#  %{cfi#format('%20s', repeat('-', 20))} "
-  "let right .= "%#Statusline# %{cfi#format('%s ()', repeat('-', 10))} "
-  let right .= "%#Statusline#" . "%#SLFileName# %{'[ '.&diffopt.' ]'} " . info
-
-  return left . '  %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
-  "return left . '    %<' . tabpages . '%=  ' . right  " タブリストを左に、情報を右に表示
+  return left . '  %<' . tabpages . '%=  ' . right
 endfunction
 
 "===============================================================
 
-function! Updatetabline(dummy)
-  set tabline=%!MakeTabLine()
+function! UpdateTabline(dummy)
+  set tabline=%!TabLineStr()
 endfunction
 
 " 旧タイマの削除  vimrcを再読み込みする際、古いタイマを削除しないと、どんどん貯まっていってしまう。
-if exists('TimerTab')
-  call timer_stop(TimerTab)
+if exists('TimerTabline')
+  call timer_stop(TimerTabline)
 endif
 
-let UpdatetablineInterval = 1000
-let TimerTab = timer_start(UpdatetablineInterval, 'Updatetabline', {'repeat': -1})
+let s:UpdateTablineInterval = 1000
+let TimerTabline = timer_start(s:UpdateTablineInterval, 'UpdateTabline', {'repeat': -1})
 
 "===============================================================
 
@@ -1363,7 +1355,7 @@ function! s:toggle_tabline()
   else
     set showtabline=2
   endif
-  call Updatetabline(0)
+  call UpdateTabline(0)
 endfunction
 
 let s:tabline_status = 4 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
@@ -1381,45 +1373,53 @@ nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 function! SetDefaultStatusline(arg)
 
   let g:stl = "  "
-  "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
-  "let g:stl .= "%<"
-  "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
-  "let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
+ "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
+ "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
+ "let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
   let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
   let g:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
-  let g:stl .= "%##%#SLFileName# %t "
-  "let g:stl .= "%##%#SLFileName# %F "
-  let g:stl .= "%<"
+
   "let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
   "let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
+  if 0
+    let g:stl .= "%<"
+    let g:stl .= "%##%#SLFileName# %F "
+  else
+    let g:stl .= "%##%#SLFileName# %t "
+    let g:stl .= "%<"
+  endif
+
   let g:stl .= "%#SLFileName#%="
+
   "let g:stl .= "%## %5{&fenc==''?'$':&fenc}  %4{&ff}  %4{&ft==''?'none':&ft} "
   "let g:stl .= "%## %-4{&ft==''?'-   ':&ft}  %-5{&fenc==''?'  -  ':&fenc}  %4{&ff} "
   "let g:stl .= "%## %-4{&ft==''?'    ':TitleCase(&ft)}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
-  let g:stl .= "%## %-5{&fenc==''?'     ':&fenc}  %4{&ff}  %-4{&ft==''?'    ':TitleCase(&ft)} "
-  "let g:stl .= "%#SLFileName# %{&diff?'['.&diffopt.']':''} "
-  "let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
+  let g:stl .= "%## %-5{&fenc==''?'     ':&fenc}  %4{&ff}  %-4{&ft==''?'    ':&ft} "
+
+ "let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
   let g:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
-  "let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
-  "let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
+ "let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
+ "let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
   let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %4{&iminsert?'Jpn':'Code'} "
-  "let g:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
+ "let g:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
+
   let g:stl .= "%## %3p%% [%5L] "
-  "let g:stl .= "%## %3p%% @ %-5L  "
-  "let g:stl .= "%## %3p%%  %-5L  "
-  "let g:stl .= "%## %5l L, %3v C "
-  "let g:stl .= "%#SLFileName#%{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))}"
-  let g:stl .= "%#SLFileName# %{repeat(' ',winwidth(0)-178)} "
-  let g:stl .= "%#SLFileName#"
+ "let g:stl .= "%## %3p%%  %5L  "
+  if 0
+    let g:stl .= "%## %5l L, %3v C "
+  endif
+
+ "let g:stl .= "%#SLFileName#%{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))}"
+  let g:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
 
   call RestoreDefaultStatusline(0)
 endfunction
 
-augroup MyVimrc_StatusLine
-  au!
-  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter *
-     \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+142, 240])
-augroup end
+"augroup MyVimrc_StatusLine
+"  au!
+"  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter *
+"     \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+142, 240])
+"augroup end
 
 function! RestoreDefaultStatusline(dummy)
   " タイマの削除
@@ -2171,3 +2171,4 @@ nnoremap <C-\> g,
 
 " @^
 " - ]\ jk ey du np hqio
+
