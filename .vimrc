@@ -15,7 +15,7 @@ scriptencoding utf-8
 " イルの後に読込まれるため、ここに書かれた内容を上書きして設定することが出来
 " ます。_vimrcは$HOMEまたは$VIMに置いておく必要があります。$HOMEは$VIMよりも
 " 優先され、$HOMEでみつかった場合$VIMは読込まれません。
-"あ
+"
 " 管理者向けに本設定ファイルを直接書き換えずに済ませることを目的として、サイ
 " トローカルな設定を別ファイルで行なえるように配慮してあります。Vim起動時に
 " サイトローカルな設定ファイル($VIM/vimrc_local.vim)が存在するならば、本設定
@@ -1372,70 +1372,60 @@ nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 
 function! SetDefaultStatusline(arg)
 
-  let g:stl = "  "
- "let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) %m%r%{&autoread?'[AR]':''}%h%w "
- "let g:stl .= "%## %{substitute(expand('%:p'),'/[^/]\\+$','','')} %##%#SLFileName# %t %##   "
- "let g:stl .= "%#SLFileName#[ %{winnr()} %#tabline#%{g:www[winnr()]} %#SLFileName# ]%## ( %n ) %##"
-  let g:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
-  let g:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
+  let s:stl = "  "
+  let s:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
+  let s:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
 
-  "let g:stl .= "%## %{&buftype!=''?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
-  "let g:stl .= "%## %{&buftype=~'help\\|quickref'?'':substitute(expand('%:p'),'/[^/]\\+$','','')} "
   if 0
-    let g:stl .= "%<"
-    let g:stl .= "%##%#SLFileName# %F "
+    let s:stl .= "%<"
+    let s:stl .= "%##%#SLFileName# %F "
   else
-    let g:stl .= "%##%#SLFileName# %t "
-    let g:stl .= "%<"
+    let s:stl .= "%##%#SLFileName# %t "
+    let s:stl .= "%<"
   endif
 
-  let g:stl .= "%#SLFileName#%="
+  " Separate Left Right
+  let s:stl .= "%#SLFileName#%="
 
-  "let g:stl .= "%## %5{&fenc==''?'$':&fenc}  %4{&ff}  %4{&ft==''?'none':&ft} "
-  "let g:stl .= "%## %-4{&ft==''?'-   ':&ft}  %-5{&fenc==''?'  -  ':&fenc}  %4{&ff} "
-  "let g:stl .= "%## %-4{&ft==''?'    ':TitleCase(&ft)}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
-  let g:stl .= "%## %-5{&fenc==''?'     ':&fenc}  %4{&ff}  %-4{&ft==''?'    ':&ft} "
+  let s:stl .= "%## %-5{&fenc==''?'     ':&fenc}  %4{&ff}  %-4{&ft==''?'    ':&ft} "
 
- "let g:stl .= "%#SLFileName# %{&l:scrollbind?'Bind':'    '} "
-  let g:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
- "let g:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
- "let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{&iminsert?'j':'e'} "
-  let g:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %4{&iminsert?'Jpn':'Code'} "
- "let g:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
+  let s:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
+ "let s:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
+  let s:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %4{&iminsert?'Jpn':'Code'} "
+ "let s:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
 
-  let g:stl .= "%## %3p%% [%5L] "
- "let g:stl .= "%## %3p%%  %5L  "
+  let s:stl .= "%## %3p%% [%5L] "
+ "let s:stl .= "%## %3p%%  %5L  "
   if 0
-    let g:stl .= "%## %5l L, %3v C "
+    let s:stl .= "%## %5l L, %3v C "
   endif
 
- "let g:stl .= "%#SLFileName#%{repeat(' ',winwidth(0)-(exists('b:buf_name_len')?b:buf_name_len:6)+(72))}"
-  let g:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
+  let s:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
 
   call RestoreDefaultStatusline(0)
 endfunction
 
-"augroup MyVimrc_StatusLine
-"  au!
-"  au BufAdd,BufNewFile,BufRead,BufFilePost,BufNew,FilterReadPost,FileReadPost,BufEnter,BufWinEnter *
-"     \ let b:buf_name_len = strdisplaywidth(fnamemodify(bufname(''),':t')) + max([strdisplaywidth(fnamemodify(bufname(''),':p'))+142, 240])
-"augroup end
-
 function! RestoreDefaultStatusline(dummy)
-  " タイマの削除
-  if exists('g:TimerUsl') | call timer_stop(g:TimerUsl) | unlet g:TimerUsl | endif
-
-  set statusline=%!g:stl
+  call s:SetStatusline(s:stl, '', -1)
 endfunction
 
 function! SetAltStatusline(stl, local, time)
-  " 旧タイマの削除
-  if exists('g:TimerUsl') | call timer_stop(g:TimerUsl) | unlet g:TimerUsl | endif
+  call s:SetStatusline(a:stl, a:local, a:time)
+endfunction
 
-  let g:ttt_stl = a:stl
-  exe 'set' . a:local . ' stl=%!g:ttt_stl'
+function! s:SetStatusline(stl, local, time)
+  if a:time > 0
+    " 旧タイマの削除
+    if exists('s:TimerUsl') | call timer_stop(s:TimerUsl) | unlet s:TimerUsl | endif
+  endif
 
-  let g:TimerUsl = timer_start(a:time, 'RestoreDefaultStatusline', {'repeat': 0})
+  " gスコープでないと、式として設定できない。エラーになる。
+  let g:stl = a:stl
+  exe 'set' . a:local . ' stl=%!g:stl'
+
+  if a:time > 0
+    let s:TimerUsl = timer_start(a:time, 'RestoreDefaultStatusline', {'repeat': 0})
+  endif
 endfunction
 
 " 初期設定のために1回は呼び出す。
