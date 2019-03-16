@@ -1299,7 +1299,7 @@ function! TabLineStr()
   let left .= '%#Statusline#  '
   let left .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . '   '
  "let left .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' %#Statusline#  '
-  let left .= '%#SLFileName# ' . g:bat_str . ' '
+  let left .= '%#SLFileName# ' . g:BatteryInfo . ' '
   let left .= '%#Statusline#  '
   let left .= '%##  '
 
@@ -1427,36 +1427,8 @@ call SetDefaultStatusline(g:stl_fullpath)
 
 " Battery {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-try
-  " bat_win.pyが存在しない環境でもエラーとさせないためtryブロック内で実行。
-  " filereadable()にしようか。
-
-  py3file $HOME/system_py/bat_win.py
-
-  " Battery (Statusline)
-  function! Update_StatuslineBatteryInfo(dummy)
-    call py3eval('bat_win_main()')
-    let g:bat_str = g:bat_info['ACLine'] . ' ' . g:bat_info['Charging'] . ' ' . g:bat_info['RemainingPercent'] . ' ' . g:bat_info['RemainingTime']
-  endfunction
-
-  " 旧タイマの削除
-  if exists('TimerUbi')
-    call timer_stop(TimerUbi)
-  endif
-
-  let UpdateBatteryInfoInterval = 5 * 1000
-  let TimerUbi = timer_start(UpdateBatteryInfoInterval, 'Update_StatuslineBatteryInfo', {'repeat': -1})
-
-  " Battery Information
-  let bat_info = {}
-
-  call py3eval('bat_win_ini()')
-
-  call Update_StatuslineBatteryInfo(0)
-catch
-  let bat_str='? ? ---% [--:--:--]'
- "let bat_str='$ y 100% [13:05:24]'
-endtry
+" Battery.vimが存在しない環境に備えて。
+let g:BatteryInfo = '? ---% [--:--:--]'
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
