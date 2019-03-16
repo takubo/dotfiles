@@ -1370,13 +1370,13 @@ nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-function! SetDefaultStatusline(arg)
+function! SetDefaultStatusline(fullpath)
 
   let s:stl = "  "
   let s:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
   let s:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
 
-  if 0
+  if a:fullpath
     let s:stl .= "%<"
     let s:stl .= "%##%#SLFileName# %F "
   else
@@ -1384,8 +1384,9 @@ function! SetDefaultStatusline(arg)
     let s:stl .= "%<"
   endif
 
-  " Separate Left Right
+  " ===== Separate Left Right =====
   let s:stl .= "%#SLFileName#%="
+  " ===== Separate Left Right =====
 
   let s:stl .= "%## %-5{&fenc==''?'     ':&fenc}  %4{&ff}  %-4{&ft==''?'    ':&ft} "
 
@@ -1413,23 +1414,29 @@ function! SetAltStatusline(stl, local, time)
   call s:SetStatusline(a:stl, a:local, a:time)
 endfunction
 
+function! AddAltStatusline(stl, local, time)
+  call s:SetStatusline((a:local == 'l' ? &l:stl : &stl) . a:stl, a:local, a:time)
+endfunction
+
 function! s:SetStatusline(stl, local, time)
-  if a:time > 0
+  if a:time > 0 && exists('s:TimerUsl')
     " 旧タイマの削除
-    if exists('s:TimerUsl') | call timer_stop(s:TimerUsl) | unlet s:TimerUsl | endif
+     call timer_stop(s:TimerUsl)
+     unlet s:TimerUsl
   endif
 
-  " gスコープでないと、式として設定できない。エラーになる。
-  let g:stl = a:stl
-  exe 'set' . a:local . ' stl=%!g:stl'
+  exe 'set' . a:local . ' stl=' . substitute(a:stl, ' ', '\\ ', 'g')
 
   if a:time > 0
     let s:TimerUsl = timer_start(a:time, 'RestoreDefaultStatusline', {'repeat': 0})
   endif
 endfunction
 
+let g:stl_fullpath = v:false
+nnoremap <silent> <Leader>- :<C-u>let g:stl_fullpath = !g:stl_fullpath <Bar> call SetDefaultStatusline(g:stl_fullpath)<CR>
+
 " 初期設定のために1回は呼び出す。
-call SetDefaultStatusline(0)
+call SetDefaultStatusline(g:stl_fullpath)
 
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1677,7 +1684,7 @@ nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR
 "                      \ <Bar> let g:alt_stl_time = 12
 nnoremap <silent> <C-o> :<C-u>pwd
                       \ <Bar> echon '        ' &fileencoding '  ' &fileformat '  ' &filetype '    ' printf('L %d  C %d  %3.2f %%  TL %3d', line('.'), col('.'), line('.') * 100.0 / line('$'), line('$'))
-                      \ <Bar> call SetAltStatusline('%#hl_buf_name_stl#  %F', '', 10000)<CR>
+                      \ <Bar> call SetAltStatusline('%#hl_buf_name_stl#  %F', 'g', 10000)<CR>
 
 
 "nnoremap <C-Tab> <C-w>p
