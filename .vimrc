@@ -1248,33 +1248,34 @@ nnoremap <A-b> :tabmove -1<CR>
 
 " Tabline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"===============================================================
+"----------------------------------------------------------------------------------------
+" Make TabLine
 
 function! s:make_tabpage_label(n)
   " カレントタブページかどうかでハイライトを切り替える
-  "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
-  "let hi = a:n is tabpagenr() ? '%#SLFileName#' : '%#TabLine#'
   let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
 
-  if s:tabline_status == 1
+  if s:TablineStatus == 1
     return hi . ' [ ' . a:n . ' ] %#TabLineFill#'
   endif
 
+  " タブ番号
   let no = '[' . a:n . ']'
 
-  " タブページ内のバッファのリスト
+  " タブ内のバッファのリスト
   let bufnrs = tabpagebuflist(a:n)
 
   " バッファが複数あったらバッファ数を表示
   let num = '(' . len(bufnrs) . ')'
 
-  " タブページ内に変更ありのバッファがあったら '+' を付ける
+  " タブ内に変更ありのバッファがあったら '+' を付ける
   let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '+' : ''
 
-  if s:tabline_status == 2
+  if s:TablineStatus == 2
     return hi . ' [ ' . a:n . ' ' . mod . ' ] %#TabLineFill#'
   endif
-  if s:tabline_status == 3
+
+  if s:TablineStatus == 3
     return hi . ' [ ' . a:n . ' ' . num . ' ' . mod . ' ] %#TabLineFill#'
   endif
 
@@ -1297,42 +1298,26 @@ function! TabLineStr()
   let left = ''
   let left .= '%#Statusline#  '
   let left .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . '   '
- "let left .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' '
- "let left .= '%#Statusline#  '
+ "let left .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' %#Statusline#  '
   let left .= '%#SLFileName# ' . g:bat_str . ' '
   let left .= '%#Statusline#  '
   let left .= '%##  '
 
   let right = ''
-  if 0
-    let right = "%#hl_func_name_stl#  %{cfi#format('%20s ()', repeat(' ', 20) . '- ()')} "
-    let right .= "%#Statusline#  %{cfi#format('%20s', repeat('-', 20))} "
-    let right .= "%#Statusline# %{cfi#format('%s ()', repeat('-', 10))} "
-  else
-    let right .= "%#Statusline#  "
-    let right .= "%#Statusline#" . "%#SLFileName# %{'[ '.&diffopt.' ]'} "
-  endif
-  if 0
-    let right .= '%#Statusline#  '
-    let right .= '%#SLFileName# ' . g:bat_str . ' '
-    let right .= '%#Statusline#  '
-    let right .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-    let right .= '%#Statusline#  '
-    let right .= '%##'
-  else
-    let right .= '%#Statusline#  '
-   "let right .= '%#SLFileName# ' . g:bat_str . ' '
-    let right .= '%#Statusline#  '
-    let right .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-   "let right .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-    let right .= '%#Statusline# '
-    let right .= '%##'
-  endif
+  let right .= "%#Statusline#  "
+  let right .= "%#Statusline#" . "%#SLFileName# %{'[ '.&diffopt.' ]'} "
+  let right .= '%#Statusline#  '
+  let right .= '%#Statusline#  '
+  let right .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+ "let right .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
+  let right .= '%#Statusline# '
+  let right .= '%##'
 
   return left . '  %<' . tabpages . '%=  ' . right
 endfunction
 
-"===============================================================
+"----------------------------------------------------------------------------------------
+" TabLine Timer
 
 function! UpdateTabline(dummy)
   set tabline=%!TabLineStr()
@@ -1346,11 +1331,12 @@ endif
 let s:UpdateTablineInterval = 1000
 let TimerTabline = timer_start(s:UpdateTablineInterval, 'UpdateTabline', {'repeat': -1})
 
-"===============================================================
+"----------------------------------------------------------------------------------------
+" Switch TabLine Contents
 
 function! s:toggle_tabline()
-  let s:tabline_status = ( s:tabline_status + 1 ) % 5
-  if s:tabline_status == 0
+  let s:TablineStatus = ( s:TablineStatus + 1 ) % 5
+  if s:TablineStatus == 0
     set showtabline=0
   else
     set showtabline=2
@@ -1358,12 +1344,10 @@ function! s:toggle_tabline()
   call UpdateTabline(0)
 endfunction
 
-let s:tabline_status = 4 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
+let s:TablineStatus = 4 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
 call <SID>toggle_tabline()
 
 nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
-
-"===============================================================
 
 " Tabline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
