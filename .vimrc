@@ -372,10 +372,9 @@ syntax enable
 colorscheme Vitamin
 " TODO hi CursorLine ctermbg=NONE guibg=NONE
 
-augroup MyVimrc_DynamicColorshemeChage
+augroup MyVimrc_JpnMode
   au!
-  au WinEnter * exe 'colorscheme ' (&iminsert ? 'desert_new' : 'Vitamin')
-  au BufEnter * exe 'colorscheme ' (&iminsert ? 'desert_new' : 'Vitamin')
+  au WinEnter,BufEnter * exe 'colorscheme ' (&iminsert ? 'desert_new' : 'Vitamin') | exe 'set whichwrap' . (&iminsert ? '+' : '-') . '=h,l'
 augroup end
 
 
@@ -443,8 +442,6 @@ nnoremap <expr> <leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<C
 nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>' : ':<C-u>setl isk-=.<CR>'
 nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
-
-nnoremap <silent> <Leader>" :<C-u>disp<CR>
 
 nnoremap <silent> <Leader>@ :<C-u>set relativenumber!<CR>
 "nnoremap <silent> <Leader>@ :<C-u>let &l:number = &l:number && &l:relativenumber ? 0 : 1<CR>:let &l:relativenumber = &l:number && !&l:relativenumber ? 1 : 0<CR>
@@ -516,9 +513,8 @@ vnoremap gk <C-u>
 
 augroup MyVimrc_Cursor
   au!
-  au WinEnter * setl cursorline   cursorcolumn
-  au BufEnter * setl cursorline   cursorcolumn
-  au WinLeave * setl nocursorline nocursorcolumn
+  au WinEnter,BufEnter * setl cursorline   cursorcolumn
+  au WinLeave          * setl nocursorline nocursorcolumn
 augroup end
 
 nnoremap <silent> <Leader>c :<C-u>setl cursorline!<CR>
@@ -544,9 +540,8 @@ nnoremap g<Space>  :<C-u> let w:BrowsingScroll = !w:BrowsingScroll
 
 augroup MyVimrc_ScrollOff
   au!
-  au WinNew     * let w:BrowsingScroll = v:false
-  au WinEnter   * call <SID>best_scrolloff()
-  au VimResized * call <SID>best_scrolloff()
+  au WinNew              * let w:BrowsingScroll = v:false
+  au WinEnter,VimResized * call <SID>best_scrolloff()
 augroup end
 " 最初のWindowに対しては、WinNewが効かないので、別途設定。
 let w:BrowsingScroll = v:false
@@ -704,6 +699,9 @@ com! SearchStrNum call <SID>search_str_num()
 
 nnoremap <silent> n n:SearchStrNum<CR>
 nnoremap <silent> N N:SearchStrNum<CR>
+
+nnoremap <Leader>* ^y$:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
+vnoremap <Leader>*   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
 
 " Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1006,6 +1004,13 @@ else
   nnoremap <silent> <Leader>T  G[c]c^zz
 endif
 
+" Block Diff
+"vmap <leader>1 <Plug>(BlockDiff-GetBlock1)
+"vmap <leader>2 <Plug>(BlockDiff-GetBlock2andExe)
+"vmap <leader>3 <Plug>(BlockDiff-GetBlock1andExe)
+"vmap <leader>4 <Plug>(BlockDiff-GetBlock2)
+"nmap <leader>1 <Plug>(BlockDiff-Exe)
+
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
@@ -1082,10 +1087,10 @@ nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" 
 "nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
 
 " Force (Manual)
-"nnoremap <silent> -                <C-w>s:setl noscrollbind<CR>
-"nnoremap <silent> g-               <C-w>n
-nnoremap U                         <C-w>s
-nnoremap gU                        <C-w>n
+nnoremap <silent> -                <C-w>s:setl noscrollbind<CR>
+nnoremap <silent> g-               <C-w>n
+nnoremap gu                        <C-w>s:setl noscrollbind<CR>
+nnoremap U                         <C-w>n
 nnoremap <silent> <Bar>            <C-w>v:setl noscrollbind<CR>
 nnoremap <silent> g<Bar>           :<C-u>vnew<CR>
 
@@ -1130,14 +1135,25 @@ tnoremap <silent>  <C-Up>     <C-w>k
 "----------------------------------------------------------------------------------------
 " Resize
 
-nnoremap <silent> +         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> +         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> _         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> g_        <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> (         <esc>3<C-w><
+"nnoremap <silent> g(        <esc>1<C-w>|
+"nnoremap <silent> )         <esc>3<C-w>>
+"nnoremap <silent> g)        <esc><C-w>|
+
+nnoremap <silent> <C-j>         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-k>         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-h>         <esc>3<C-w><
+nnoremap <silent> <C-l>         <esc>3<C-w>>
 nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> _         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
 nnoremap <silent> g_        <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> (         <esc>3<C-w><
 nnoremap <silent> g(        <esc>1<C-w>|
-nnoremap <silent> )         <esc>3<C-w>>
 nnoremap <silent> g)        <esc><C-w>|
+
+nnoremap <silent> <A-o>    <C-l>
 
 tnoremap <silent> <up>	    <C-w>2+:<C-u>
 tnoremap <silent> <down>    <C-w>2-:<C-u>
@@ -1296,8 +1312,7 @@ function! TabLineStr()
   let tabpages = sep . join(tab_labels, sep) . sep . '%#TabLineFill#%T'
 
   let left = ''
-  let left .= '%#Statusline#  '
-  let left .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . '   '
+  let left .= '%#Statusline#   ' . strftime('%Y/%m/%d (%a) %X') . '   '
  "let left .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' %#Statusline#  '
   let left .= '%#SLFileName# ' . g:BatteryInfo . ' '
   let left .= '%#Statusline#  '
@@ -1633,7 +1648,7 @@ nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g
 nnoremap <leader>w :<C-u>w<CR>
 nnoremap <silent><expr> <Leader>r &l:readonly ? ':<C-u>setl noreadonly<CR>' : ':<C-u>setl readonly<CR>'
 nnoremap <silent><expr> <Leader>R &l:modifiable ? ':<C-u>setl nomodifiable <BAR> setl readonly<CR>' : ':<C-u>setl modifiable<CR>'
-nnoremap <leader>l :<C-u>echo len("<C-r><C-w>")<CR>
+nnoremap <leader>L :<C-u>echo len("<C-r><C-w>")<CR>
 nnoremap <silent> yx :PushPos<CR>ggyG:PopPos<CR> | ":echo "All lines yanked."<CR>
 
 "nnoremap <silent> <C-o> :<C-u>exe (g:alt_stl_time > 0 ? '' : 'normal! <C-l>')
@@ -1649,10 +1664,7 @@ inoremap <C-e>	<End>
 "inoremap <CR> <C-]><C-G>u<CR>
 inoremap <C-H> <C-G>u<C-H>
 
-nnoremap <leader>E :<C-u><C-R>"
-"set whichwrap+=h,l
-nnoremap <silent><expr> <leader>h &whichwrap !~ 'h' ? ':<C-u>set whichwrap+=h,l<CR>' : ':<C-u>set whichwrap-=h,l<CR>'
-nnoremap <silent><expr> <Leader>L &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
+nnoremap <silent><expr> <Leader>l &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
 
 nnoremap gG G
 
