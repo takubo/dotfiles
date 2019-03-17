@@ -969,6 +969,10 @@ nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
                        \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
                        \ ':<C-u>diffthis<CR>'
 nmap d<CR> d<Space>
+nnoremap d<S-Space> :<C-u>diffoff<CR>
+
+" diffoff
+
 
 " diff accept (obtain and next or Previouse) (dotは、repeat.)
 nnoremap d. do1gs]c^
