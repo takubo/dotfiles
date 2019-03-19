@@ -374,7 +374,7 @@ colorscheme Vitamin
 
 augroup MyVimrc_JpnMode
   au!
-  au WinEnter,BufEnter * exe 'colorscheme ' (&iminsert ? 'desert_new' : 'Vitamin') | exe 'set whichwrap' . (&iminsert ? '+' : '-') . '=h,l'
+  "au WinEnter,BufEnter * exe 'colorscheme ' (&iminsert ? 'desert_new' : 'Vitamin') | exe 'set whichwrap' . (&iminsert ? '+' : '-') . '=h,l'
 augroup end
 
 
@@ -384,12 +384,12 @@ set timeoutlen=1100
 augroup MyVimrc
   au!
 
-  au QuickfixCmdPost make,grep,grepadd,vimgrep,cbuffer,cfile botright copen
-  au QuickfixCmdPost lmake,lgrep,lgrepadd,lvimgrep,lcbuffer,lcfile botright lopen
+  au QuickfixCmdPost make,grep,grepadd,vimgrep,cbuffer,cfile botright cwindow
+  au QuickfixCmdPost lmake,lgrep,lgrepadd,lvimgrep,lcbuffer,lcfile lwindow
  "au BufNewFile,BufRead,FileType qf set modifiable
 
   " grepする際に'|cw'を付けなくても、Quickfixに結果を表示する
-  au QuickfixCmdPost vimgrep botright cwindow
+  "au QuickfixCmdPost vimgrep botright cwindow
   "au QuickfixCmdPost make,grep,grepadd,vimgrep 999wincmd w
 
   au InsertEnter * set timeoutlen=3000
@@ -961,18 +961,14 @@ nnoremap <expr> du match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>
 " diff Y(whi)tespace
 nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
-" diff Visualize option
-nnoremap dv :<C-u>echo &diffopt<CR>
-
 " diff Special
 nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
                        \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
                        \ ':<C-u>diffthis<CR>'
 nmap d<CR> d<Space>
+
+" diff off
 nnoremap d<S-Space> :<C-u>diffoff<CR>
-
-" diffoff
-
 
 " diff accept (obtain and next or Previouse) (dotは、repeat.)
 nnoremap d. do1gs]c^
@@ -981,29 +977,22 @@ nnoremap dp do1gs[c^
 if 1 " exists(':FuncNameStl') == 2
   " Next Hunk
   nnoremap <silent> t ]c^zz:FuncNameStl<CR>
-
   " Previouse Hunk
   nnoremap <silent> T [c^zz:FuncNameStl<CR>
-
   " Top Hunk
   nmap      <silent> <Leader>t ggtT
   "nnoremap <silent> <Leader>t gg]c[c^zz:FuncNameStl<CR>
-
   " Bottom Hunk
   nmap      <silent> <Leader>T  GTt
   "nnoremap <silent> <Leader>T  G[c]c^zz:FuncNameStl<CR>
-
   " 最初にgg/G/[c/]cすると、FuncNameStlが実行されない不具合あり。対策として、t/Tをnmap。
 else
   " Next Hunk
   nnoremap <silent> t ]c^zz
-
   " Previouse Hunk
   nnoremap <silent> T [c^zz
-
   " Top Hunk
   nnoremap <silent> <Leader>t gg]c[c^zz
-
   " Bottom Hunk
   nnoremap <silent> <Leader>T  G[c]c^zz
 endif
@@ -1273,6 +1262,8 @@ nnoremap <A-b> :tabmove -1<CR>
 
 function! s:make_tabpage_label(n)
   " カレントタブページかどうかでハイライトを切り替える
+ "let hi = a:n is tabpagenr() ? '%#SLFileName#' : '%#TabLine#'
+ "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
   let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
 
   if s:TablineStatus == 1
@@ -1289,14 +1280,14 @@ function! s:make_tabpage_label(n)
   let num = '(' . len(bufnrs) . ')'
 
   " タブ内に変更ありのバッファがあったら '+' を付ける
-  let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? '+' : ''
+  let mod = len(filter(copy(bufnrs), 'getbufvar(v:val, "&modified")')) ? ' +' : ''
 
   if s:TablineStatus == 2
     return hi . ' [ ' . a:n . ' ' . mod . ' ] %#TabLineFill#'
   endif
 
   if s:TablineStatus == 3
-    return hi . ' [ ' . a:n . ' ' . num . ' ' . mod . ' ] %#TabLineFill#'
+    return hi . ' [ ' . a:n . ' ' . num . mod . ' ] %#TabLineFill#'
   endif
 
   " カレントバッファ
@@ -1305,7 +1296,7 @@ function! s:make_tabpage_label(n)
   "let fname = pathshorten(expand('#' . curbufnr . ':p'))
   let fname = fname == '' ? 'No Name' : fname
 
-  let label = no . ' ' . num . mod . ' '  . fname
+  let label = no . ' ' . num . (s:TablineStatus != 4 ? mod : '') . ' '  . fname
 
   return '%' . a:n . 'T' . hi . '  ' . label . '%T  %#TabLineFill#'
 endfunction
@@ -1353,18 +1344,21 @@ let TimerTabline = timer_start(s:UpdateTablineInterval, 'UpdateTabline', {'repea
 "----------------------------------------------------------------------------------------
 " Switch TabLine Contents
 
+let s:TablineStatusNum = 6
+let s:TablineStatus = 5 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
+
 function! s:toggle_tabline()
-  let s:TablineStatus = ( s:TablineStatus + 1 ) % 5
+  let s:TablineStatus = ( s:TablineStatus + 1 ) % s:TablineStatusNum
   if s:TablineStatus == 0
     set showtabline=0
   else
     set showtabline=2
   endif
   call UpdateTabline(0)
+  echo 'TablineStatus' s:TablineStatus
 endfunction
 
-let s:TablineStatus = 4 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
-call <SID>toggle_tabline()
+silent call <SID>toggle_tabline()
 
 nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 
@@ -1391,12 +1385,11 @@ function! SetDefaultStatusline(fullpath)
   let s:stl .= "%#SLFileName#%="
   " ===== Separate Left Right =====
 
-  let s:stl .= "%## %-5{&fenc==''?'     ':&fenc}  %4{&ff}  %-4{&ft==''?'    ':&ft} "
+  let s:stl .= "%## %4{&ft==''?'    ':&ft}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
 
   let s:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
  "let s:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
-  let s:stl .= "%1{c_jk_local!=0?'-':' '} %1{&whichwrap=~'h'?'>':'='} %{g:clever_f_use_migemo?'Ⓜ':'Ⓕ'} %4{&iminsert?'Jpn':'Code'} "
- "let s:stl .= "%1{c_jk_local!=0?'l':'q'} %1{&whichwrap=~'h'?'>':'='} %1{g:MigemoIsSlash?'\\':'/'} %{g:clever_f_use_migemo?'m':'f'} %{&iminsert?'j':'e'} "
+  let s:stl .= "%1{c_jk_local!=0?'L':'G'} %1{&l:wrap?'<>':'>>'} %{g:clever_f_use_migemo?'(M)':'(F)'} %4{&iminsert?'Jpn':'Code'} "
 
   let s:stl .= "%## %3p%% [%5L] "
  "let s:stl .= "%## %3p%%  %5L  "
@@ -1668,7 +1661,7 @@ inoremap <C-e>	<End>
 "inoremap <CR> <C-]><C-G>u<CR>
 inoremap <C-H> <C-G>u<C-H>
 
-nnoremap <silent><expr> <Leader>l &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
+nnoremap <silent><expr> gl &l:wrap ? ':setl nowrap<CR>' : ':setl wrap<CR>'
 
 nnoremap gG G
 
@@ -2141,3 +2134,6 @@ nnoremap <C-\> g,
 " @^
 " - ]\ jk ey du np hqio
 
+set wildmenu
+set wildmode=longest:full,full
+cnoremap <C-o> <C-\>e(getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\<' . getcmdline() . '\>' : getcmdline()<CR><Left><Left>
