@@ -1404,6 +1404,11 @@ endfunction
 
 function! RestoreDefaultStatusline(dummy)
   call s:SetStatusline(s:stl, '', -1)
+  PushPosAll
+  windo if exists('w:stl') | let &l:stl = w:stl | unlet w:stl | endif
+  " Localしか設定してないときは、全WindowのStlを再設定するより、if existsの方が速いか？
+  "windo let &l:stl = getwinvar(winnr(), 'stl', '')
+  PopPosAll
 endfunction
 
 function! SetAltStatusline(stl, local, time)
@@ -1415,14 +1420,35 @@ function! AddAltStatusline(stl, local, time)
 endfunction
 
 function! s:SetStatusline(stl, local, time)
+  " 旧タイマの削除
   if a:time > 0 && exists('s:TimerUsl')
-    " 旧タイマの削除
      call timer_stop(s:TimerUsl)
      unlet s:TimerUsl
   endif
 
+  " Local Statusline の保存。および、WinLeaveイベントの設定。
+  if a:local == 'l'
+    let w:stl = getwinvar(winnr(), 'stl', &l:stl)
+    augroup MyVimrc_Restore_LocalStl
+      au!
+      au WinLeave * if exists('w:stl') | let &l:stl = w:stl | unlet w:stl | endif
+      au WinLeave * au! MyVimrc_Restore_LocalStl
+    augroup end
+  else
+    PushPosAll
+    "windo if !exists('w:stl') | let w:stl = &l:stl | endif
+    "windo let w:stl = !exists('w:stl') ? &l:stl : w:stl
+    windo let w:stl = getwinvar(winnr(), 'stl', &l:stl)
+    PopPosAll
+    augroup MyVimrc_Restore_LocalStl
+      au!
+    augroup end
+  endif
+
+  " Statusline の設定
   exe 'set' . a:local . ' stl=' . substitute(a:stl, ' ', '\\ ', 'g')
 
+  " タイマスタート
   if a:time > 0
     let s:TimerUsl = timer_start(a:time, 'RestoreDefaultStatusline', {'repeat': 0})
   endif
