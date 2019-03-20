@@ -976,9 +976,11 @@ nnoremap dp do1gs[c^
 
 if 1 " exists(':FuncNameStl') == 2
   " Next Hunk
-  nnoremap <silent> t ]c^zz:FuncNameStl<CR>
+  "nnoremap <silent> t ]c^zz:FuncNameStl<CR>
+  nnoremap <silent> t ]c^:FuncNameStl<CR>
   " Previouse Hunk
-  nnoremap <silent> T [c^zz:FuncNameStl<CR>
+  "nnoremap <silent> T [c^zz:FuncNameStl<CR>
+  nnoremap <silent> T [c^:FuncNameStl<CR>
   " Top Hunk
   nmap      <silent> <Leader>t ggtT
   "nnoremap <silent> <Leader>t gg]c[c^zz:FuncNameStl<CR>
@@ -1404,11 +1406,11 @@ endfunction
 
 function! RestoreDefaultStatusline(dummy)
   call s:SetStatusline(s:stl, '', -1)
-  PushPosAll
+  let cur_win = winnr()
   windo if exists('w:stl') | let &l:stl = w:stl | unlet w:stl | endif
   " Localしか設定してないときは、全WindowのStlを再設定するより、if existsの方が速いか？
   "windo let &l:stl = getwinvar(winnr(), 'stl', '')
-  PopPosAll
+  silent exe cur_win . 'wincmd w'
 endfunction
 
 function! SetAltStatusline(stl, local, time)
@@ -1435,11 +1437,11 @@ function! s:SetStatusline(stl, local, time)
       au WinLeave * au! MyVimrc_Restore_LocalStl
     augroup end
   else
-    PushPosAll
+    let cur_win = winnr()
     "windo if !exists('w:stl') | let w:stl = &l:stl | endif
     "windo let w:stl = !exists('w:stl') ? &l:stl : w:stl
     windo let w:stl = getwinvar(winnr(), 'stl', &l:stl)
-    PopPosAll
+    silent exe cur_win . 'wincmd w'
     augroup MyVimrc_Restore_LocalStl
       au!
     augroup end
@@ -2163,3 +2165,17 @@ nnoremap <C-\> g,
 set wildmenu
 set wildmode=longest:full,full
 cnoremap <C-o> <C-\>e(getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\<' . getcmdline() . '\>' : getcmdline()<CR><Left><Left>
+
+nnoremap + :setl isk+=
+nnoremap _ :setl isk-=
+
+nnoremap <silent> <C-]> [c^:FuncNameStl<CR>
+nnoremap <silent> <C-\> ]c^:FuncNameStl<CR>
+nnoremap <silent> s ]c^zz:FuncNameStl<CR>
+nnoremap <silent> S [c^zz:FuncNameStl<CR>
+
+nmap      <silent> gs ggsS
+nmap      <silent> gS  GSs
+
+nnoremap g9 g8
+nnoremap 9g9 8g8
