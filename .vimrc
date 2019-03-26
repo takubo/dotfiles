@@ -702,6 +702,7 @@ nnoremap <silent> N N:SearchStrNum<CR>
 
 nnoremap <Leader>* ^y$:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
 vnoremap <Leader>*   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
+vnoremap         *   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
 
 " Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -2168,6 +2169,7 @@ cnoremap <C-o> <C-\>e(getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\<'
 
 nnoremap + :setl isk+=
 nnoremap _ :setl isk-=
+nnoremap - :setl isk-=
 
 nnoremap <silent> <C-]> [c^:FuncNameStl<CR>
 nnoremap <silent> <C-\> ]c^:FuncNameStl<CR>
@@ -2179,3 +2181,59 @@ nmap      <silent> gS  GSs
 
 nnoremap g9 g8
 nnoremap 9g9 8g8
+
+
+
+" FuncName {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+function! Func_Name_Stl(alt_stl_time)
+  let stl="   %m   %#hl_func_name_stl#   " . cfi#format("%s ()", "... ()") . "   %##"
+  call SetAltStatusline(stl, 'l', a:alt_stl_time)
+endfunction
+
+com! FuncNameStl       call Func_Name_Stl(5000)
+com! FuncNameEcho      echo cfi#format("%s ()", "... ()")
+com! FuncNameEchoColor echohl hl_func_name_stl <Bar> echo cfi#format("%s", "... ()") <Bar> echohl None
+com! FuncName          exe 'FuncNameStl' | exe 'FuncNameEcho'
+
+
+nnoremap <silent> <Plug>(FuncName-Stl) :<C-u>FuncNameStl<CR>
+
+
+"nnoremap <silent> ][ ][:FuncNameStl<CR>
+"nnoremap <silent> [] []:FuncNameStl<CR>
+
+nnoremap <expr> <C-w><CR> (&ft != 'qf') ? ('<C-w><C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>:call feedkeys(":FuncName\<CR>"')
+nnoremap <expr> <C-w><CR> (&ft != 'qf') ? ('<C-w><C-]>z<CR>' . (winheight(0)/4) . '<C-y>') : ('<CR>:FuncName<CR>')
+
+cnoremap <C-r><C-f> <C-R>=cfi#format('%s', '')<CR>
+cmap     <C-r>f <C-r><C-f>
+
+nnoremap <silent> , :<C-u>FuncName<CR>
+
+" FuncName }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
+
+function! CursorOnWord()
+  return search('\%#\k', 'cnz')
+endfunction
+function! CursorWord()
+  if search('\<\%#\k', 'cnz')
+    return -1
+  elseif search('\%#\k', 'cnz')
+    return 1
+  endif
+  return 0
+endfunction
+"map \e :so %<CR>
+
+
+function! ProcTopUnderScore(word)
+  if a:word[0] == '_'
+    return '_\?' . a:word[1:]
+  elseif a:word[0] =~ '\a'
+    return '_\?' . a:word
+  endif
+  return a:word
+endfunction
+
