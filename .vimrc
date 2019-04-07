@@ -2173,8 +2173,8 @@ nnoremap - :setl isk-=
 
 nnoremap <silent> <C-]> [c^:FuncNameStl<CR>
 nnoremap <silent> <C-\> ]c^:FuncNameStl<CR>
-nnoremap <silent> s ]c^zz:FuncNameStl<CR>
-nnoremap <silent> S [c^zz:FuncNameStl<CR>
+"nnoremap <silent> s ]c^zz:FuncNameStl<CR>
+"nnoremap <silent> S [c^zz:FuncNameStl<CR>
 
 nmap      <silent> gs ggsS
 nmap      <silent> gS  GSs
@@ -2236,4 +2236,3 @@ function! ProcTopUnderScore(word)
   endif
   return a:word
 endfunction
-
