@@ -403,7 +403,8 @@ augroup MyVimrc
 augroup end
 
 
-" Orthodox {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+" Basic {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 nnoremap Y y$
 
@@ -435,16 +436,25 @@ cnoremap << \<
 cnoremap >> \>
 cnoremap <Bar><Bar> \<Bar>
 
-
 " コメント行の後の新規行の自動コメント化のON/OFF
 nnoremap <expr> <leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':<C-u>set formatoptions+=o<CR>:set formatoptions+=r<CR>'
 
-nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>' : ':<C-u>setl isk-=.<CR>'
-nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
-nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
+"nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>' : ':<C-u>setl isk-=.<CR>'
+"nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
+"nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 
-nnoremap <silent> <Leader>@ :<C-u>set relativenumber!<CR>
-"nnoremap <silent> <Leader>@ :<C-u>let &l:number = &l:number && &l:relativenumber ? 0 : 1<CR>:let &l:relativenumber = &l:number && !&l:relativenumber ? 1 : 0<CR>
+nnoremap <silent> <Leader>@ :<C-u>call <SID>ToggleNumber()<CR>
+
+function! s:ToggleNumber()
+  if !&l:number && !&l:relativenumber
+    let &l:number = 1
+  elseif &l:number && !&l:relativenumber
+    let &l:relativenumber = 1
+  else
+    let &l:number = 0
+    let &l:relativenumber = 0
+  endif
+endfunction
 
 cnoremap <expr> <C-t>	  getcmdtype() == ':' ? '../' :
 			\ (getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\\|' :
@@ -466,8 +476,7 @@ nnoremap g[]  []
 vnoremap af ][<ESC>V[[
 vnoremap if ][k<ESC>V[[j
 
-
-" Orthodox }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+" Basic }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 
@@ -578,6 +587,7 @@ cnoremap <A-b>		<S-Left>
 " Emacs }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Esc_Esc {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let g:EscEsc = []
@@ -602,6 +612,7 @@ call EscEsc_Add('call RestoreDefaultStatusline(0)')
 call EscEsc_Add('call clever_f#reset()')
 
 " Esc_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -707,6 +718,7 @@ vnoremap         *   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><C
 " Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Substitute {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 nnoremap <C-s>           :<C-u>g$.$s    //<Left>
@@ -728,6 +740,7 @@ cnoremap <expr> <C-g> match(getcmdline(), '\(g.\..s\\|s\)    /') == 0 ? '<End>/g
                     \ match(getcmdline(), '\(g.\..s\\|s\)    %') == 0 ? '<End>/g' : ''
 
 " Substitute }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Grep {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -790,6 +803,7 @@ nnoremap          <leader>g     :<C-u>call CS('')<Left><Left>
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 " Grep }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Quickfix & Locationlist {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -940,6 +954,7 @@ nmap     <silent> <BS><CR>     <BS><BS><CR>
 " Tag, Jump, and Unified CR }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Diff {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 set diffopt+=iwhite
@@ -1001,13 +1016,16 @@ else
 endif
 
 " Block Diff
-"vmap <leader>1 <Plug>(BlockDiff-GetBlock1)
-"vmap <leader>2 <Plug>(BlockDiff-GetBlock2andExe)
-"vmap <leader>3 <Plug>(BlockDiff-GetBlock1andExe)
-"vmap <leader>4 <Plug>(BlockDiff-GetBlock2)
-"nmap <leader>1 <Plug>(BlockDiff-Exe)
+if 0
+  vmap <leader>1 <Plug>(BlockDiff-GetBlock1)
+  vmap <leader>2 <Plug>(BlockDiff-GetBlock2andExe)
+  vmap <leader>3 <Plug>(BlockDiff-GetBlock1andExe)
+  vmap <leader>4 <Plug>(BlockDiff-GetBlock2)
+  nmap <leader>1 <Plug>(BlockDiff-Exe)
+endif
 
 " Diff }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Window {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1182,6 +1200,7 @@ tnoremap <silent> <A-right> <C-w>L:<C-u>call		<SID>best_scrolloff()<CR>
 " Window }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Terminal {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 function! OpenTerm_Sub(key, val)
@@ -1230,6 +1249,7 @@ nmap <expr> o &buftype == 'terminal' ? 'i' : 'o'
 " Terminal }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Buffer {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 nnoremap K         :<C-u>ls <CR>:b<Space>
@@ -1245,6 +1265,7 @@ nnoremap <Leader>Z :<C-u>bdel!
 " Buffer }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Tab {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 nnoremap <C-t> :<C-u>tabnew<Space>
@@ -1252,10 +1273,11 @@ nnoremap <C-t> :<C-u>tabnew<Space>
 nnoremap <C-f> gt
 nnoremap <C-b> gT
 
-nnoremap <A-f> :tabmove +1<CR>
-nnoremap <A-b> :tabmove -1<CR>
+nnoremap <A-f> :exe tabpagenr() == tabpagenr('$') ? 'tabmove 0' : 'tabmove +1'<CR>
+nnoremap <A-b> :exe tabpagenr() == 1              ? 'tabmove $' : 'tabmove -1'<CR>
 
 " Tab }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Tabline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1368,6 +1390,7 @@ nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 " Tabline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 function! SetDefaultStatusline(fullpath)
@@ -1394,13 +1417,13 @@ function! SetDefaultStatusline(fullpath)
  "let s:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
   let s:stl .= "%1{c_jk_local!=0?'L':'G'} %1{&l:wrap?'<>':'>>'} %{g:clever_f_use_migemo?'(M)':'(F)'} %4{&iminsert?'Jpn':'Code'} "
 
+  let s:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
+
   let s:stl .= "%## %3p%% [%5L] "
  "let s:stl .= "%## %3p%%  %5L  "
   if 0
     let s:stl .= "%## %5l L, %3v C "
   endif
-
-  let s:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
 
   call RestoreDefaultStatusline(0)
 endfunction
@@ -1466,12 +1489,14 @@ call SetDefaultStatusline(g:stl_fullpath)
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Battery {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-" Battery.vimが存在しない環境に備えて。
+" Battery.vimが存在しない場合に備えて。
 let g:BatteryInfo = '? ---% [--:--:--]'
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Mru {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1493,7 +1518,8 @@ else
 endif
 
 " Mru }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-"
+
+
 
 " Completion {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
@@ -1569,6 +1595,7 @@ inoremap <expr> gg ( pumvisible() ? '<C-Y>' : '' ) . '<Esc>:<C-u>w<CR>'
 " Completion }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " i_Esc {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let g:IEscPre = []
@@ -1623,6 +1650,7 @@ inoremap <expr> <plug>(I_Esc_Write) IEscPre() . "\<Esc>" . ':w<CR>'
 " i_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Snippets {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 "source D:/bin/vim74-kaoriya-win32/vim74/plugin/snipMate.vim
@@ -1631,6 +1659,7 @@ if exists('*TriggerSnippet')
 endif
 
 " Snippets }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 " Vim Configure {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1669,6 +1698,7 @@ nnoremap <expr> <Leader>V  ( len(win_findbuf(buffer_number(g:color_buf_name1 . g
 " Vim Configure }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Other Key-Maps {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 nnoremap <leader>w :<C-u>w<CR>
@@ -1699,6 +1729,7 @@ nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
 " Other Key-Maps }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Clever-f Configuration {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let g:clever_f_smart_case=1			"
@@ -1725,6 +1756,7 @@ endfunction
 " Clever-f Configuration }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Transparency {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let g:my_transparency = 229
@@ -1748,6 +1780,7 @@ nnoremap <silent>       <C-PageDown> :exe 'se transparency=' . (&transparency ==
 com! Transparency echo printf(' Transparency = %4.1f%%', &transparency * 100 / 255.0)
 
 " Transparency }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
+
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1795,6 +1828,7 @@ function! GetKey()
   return nr2char(getchar())
 endfunction
 "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 
 
 " Push Pop Pos {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -1881,6 +1915,7 @@ com! PopPosAll :call PopPos_All()
 " Push Pop Pos }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Commnad Output Capture {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 command!
@@ -1919,13 +1954,14 @@ endfunction
 " Commnad Output Capture }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
+
 " Util {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
 function! TitleCase(str)
   return toupper(a:str[0]) . a:str[1:]
 endfunction
+
 " Util }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
-
-
 
 
 ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
