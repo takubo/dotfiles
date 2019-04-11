@@ -960,7 +960,8 @@ nmap     <silent> <BS><CR>     <BS><BS><CR>
 set diffopt+=iwhite
 
 " diff Close
-nnoremap dc :<C-u>diffoff<CR>
+nnoremap dc    :<C-u>diffoff<CR>
+nnoremap d<BS> :<C-u>diffoff<CR>
 
 " diff (all window) Quit
 nnoremap <silent> dq :<C-u>call PushPos_All() <Bar> exe 'windo diffoff' <Bar> call PopPos_All() <Bar> echo 'windo diffoff'<CR>
@@ -1047,6 +1048,7 @@ endfunction
 " Skip Terminal
 
 function! s:SkipTerm(direction)
+  "Window番号を指定されてら、そのWindowへ移動。
   if v:prevcount | return v:prevcount | endif
 
   "windowが2つしかないなら、もう一方へ移動することは自明なので、terminalであっても移動を許す。
@@ -1072,6 +1074,30 @@ endfunction
 nnoremap <BS> <C-w>
 
 "----------------------------------------------------------------------------------------
+" Split
+
+" Auto
+nnoremap <silent> <expr> <BS><BS>         ( <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
+nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
+"nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
+
+" Manual
+"nnoremap gu                        <C-w>s:setl noscrollbind<CR>
+"nnoremap U                         <C-w>n
+nnoremap <silent> _                <C-w>s:setl noscrollbind<CR>
+nnoremap <silent> g_               <C-w>n
+nnoremap <silent> <Bar>            <C-w>v:setl noscrollbind<CR>
+nnoremap <silent> g<Bar>           :<C-u>vnew<CR>
+
+"----------------------------------------------------------------------------------------
+" Reopen as Tab
+
+nnoremap <C-w><C-t> :<C-u>tab split<CR>
+tnoremap <C-w><C-t> <C-w>T
+
+" TODO diffのバッファも再現する。
+
+"----------------------------------------------------------------------------------------
 " Close
 
 nnoremap <silent> q         <C-w><C-c>
@@ -1087,102 +1113,52 @@ com! Kwbd let s:kwbd_bn = bufnr('%') | enew | exe 'bdel '. s:kwbd_bn | unlet s:k
 nnoremap <silent> <C-q><C-q> :<C-u>Kwbd<CR>
 
 "----------------------------------------------------------------------------------------
-" Reopen in Tab
-
-nnoremap <C-w><C-t> :<C-u>tab split<CR>
-tnoremap <C-w><C-t> <C-w>T
-
-"----------------------------------------------------------------------------------------
-" Split
-
-" Ration (Auto)
-nnoremap <silent> <expr> <BS><BS>         ( <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
-nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
-"nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
-
-" Force (Manual)
-nnoremap <silent> -                <C-w>s:setl noscrollbind<CR>
-nnoremap <silent> g-               <C-w>n
-nnoremap gu                        <C-w>s:setl noscrollbind<CR>
-nnoremap U                         <C-w>n
-nnoremap <silent> <Bar>            <C-w>v:setl noscrollbind<CR>
-nnoremap <silent> g<Bar>           :<C-u>vnew<CR>
-
-"----------------------------------------------------------------------------------------
 " Focus
 
 " Basic
-nnoremap <silent> <Space>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-nnoremap <silent> <S-Space>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+nnoremap <silent> <Space>   <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+nnoremap <silent> <S-Space> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 
 " Previouse
-nnoremap -         <C-w>p
+"nnoremap <Tab> <C-w>p
 
-" Terminal (Tab)
-nnoremap           <Tab>      <C-w>p
-nnoremap           <C-Tab>    <C-w>p
+" Terminal Windowから抜ける。
+nnoremap        <C-Tab> <C-w>p
 " Windowが１つしかないなら、Tabを抜ける。
-tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
+tnoremap <expr> <C-Tab> winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>p'
 
-"nnoremap <silent>  <Tab>      <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-"nnoremap <silent>  <S-Tab>    <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
-"nnoremap           <C-Tab>    <C-w>w
-"nnoremap           <S-C-Tab>  <C-w>W
-"tnoremap <expr>    <C-Tab>    winnr('$') == 1 ? '<C-w>:tabNext<CR>' : '<C-w>w'
-"tnoremap <expr>    <S-C-Tab>  winnr('$') == 1 ? '<C-w>:tabprevious<CR>' : '<C-w>W'
-
-nnoremap <silent>  <Left>     <C-w>h
-nnoremap <silent>  <Right>    <C-w>l
-nnoremap <silent>  <Down>     <C-w>j
-nnoremap <silent>  <Up>       <C-w>k
-nnoremap <silent>  <C-Left>   <C-w>h
-nnoremap <silent>  <C-Right>  <C-w>l
-nnoremap <silent>  <C-Down>   <C-w>j
-nnoremap <silent>  <C-Up>     <C-w>k
-tnoremap <silent>  <C-Left>   <C-w>h
-tnoremap <silent>  <C-Right>  <C-w>l
-tnoremap <silent>  <C-Down>   <C-w>j
-tnoremap <silent>  <C-Up>     <C-w>k
-
-" y quopdiixcvm.
-" y hjkl
 "----------------------------------------------------------------------------------------
 " Resize
 
-"nnoremap <silent> +         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> _         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> g_        <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
-"nnoremap <silent> (         <esc>3<C-w><
-"nnoremap <silent> g(        <esc>1<C-w>|
-"nnoremap <silent> )         <esc>3<C-w>>
-"nnoremap <silent> g)        <esc><C-w>|
+" 漸次
+nnoremap <silent> <C-j> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-k> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-h> <esc>3<C-w><
+nnoremap <silent> <C-l> <esc>3<C-w>>
 
-nnoremap <silent> <C-j>         <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-k>         <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-h>         <esc>3<C-w><
-nnoremap <silent> <C-l>         <esc>3<C-w>>
-nnoremap <silent> g+        <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> g_        <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> g(        <esc>1<C-w>|
-nnoremap <silent> g)        <esc><C-w>|
-
-nnoremap <silent> <A-o>    <C-l>
-
-tnoremap <silent> <up>	    <C-w>2+:<C-u>
-tnoremap <silent> <down>    <C-w>2-:<C-u>
-tnoremap <silent> <left>    <C-w>3<
-tnoremap <silent> <right>   <C-w>3>
+tnoremap <silent> <up>	  <C-w>1+:<C-u>call <SID>best_scrolloff()<CR>
+tnoremap <silent> <down>  <C-w>1-:<C-u>call <SID>best_scrolloff()<CR>
+tnoremap <silent> <left>  <C-w>3<
+tnoremap <silent> <right> <C-w>3>
 
 tnoremap <silent> <S-up>    <C-w>+:<C-u>
 tnoremap <silent> <S-down>  <C-w>-:<C-u>
 tnoremap <silent> <S-left>  <C-w><
 tnoremap <silent> <S-right> <C-w>>
 
-tnoremap <silent> <C-up>    <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
-tnoremap <silent> <C-down> 1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
-tnoremap <silent> <C-left> 1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
-tnoremap <silent> <C-right> <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
+" 補償
+nnoremap <silent> <A-o> <C-l>
+
+" 最小化・最大化
+nnoremap <silent> g<C-j> <esc><C-w>_:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> g<C-k> <esc>1<C-w>_:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> g<C-h> <esc>1<C-w>|
+nnoremap <silent> g<C-l> <esc><C-w>|
+
+tnoremap <silent> <C-up>     <C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+tnoremap <silent> <C-down>  1<C-w>_:<C-u>call		<SID>best_scrolloff()<CR>
+tnoremap <silent> <C-left>  1<C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
+tnoremap <silent> <C-right>  <C-w><bar>:<C-u>call	<SID>best_scrolloff()<CR>
 
 "----------------------------------------------------------------------------------------
 " Move
@@ -2204,7 +2180,7 @@ set wildmode=longest:full,full
 cnoremap <C-o> <C-\>e(getcmdtype() == '/' <Bar><Bar> getcmdtype() == '?') ? '\<' . getcmdline() . '\>' : getcmdline()<CR><Left><Left>
 
 nnoremap + :setl isk+=
-nnoremap _ :setl isk-=
+"nnoremap _ :setl isk-=
 nnoremap - :setl isk-=
 
 nnoremap <silent> <C-]> [c^:FuncNameStl<CR>
@@ -2272,3 +2248,12 @@ function! ProcTopUnderScore(word)
   endif
   return a:word
 endfunction
+
+
+
+nnoremap <silent> <C-b> <esc>3<C-w><
+nnoremap <silent> <C-f> <esc>3<C-w>>
+nnoremap <silent> <C-n> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <silent> <C-p> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+nnoremap <Tab>   gt
+nnoremap <S-Tab> gT
