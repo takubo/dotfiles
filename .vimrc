@@ -617,22 +617,7 @@ call EscEsc_Add('call clever_f#reset()')
 
 " Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-"? nnoremap <leader>/ /<Up>\<Bar>
-
-"? nnoremap ? /\<\><Left><Left>
-"? nnoremap <Bar> /<C-p>\<Bar>
-
-"nnoremap ! /<C-p>\\|<C-r><C-w><CR>
-"nnoremap ! /<C-R>*<CR>
-
-"? __nnoremap _ /\<<C-R>*\><CR>
-
-"nnoremap <leader>* /\<_\?<C-r><C-w>\><CR>
-"nnoremap <expr> <leader>* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
-"nnoremap <expr> <leader># (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
-
-"nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
-
+"----------------------------------------------------------------------------------------
 nnoremap <expr> *  (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
 nnoremap <expr> #  (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
 
@@ -649,28 +634,28 @@ nnoremap        ?  /<C-p>\<Bar>
 nnoremap        ?  /\M
 nnoremap    <Bar>  /<C-p>\<Bar>\<\><Left><Left>
 
-"cnoremap <C-g> \<\><Left><Left>
+"----------------------------------------------------------------------------------------
+"??? let g:MigemoIsSlash = 0
+"??? if has('migemo')
+"???   function! s:toggle_migemo_search()
+"???     let g:MigemoIsSlash = !g:MigemoIsSlash
+"???     if g:MigemoIsSlash
+"???       nnoremap / g/
+"???       nnoremap ? /
+"???       let g:clever_f_use_migemo=1
+"???     else
+"???       nnoremap / /
+"???       nnoremap ? g/
+"???       let g:clever_f_use_migemo=0
+"???     endif
+"???   endfunction
+"??? 
+"???  "nnoremap / /
+"???   nnoremap ? g/
+"???   nnoremap <silent> <leader>/ :<C-u>call <SID>toggle_migemo_search()<CR>
+"??? endif
 
-let g:MigemoIsSlash = 0
-if has('migemo')
-  function! s:toggle_migemo_search()
-    let g:MigemoIsSlash = !g:MigemoIsSlash
-    if g:MigemoIsSlash
-      nnoremap / g/
-      nnoremap ? /
-      let g:clever_f_use_migemo=1
-    else
-      nnoremap / /
-      nnoremap ? g/
-      let g:clever_f_use_migemo=0
-    endif
-  endfunction
-
- "nnoremap / /
-  nnoremap ? g/
-  nnoremap <silent> <leader>/ :<C-u>call <SID>toggle_migemo_search()<CR>
-endif
-
+"----------------------------------------------------------------------------------------
 " /			/				o
 " /\<\>			?				 
 " *			*				o
@@ -688,14 +673,7 @@ endif
 " 入力 カーソル下の単語 クリップボード 前回
 " Enter要 不要
 
-function! s:search_str_num()
-  let g:save_lang=$LANG
-  let $LANG='C'
-  PushPos
-  exe '%s!' . @/ . '!!gn'
-  PopPos
-  let $LANG=g:save_lang
-endfunction
+"----------------------------------------------------------------------------------------
 function! s:search_str_num()
   let g:save_lang=$LANG
   let $LANG='C'
@@ -706,14 +684,27 @@ function! s:search_str_num()
   let $LANG=g:save_lang
 endfunction
 com! SearchStrNum call <SID>search_str_num()
-"nnoremap <silent> <leader>n :<C-u>call <SID>search_str_num()<CR>
 
 nnoremap <silent> n n:SearchStrNum<CR>
 nnoremap <silent> N N:SearchStrNum<CR>
 
+"----------------------------------------------------------------------------------------
 nnoremap <Leader>* ^y$:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
 vnoremap <Leader>*   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
 vnoremap         *   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
+
+"----------------------------------------------------------------------------------------
+"? nnoremap <leader>/ /<Up>\<Bar>
+"? nnoremap ? /\<\><Left><Left>
+"? nnoremap <Bar> /<C-p>\<Bar>
+"? nnoremap ! /<C-p>\\|<C-r><C-w><CR>
+"? nnoremap ! /<C-R>*<CR>
+"? __nnoremap _ /\<<C-R>*\><CR>
+"nnoremap <leader>* /\<_\?<C-r><C-w>\><CR>
+"nnoremap <expr> <leader>* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+"nnoremap <expr> <leader># (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+"nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
+"cnoremap <C-g> \<\><Left><Left>
 
 " Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
