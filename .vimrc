@@ -618,21 +618,70 @@ call EscEsc_Add('call clever_f#reset()')
 " Search {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 "----------------------------------------------------------------------------------------
-nnoremap <expr> *  (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
-nnoremap <expr> #  (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+if 0
+" 単語   新規 動く	*
+" 単語   新規 留まる	g*	g8
+" 単語   追加 動く	g&	g7
+" 単語   追加 留まる	&
+" 非単語 新規 動く	#
+" 非単語 新規 留まる	g#	g3
+" 非単語 追加 動く	g@	g2
+" 非単語 追加 留まる	@
+"----------------------------------------------------------------------------------------
+else
+" 単語   新規 動く	*
+" 単語   追加 動く	&
+" 非単語 新規 動く	#
+" 非単語 追加 動く	@
+  nnoremap <expr> *  (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+  nnoremap <expr> #  (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+  nnoremap <expr> &  '/<C-p>\\|\<' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '\><CR>'
+  nnoremap <expr> @  '/<C-p>\\|' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '<CR>'
+endif
 
-nnoremap       g*  *
-nnoremap       g#  g*
+"----------------------------------------------------------------------------------------
+function! s:search_str_num()
+  let g:save_lang=$LANG
+  let $LANG='C'
+  PushPos
+  let num = CmdOut("silent exe '%s!' . @/ . '!!gn'")
+  PopPos
+  echo '/' . @/ num
+  let $LANG=g:save_lang
+endfunction
+com! SearchStrNum call <SID>search_str_num()
 
-nnoremap <expr> !  '/<C-p>\\|\<' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '\><CR>'
-nnoremap <expr> &  '/<C-p>\\|' . ((match(expand("<cword>"), '_') == 0) ? ('_\?' . substitute(expand("<cword>"), '^_', '', '')) : ('_\?<C-r><C-w>')) . '<CR>'
+nnoremap <silent> n n:SearchStrNum<CR>
+nnoremap <silent> N N:SearchStrNum<CR>
 
-nnoremap       g!  /<C-p>\\|\<<C-r><C-w>\><CR>
-nnoremap       g&  /<C-p>\\|<C-r><C-w><CR>
+"----------------------------------------------------------------------------------------
+nnoremap <Leader>* ^y$:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
+vnoremap <Leader>*   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
+vnoremap         *   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
 
-nnoremap        ?  /<C-p>\<Bar>
-nnoremap        ?  /\M
-nnoremap    <Bar>  /<C-p>\<Bar>\<\><Left><Left>
+"----------------------------------------------------------------------------------------
+"? nnoremap <leader>/ /<Up>\<Bar>
+"? nnoremap ? /\<\><Left><Left>
+"? nnoremap <Bar> /<C-p>\<Bar>
+"? nnoremap ! /<C-p>\\|<C-r><C-w><CR>
+"? nnoremap ! /<C-R>*<CR>
+"? __nnoremap _ /\<<C-R>*\><CR>
+"nnoremap <leader>* /\<_\?<C-r><C-w>\><CR>
+"nnoremap <expr> <leader>* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
+"nnoremap <expr> <leader># (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
+"nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
+"cnoremap <C-g> \<\><Left><Left>
+
+"----------------------------------------------------------------------------------------
+"nnoremap       g*  *
+"nnoremap       g#  g*
+
+"nnoremap       g!  /<C-p>\\|\<<C-r><C-w>\><CR>
+"nnoremap       g&  /<C-p>\\|<C-r><C-w><CR>
+
+"nnoremap        ?  /<C-p>\<Bar>
+"nnoremap        ?  /\M
+"nnoremap    <Bar>  /<C-p>\<Bar>\<\><Left><Left>
 
 "----------------------------------------------------------------------------------------
 "??? let g:MigemoIsSlash = 0
@@ -672,39 +721,6 @@ nnoremap    <Bar>  /<C-p>\<Bar>\<\><Left><Left>
 " 通常 単語囲み
 " 入力 カーソル下の単語 クリップボード 前回
 " Enter要 不要
-
-"----------------------------------------------------------------------------------------
-function! s:search_str_num()
-  let g:save_lang=$LANG
-  let $LANG='C'
-  PushPos
-  let num = CmdOut("silent exe '%s!' . @/ . '!!gn'")
-  PopPos
-  echo '/' . @/ num
-  let $LANG=g:save_lang
-endfunction
-com! SearchStrNum call <SID>search_str_num()
-
-nnoremap <silent> n n:SearchStrNum<CR>
-nnoremap <silent> N N:SearchStrNum<CR>
-
-"----------------------------------------------------------------------------------------
-nnoremap <Leader>* ^y$:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
-vnoremap <Leader>*   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
-vnoremap         *   y:let lstmp = @"<CR>/\C\V<C-r>=escape(lstmp, '/\|\\')<CR><CR>
-
-"----------------------------------------------------------------------------------------
-"? nnoremap <leader>/ /<Up>\<Bar>
-"? nnoremap ? /\<\><Left><Left>
-"? nnoremap <Bar> /<C-p>\<Bar>
-"? nnoremap ! /<C-p>\\|<C-r><C-w><CR>
-"? nnoremap ! /<C-R>*<CR>
-"? __nnoremap _ /\<<C-R>*\><CR>
-"nnoremap <leader>* /\<_\?<C-r><C-w>\><CR>
-"nnoremap <expr> <leader>* (match(expand("<cword>"), '_') == 0) ? ('/\<_\?' . substitute(expand("<cword>"), '^_', '', '') . '\><CR>') : ('/\<_\?<C-r><C-w>\><CR>')
-"nnoremap <expr> <leader># (match(expand("<cword>"), '_') == 0) ? ('/_\?' . substitute(expand("<cword>"), '^_', '', '') . '<CR>') : ('/_\?<C-r><C-w><CR>')
-"nnoremap ! /<C-p>\\|\<<C-r><C-w>\><CR>
-"cnoremap <C-g> \<\><Left><Left>
 
 " Search }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
