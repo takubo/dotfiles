@@ -1085,12 +1085,12 @@ nnoremap <BS> <C-w>
 
 " Auto
 nnoremap <silent> <expr> <BS><BS>         ( <SID>WindowRatio() >= 0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
-nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
+nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() >= 0 ? ":\<C-u>vnew\<CR>" : "\<C-w>n" )
+"nnoremap <silent> <expr> <Leader><Leader> ( <SID>WindowRatio() <  0 ? "\<C-w>v" : "\<C-w>s" ) . ':diffoff<CR>'
 "nnoremap <BS><CR> " Tag, Jump, and Unified CR を参照。
 
 " Manual
 "nnoremap gu                        <C-w>s:setl noscrollbind<CR>
-"nnoremap U                         <C-w>n
 nnoremap <silent> _                <C-w>s:setl noscrollbind<CR>
 nnoremap <silent> g_               <C-w>n
 nnoremap <silent> <Bar>            <C-w>v:setl noscrollbind<CR>
@@ -1270,8 +1270,6 @@ nnoremap <A-b> :exe tabpagenr() == 1              ? 'tabmove $' : 'tabmove -1'<C
 
 function! s:make_tabpage_label(n)
   " カレントタブページかどうかでハイライトを切り替える
- "let hi = a:n is tabpagenr() ? '%#SLFileName#' : '%#TabLine#'
- "let hi = a:n is tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
   let hi = a:n is tabpagenr() ? '%#Statusline#' : '%#TabLine#'
 
   if s:TablineStatus == 1
@@ -1284,7 +1282,7 @@ function! s:make_tabpage_label(n)
   " タブ内のバッファのリスト
   let bufnrs = tabpagebuflist(a:n)
 
-  " バッファが複数あったらバッファ数を表示
+  " バッファ数
   let num = '(' . len(bufnrs) . ')'
 
   " タブ内に変更ありのバッファがあったら '+' を付ける
@@ -1301,8 +1299,8 @@ function! s:make_tabpage_label(n)
   " カレントバッファ
   let curbufnr = bufnrs[tabpagewinnr(a:n) - 1]  " tabpagewinnr() は 1 origin
   let fname = pathshorten(bufname(curbufnr))
-  "let fname = pathshorten(expand('#' . curbufnr . ':p'))
-  let fname = fname == '' ? 'No Name' : fname
+ "let fname = pathshorten(expand('#' . curbufnr . ':p'))
+  let fname = fname == '' ? 'No Name' : fname  " 無名バッファは、バッファ名が出ない。
 
   let label = no . ' ' . num . (s:TablineStatus != 4 ? mod : '') . ' '  . fname
 
@@ -1310,28 +1308,24 @@ function! s:make_tabpage_label(n)
 endfunction
 
 function! TabLineStr()
+  " Tab Label
   let tab_labels = map(range(1, tabpagenr('$')), 's:make_tabpage_label(v:val)')
   let sep = '%#SLFileName# | '  " タブ間の区切り
   let tabpages = sep . join(tab_labels, sep) . sep . '%#TabLineFill#%T'
 
+  " Left
   let left = ''
-  let left .= '%#Statusline#   ' . strftime('%Y/%m/%d (%a) %X') . '   '
- "let left .= '%#SLFileName#  ' . strftime('%Y/%m/%d (%a) %X') . ' %#Statusline#  '
+  let left .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . '  '
   let left .= '%#SLFileName# ' . g:BatteryInfo . ' '
   let left .= '%#Statusline#  '
-  let left .= '%##  '
 
+  " Right
   let right = ''
   let right .= "%#Statusline#  "
-  let right .= "%#Statusline#" . "%#SLFileName# %{'[ '.&diffopt.' ]'} "
-  let right .= '%#Statusline#  '
-  let right .= '%#Statusline#  '
-  let right .= '%#Statusline# ' . strftime('%Y/%m/%d (%a) %X') . ' '
- "let right .= '%#SLFileName# ' . strftime('%Y/%m/%d (%a) %X') . ' '
-  let right .= '%#Statusline# '
-  let right .= '%##'
+  let right .= "%#SLFileName# %{'[ '. substitute(&diffopt, ',', ', ', 'g') . ' ]'} "
+  let right .= '%#Statusline#  ' . strftime('%Y/%m/%d (%a) %X') . '  '
 
-  return left . '  %<' . tabpages . '%=  ' . right
+  return left . '%##    %<' . tabpages . '%=  ' . right
 endfunction
 
 "----------------------------------------------------------------------------------------
@@ -1350,12 +1344,12 @@ let s:UpdateTablineInterval = 1000
 let TimerTabline = timer_start(s:UpdateTablineInterval, 'UpdateTabline', {'repeat': -1})
 
 "----------------------------------------------------------------------------------------
-" Switch TabLine Contents
+" Switch TabLine Status
 
 let s:TablineStatusNum = 6
-let s:TablineStatus = 5 - 1  " 初回のtoggle_tabline呼び出しがあるので、ここは本来値-1を設定。
+let s:TablineStatus = 5 - 1  " 初回のToggleTabline呼び出しがあるので、ここは本来値-1を設定。
 
-function! s:toggle_tabline()
+function! s:ToggleTabline()
   let s:TablineStatus = ( s:TablineStatus + 1 ) % s:TablineStatusNum
   if s:TablineStatus == 0
     set showtabline=0
@@ -1366,9 +1360,10 @@ function! s:toggle_tabline()
   echo 'TablineStatus' s:TablineStatus
 endfunction
 
-silent call <SID>toggle_tabline()
+" 初期設定
+silent call <SID>ToggleTabline()
 
-nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
+nnoremap <silent> <leader>= :<C-u>call <SID>ToggleTabline()<CR>
 
 " Tabline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -1376,57 +1371,8 @@ nnoremap <silent> <leader>= :<C-u>call <SID>toggle_tabline()<CR>
 
 " Statusline {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-function! SetDefaultStatusline(fullpath)
-
-  let s:stl = "  "
-  let s:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
-  let s:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
-
-  if a:fullpath
-    let s:stl .= "%<"
-    let s:stl .= "%##%#SLFileName# %F "
-  else
-    let s:stl .= "%##%#SLFileName# %t "
-    let s:stl .= "%<"
-  endif
-
-  " ===== Separate Left Right =====
-  let s:stl .= "%#SLFileName#%="
-  " ===== Separate Left Right =====
-
-  let s:stl .= "%## %4{&ft==''?'    ':&ft}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
-
-  let s:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
- "let s:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
-  let s:stl .= "%1{c_jk_local!=0?'L':'G'} %1{&l:wrap?'<>':'>>'} %{g:clever_f_use_migemo?'(M)':'(F)'} %4{&iminsert?'Jpn':'Code'} "
-
-  let s:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
-
-  let s:stl .= "%## %3p%% [%5L] "
- "let s:stl .= "%## %3p%%  %5L  "
-  if 0
-    let s:stl .= "%## %5l L, %3v C "
-  endif
-
-  call RestoreDefaultStatusline(0)
-endfunction
-
-function! RestoreDefaultStatusline(dummy)
-  call s:SetStatusline(s:stl, '', -1)
-  let cur_win = winnr()
-  windo if exists('w:stl') | let &l:stl = w:stl | unlet w:stl | endif
-  " Localしか設定してないときは、全WindowのStlを再設定するより、if existsの方が速いか？
-  "windo let &l:stl = getwinvar(winnr(), 'stl', '')
-  silent exe cur_win . 'wincmd w'
-endfunction
-
-function! SetAltStatusline(stl, local, time)
-  call s:SetStatusline(a:stl, a:local, a:time)
-endfunction
-
-function! AddAltStatusline(stl, local, time)
-  call s:SetStatusline((a:local == 'l' ? &l:stl : &stl) . a:stl, a:local, a:time)
-endfunction
+"----------------------------------------------------------------------------------------
+" Set Statusline
 
 function! s:SetStatusline(stl, local, time)
   " 旧タイマの削除
@@ -1463,11 +1409,72 @@ function! s:SetStatusline(stl, local, time)
   endif
 endfunction
 
+function! RestoreDefaultStatusline(dummy)
+  call s:SetStatusline(s:stl, '', -1)
+  let cur_win = winnr()
+  windo if exists('w:stl') | let &l:stl = w:stl | unlet w:stl | endif
+  " Localしか設定してないときは、全WindowのStlを再設定するより、if existsの方が速いか？
+  "windo let &l:stl = getwinvar(winnr(), 'stl', '')
+  silent exe cur_win . 'wincmd w'
+endfunction
+
+"----------------------------------------------------------------------------------------
+" Make Default Statusline
+
+function! s:SetDefaultStatusline(fullpath)
+
+  let s:stl = "  "
+  let s:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
+  let s:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
+
+  if a:fullpath
+    let s:stl .= "%<"
+    let s:stl .= "%##%#SLFileName# %F "
+  else
+    let s:stl .= "%##%#SLFileName# %t "
+    let s:stl .= "%<"
+  endif
+
+  " ===== Separate Left Right =====
+  let s:stl .= "%#SLFileName#%="
+  " ===== Separate Left Right =====
+
+  let s:stl .= "%## %-4{&ft==''?'    ':&ft}  %-5{&fenc==''?'     ':&fenc}  %4{&ff} "
+
+  let s:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
+ "let s:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
+  let s:stl .= "%1{c_jk_local!=0?'L':'G'} %1{&l:wrap?'<>':'>>'} %{g:clever_f_use_migemo?'(M)':'(F)'} %4{&iminsert?'Jpn':'Code'} "
+
+  let s:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
+
+  let s:stl .= "%## %3p%% [%5L] "
+ "let s:stl .= "%## %3p%%  %5L  "
+  if 0
+    let s:stl .= "%## %5l L, %3v C "
+  endif
+
+  call RestoreDefaultStatusline(0)
+endfunction
+
+"----------------------------------------------------------------------------------------
+" Switch Statusline Contents
+
 let g:stl_fullpath = v:false
-nnoremap <silent> <Leader>- :<C-u>let g:stl_fullpath = !g:stl_fullpath <Bar> call SetDefaultStatusline(g:stl_fullpath)<CR>
+nnoremap <silent> <Leader>- :<C-u>let g:stl_fullpath = !g:stl_fullpath <Bar> call <SID>SetDefaultStatusline(g:stl_fullpath)<CR>
 
 " 初期設定のために1回は呼び出す。
-call SetDefaultStatusline(g:stl_fullpath)
+call s:SetDefaultStatusline(g:stl_fullpath)
+
+"----------------------------------------------------------------------------------------
+" Alt Statusline API
+
+function! SetAltStatusline(stl, local, time)
+  call s:SetStatusline(a:stl, a:local, a:time)
+endfunction
+
+function! AddAltStatusline(stl, local, time)
+  call s:SetStatusline((a:local == 'l' ? &l:stl : &stl) . a:stl, a:local, a:time)
+endfunction
 
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -2257,10 +2264,23 @@ function! ProcTopUnderScore(word)
 endfunction
 
 
+exe 'set transparency=' . g:my_transparency
 
-nnoremap <silent> <C-b> <esc>3<C-w><
-nnoremap <silent> <C-f> <esc>3<C-w>>
-nnoremap <silent> <C-n> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <silent> <C-p> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
-nnoremap <Tab>   gt
-nnoremap <S-Tab> gT
+
+"nnoremap <silent> <C-b> <esc>3<C-w><
+"nnoremap <silent> <C-f> <esc>3<C-w>>
+"nnoremap <silent> <C-n> <esc>1<C-w>+:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <silent> <C-p> <esc>1<C-w>-:<C-u>call <SID>best_scrolloff()<CR>
+"nnoremap <Tab>   gt
+"nnoremap <S-Tab> gT
+nnoremap <silent> <C-]> g;:FuncNameStl<CR>
+nnoremap <silent> <C-\> g,:FuncNameStl<CR>
+nnoremap <silent> ( g;:FuncNameStl<CR>
+nnoremap <silent> ) g,:FuncNameStl<CR>
+"nnoremap <silent> <C-p> g;:FuncNameStl<CR>
+"nnoremap <silent> <C-n> g,:FuncNameStl<CR>
+
+nnoremap U                         <C-w>n
+nnoremap <silent> <C-u>            :<C-u>vnew<CR>
+nnoremap <C-n>                     <C-w>n
+nnoremap <silent> <C-p>            :<C-u>vnew<CR>
