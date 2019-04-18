@@ -1723,7 +1723,7 @@ nnoremap <silent> gf :<C-u>aboveleft sp<CR>gF
 " Clever-f Configuration {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
 let g:clever_f_smart_case=1			"
-let g:clever_f_use_migemo=0			"
+let g:clever_f_use_migemo=1			"
 "let g:clever_f_fix_key_direction=1		"
 let g:clever_f_chars_match_any_signs = '\\'	" 任意の記号にマッチする文字を設定する
 "let g:clever_f_chars_match_any_signs = ';'	" 任意の記号にマッチする文字を設定する
@@ -2284,3 +2284,19 @@ nnoremap U                         <C-w>n
 nnoremap <silent> <C-u>            :<C-u>vnew<CR>
 nnoremap <C-n>                     <C-w>n
 nnoremap <silent> <C-p>            :<C-u>vnew<CR>
+
+
+set listchars+=extends:>,precedes:<
+set sidescroll=1
+set sidescrolloff=5
+nnoremap ( zh
+nnoremap ) zl
+nnoremap g4 g$
+nnoremap g6 g^
+
+function! Factorial(n)
+  python3 import math
+  return pyxeval('math.factorial(' . a:n . ')')
+endfunction
+
+nnoremap <C-y> :<C-u>registers<CR>:put<Space>
