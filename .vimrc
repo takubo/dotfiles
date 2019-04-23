@@ -511,6 +511,12 @@ vnoremap <silent> <S-Space> <C-u>
 let g:comfortable_motion_friction = 90.0
 let g:comfortable_motion_air_drag = 6.0
 let g:comfortable_motion_impulse_multiplier = 3.8
+
+let g:comfortable_motion_friction = 250.0
+let g:comfortable_motion_air_drag = 25.0
+let g:comfortable_motion_air_drag = 45.0
+let g:comfortable_motion_impulse_multiplier = 15.8
+
 nnoremap <silent> gj :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
 nnoremap <silent> gk :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
 
@@ -2299,4 +2305,13 @@ function! Factorial(n)
   return pyxeval('math.factorial(' . a:n . ')')
 endfunction
 
-nnoremap <C-y> :<C-u>registers<CR>:put<Space>
+"nnoremap <C-y> :<C-u>registers<CR>:put<Space>
+
+
+function! ZZ()
+  let n = 25
+  for i in range(n)
+    execute "normal! " . 1 . g:comfortable_motion_scroll_down_key
+    redraw
+  endfor
+endfunction
