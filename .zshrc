@@ -464,7 +464,7 @@ typeset -A abbreviations
 abbreviations=(
     "A"    "| awk '"
     "B"    "| bc -l"
-    "C"    "| cat -n"
+    "D"    "| cat -n"
 #   "CN"   "| cat -n"
     "DX"   "| d2x -s"
     "LC"   "LANG=C"
@@ -616,7 +616,7 @@ function aawk {
 	LBUFFER="AWK 'BEGIN{ print "
 	RBUFFER=" }'"
     else
-	zle end-of-line
+	zle backward-char
     fi
 }
 zle -N aawk
@@ -775,6 +775,7 @@ setopt nonomatch
 alias awk='awk -M'
 
 export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36'
+export LESS='-i -M -R'
 
 function tf {
 	unset tf
@@ -790,3 +791,7 @@ alias dog='source-highlight-esc.sh'
 
 
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+
+# for vim terminal
+LANG=ja_JP.UTF-8
