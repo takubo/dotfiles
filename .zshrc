@@ -1,19 +1,58 @@
 #!/bin/zsh
 
-#bindkey -v
 
-function is-null {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
-	`bindkey ${KEYS}`
-	return ${current}
-    else
-	`bindkey ${KEYS}`
-	return ${current}
-    fi
+
+
+######## Utilities ########
+# 行頭
+# パイプ後
+# セミコロン後
+# && または || 後
+# { または ( 後
+
+function is-head {
+	str=$1
+	case `echo -n ${str%%[ 	]*}` in
+		# 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
+		'' | *\| | *\; | *'&&' | *'||' | *\{ | *\( )
+			#echo H
+			true
+			;;
+		* )
+			#echo K
+			false
+			;;
+	esac
 }
 
-#autoload zkbd
+function ms {
+	ls_len="`ls -1 $@ | sed '
+	$ {
+		# プロンプトの分
+		i0
+		i0
+		i0
+		i0
+	}
+	' |  wc -l`"
+
+	if [ ${ls_len} -le ${LINES} ] ; then
+		# if [ -p /dev/stdout ] ; then
+			# ls -hv --color=auto -1 "$@" | cat -n
+		# else
+			ls -hv --color=always -1 "$@" | cat -n
+		# fi
+	else
+		ls -hv  --color=auto "$@"
+	fi
+}
+
+
+
+######## Key (zkbd) ######## TODO
+
+#autoload -Uz zkbd
+
 #function zkbd_file() {
 #    [[ -f ~/.zkbd/${TERM}-${VENDOR}-${OSTYPE} ]] && printf '%s' ~/".zkbd/${TERM}-${VENDOR}-${OSTYPE}" && return 0
 #	[[ -f ~/.zkbd/${TERM}-${DISPLAY}          ]] && printf '%s' ~/".zkbd/${TERM}-${DISPLAY}"          && return 0
@@ -35,26 +74,31 @@ function is-null {
 #    fi
 #    unfunction zkbd_file; unset keyfile ret
 
+
+
+
+######## Key (no zkbd) ########
+
 # create a zkbd compatible hash;
 # to add other keys to this hash, see: man 5 terminfo
 typeset -A key
 
 case `uname` in
-    *CYGWIN* )
-	key[Home]="[H"
-	;;
-    * )
-	key[Home]=${terminfo[khome]}
-	key[End]=${terminfo[kend]}
-	key[Insert]=${terminfo[kich1]}
-	key[Delete]=${terminfo[kdch1]}
-	key[Up]=${terminfo[kcuu1]}
-	key[Down]=${terminfo[kcud1]}
-	key[Left]=${terminfo[kcub1]}
-	key[Right]=${terminfo[kcuf1]}
-	key[PageUp]=${terminfo[kpp]}
-	key[PageDown]=${terminfo[knp]}
-	;;
+	*CYGWIN* )
+		key[Home]="[H"
+		;;
+	* )
+		key[Home]=${terminfo[khome]}
+		key[End]=${terminfo[kend]}
+		key[Insert]=${terminfo[kich1]}
+		key[Delete]=${terminfo[kdch1]}
+		key[Up]=${terminfo[kcuu1]}
+		key[Down]=${terminfo[kcud1]}
+		key[Left]=${terminfo[kcub1]}
+		key[Right]=${terminfo[kcuf1]}
+		key[PageUp]=${terminfo[kpp]}
+		key[PageDown]=${terminfo[knp]}
+		;;
 esac
 
 
@@ -62,38 +106,35 @@ esac
 
 ######## Prompt ########
 
-autoload colors
-colors
+autoload -Uz colors && colors
+
 case `uname` in
-    *CYGWIN* )
-	PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[green]}%}%m%u %{${fg[cyan]}%}%~%{${fg[red]}%}
+	*CYGWIN* )
+		PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M} %n%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
 %%%{${reset_color}%} "
-	PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
+		;;
+	* )
+		PROMPT="%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[green]}%}%m%u %{${fg[cyan]}%}%~%{${fg[red]}%}
 %%%{${reset_color}%} "
-	PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
+		PROMPT="%U%{${fg[red]}%}[%j] %w %D{%H:%M} %n%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
 %%%{${reset_color}%} "
-	;;
-    * )
-	PROMPT="%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[green]}%}%m%u %{${fg[cyan]}%}%~%{${fg[red]}%}
-%%%{${reset_color}%} "
-	;;
+		;;
 esac
 
 
 
 
-######## PATH ########
+######## PATH ######## TODO
 
 PATH=~/bin:$PATH
 
 
 
 
-######## Completion ########
+######## Completion ######## TODO
 
 ## 初期化
-autoload -U compinit
-compinit
+autoload -Uz compinit && compinit -C
 
 ## 補完侯補をメニューから選択する。
 ### select=2: 補完候補を一覧から選択する。
@@ -149,221 +190,183 @@ zstyle ':completion:sudo:*' environ PATH="$SUDO_PATH:$PATH"
 
 ## ヒストリを保存するファイル
 HISTFILE=~/.zsh_history
-## メモリ上のヒストリ数。
+
 ## 大きな数を指定してすべてのヒストリを保存するようにしている。
+## メモリ上のヒストリ数。
 HISTSIZE=4294967295
 ## 保存するヒストリ数
 SAVEHIST=$HISTSIZE
+
 ## ヒストリファイルにコマンドラインだけではなく実行時刻と実行時間も保存する。
 setopt extended_history
 ## 同じコマンドラインを連続で実行した場合はヒストリに登録しない。
 setopt hist_ignore_dups
-## スペースで始まるコマンドラインはヒストリに追加しない。
-#setopt hist_ignore_space
+
 ## すぐにヒストリファイルに追記する。
 setopt inc_append_history
 ## zshプロセス間でヒストリを共有する。
 setopt share_history
+
 ## C-sでのヒストリ検索が潰されてしまうため、出力停止・開始用にC-s/C-qを使わない。
 setopt no_flow_control
 
-## コマンド履歴検索
-#Ctrl-P/Ctrl-Nで、入力中の文字から始まるコマンドの履歴が表示される。
-#"l"と入力した状態でCtrl-Pを押すと、"ls"や"less"が次々に表示されていく。
-autoload history-search-end
+## 入力中の文字から始まるコマンドの履歴が表示される。
+autoload -Uz history-search-end
 zle -N history-beginning-search-backward-end history-search-end
 zle -N history-beginning-search-forward-end history-search-end
 bindkey "^P" history-beginning-search-backward-end
+#bindkey "^[[A" history-beginning-search-backward-end
 bindkey "^N" history-beginning-search-forward-end
-
-bindkey "^[[A" history-beginning-search-backward-end
-bindkey "^[[B" history-beginning-search-forward-end
+#bindkey "^[[B" history-beginning-search-forward-end
 
 
 
 
 ######## Changing Directly ########
 
-## コマンド名がディレクトリ時にcdする
-setopt auto_cd
-## # cd時に自動的にpushdする。"cd -[Tab]"で移動履歴を一覧
+## # cd時に自動的にpushdする。"cd -[Tab]"で移動履歴を一覧できる。
 setopt auto_pushd
 
-## 行頭の*で "cd ~" 実行
-function ghq2 {
-    local current=${BUFFER}
-    if [ "${current}" = "" ] ; then
+## コマンド名がディレクトリ時にcdする
+setopt auto_cd
+
+## トップでの '^' で 'cd ../' 実行
+function chdir-up-dir {
+	if [ "${BUFFER}" = "" ] ; then
+		BUFFER='cd ../'
+		zle accept-line
+	else
+		zle self-insert
+	fi
+}
+zle -N chdir-up-dir
+bindkey "\^" chdir-up-dir
+
+## トップでの '-' で 'cd -' 実行
+function chdir-prev-dir {
+	if [ "${BUFFER}" = "" ] ; then
+		BUFFER="cd -"
+		zle accept-line
+	else
+		zle self-insert
+	fi
+}
+zle -N chdir-prev-dir
+bindkey "\-" chdir-prev-dir
+
+## '^]' で 'popd' 実行
+function chdir-pop-dir {
 	zle push-input
-	BUFFER="cd ~"
+	BUFFER="popd"
 	zle accept-line
-    else
-	zle self-insert
-    fi
 }
-zle -N ghq2
-bindkey "\*" ghq2
+zle -N chdir-pop-dir
+bindkey "^\]" chdir-pop-dir
 
-#? ## 行頭の^で "cd .." 実行
-#? function up-dir {
-#?     local current=${BUFFER}
-#?     if [ "${current}" = "" ] ; then
-#? 	zle push-input
-#? 	BUFFER="cd .."
-#? 	zle accept-line
-#?     else
-#? 	zle self-insert
-#?     fi
-#? }
-#? zle -N up-dir
-#? bindkey "\^" up-dir
-
-## ^]で "popd" 実行
-function prev-dir {
-    zle push-input
-    BUFFER="popd"
-    zle accept-line
+## トップでの '[' で 'popd' 実行
+function chdir-popd {
+	if [ "${BUFFER}" = "" ] ; then
+		BUFFER="popd"
+		zle accept-line
+	else
+		zle self-insert
+	fi
 }
-zle -N prev-dir
-bindkey "^\]" prev-dir
+zle -N chdir-popd
+bindkey "[" chdir-popd
 
-## \tで "cd " 入力
+## トップでの 'Tab' で 'cd ' 入力
 function input-cd {
-    if [ "${BUFFER}" = "" ] ; then
-        zle push-input
-        LBUFFER="cd "
-    else
-        zle expand-or-complete
-    fi
+	if [ "${BUFFER}" = "" ] ; then
+		zle push-input
+		LBUFFER="cd "
+	else
+		zle expand-or-complete
+	fi
 }
 zle -N input-cd
 bindkey "\t" input-cd
-
-## 行頭の ; で "ls" を入力
-function input-ls {
-    if [ "${BUFFER}" = "" ] ; then
-        #? LBUFFER="ls "
-        LBUFFER="ms "
-	zle accept-line
-    else
-        zle self-insert
-    fi
-}
-zle -N input-ls
-bindkey ";" input-ls
 
 
 
 
 ######## ZLE ########
-autoload zed
+
+autoload -Uz zed
 
 # 改行を入力しやすくする
-bindkey "^j" self-insert
-bindkey -s "^[^m" "\n"
+bindkey "^j" self-insert    # ^jで改行(文字)を入力
+bindkey -s "^[^m" "\n"      # ^mでEnter
 
 ## jjで "$_" 入力
-function input-dollar-underbar {
-    LBUFFER=${LBUFFER}'$_'
+function input-dollar-underscore {
+	LBUFFER=${LBUFFER}'$_'
 }
-zle -N input-dollar-underbar
-bindkey "jj" input-dollar-underbar
+zle -N input-dollar-underscore
+bindkey "jj" input-dollar-underscore
 
 ## kkで "$" 入力
 function input-dollar {
-    LBUFFER=${LBUFFER}'$'
+	LBUFFER=${LBUFFER}'$'
 }
 zle -N input-dollar
 bindkey "kk" input-dollar
 
-## 行頭/パイプ後/セミコロン後の . で './' 入力
+## ヘッドでの '.' で './' 入力
 function input-curdir {
-    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-    #case `echo -n ${LBUFFER[-1]%%(#)[ 	]#}` in
-    #case `echo ${LBUFFER} | sed 's%[ 	]*$%%'` in
-    case `echo -n ${LBUFFER%%[ 	]}` in
-        *\| | *\; | '' ) LBUFFER=${LBUFFER}'./' ;;
-        * )              zle self-insert ;;
-    esac
+	if is-head ${LBUFFER} ; then
+		LBUFFER=${LBUFFER}'./'
+	else 
+		zle self-insert
+	fi
 }
 zle -N input-curdir
 bindkey "." input-curdir
 
-## ~で '~/' 入力
+## ヘッドでの '~' で '~/' 入力
 function input-homedir {
-    # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-    case `echo -n ${LBUFFER[-1]}` in
-        ' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'~/' ;;
-    #case `echo -n ${LBUFFER%%[ 	]}` in
-        #*\| | *\; | '' ) LBUFFER=${LBUFFER}'~/' ;;
-        * )                          zle self-insert ;;
-    esac
+	if is-head ${LBUFFER} ; then
+		LBUFFER=${LBUFFER}'~/'
+	else 
+		zle self-insert
+	fi
 }
 zle -N input-homedir
 bindkey "~" input-homedir
 
-## ^で '../' 入力
-function input-or-move-updir {
+## トップでの ';' で 'ms' 実行
+function exec-ls {
 	if [ "${BUFFER}" = "" ] ; then
-		BUFFER='cd ../'
+		LBUFFER="ms "
 		zle accept-line
 	else
-		# # 空文字列の比較をしているのは、カーソルが行頭にあるときのため。
-		# case `echo -n ${LBUFFER[-1]}` in
-		# 	' ' | '	' | '|' | ';' | '' ) LBUFFER=${LBUFFER}'../' ;;
-		# 	* )                          zle self-insert ;;
-		# esac
 		zle self-insert
 	fi
 }
-zle -N input-or-move-updir
-bindkey "\^" input-or-move-updir
-
-## -で 'cd -' 入力
-function go-prev-dir {
-    if [ "${BUFFER}" = "" ] ; then
-	#LBUFFER="cd -"
-	BUFFER="cd -"
-	zle accept-line
-    else
-	zle self-insert
-    fi
-}
-zle -N go-prev-dir
-bindkey "\-" go-prev-dir
+zle -N exec-ls
+bindkey ";" exec-ls
 
 
 
 
 ######## Process Control ########
 
-# ^Zで "fg %" 実行
+# '^Z' で 'fg %' 実行
 function run-fg-last {
-    #zle push-input
-    #BUFFER="fg %"
-    #zle accept-line
-    fg %
-    zle reset-prompt
+	fg %
+	zle reset-prompt
 }
 zle -N run-fg-last
 bindkey "^z" run-fg-last
 
-## 実行したプロセスの消費時間が5秒以上かかったら
+## 実行したプロセスの消費時間がn秒以上かかったら
 ## 自動的に消費時間の統計情報を表示する。
 REPORTTIME=5
 
-#function command-time {
-#    local current=$BUFFER
-#    zle push-input
-#    BUFFER="time "${current}
-#    zle end-of-line
-#}
-#zle -N command-time
-#bindkey "::" command-time
 
 
 
-
-######## Aliases ########
+######## Aliases ######## TODO
 
 alias ls='ls --color=auto -v'
 alias ll='ls -l'
@@ -455,7 +458,7 @@ esac
 
 
 
-######## Abbreviations ########
+######## Abbreviations ######## TODO
 
 setopt extended_glob
 
@@ -534,24 +537,13 @@ abbreviations=(
 # alias -g Y='| wc'
 )
 
-# magic-abbrev-expand() {
-#     local MATCH
-#     OLD_LBUFFER=${LBUFFER}
-#     LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
-#     LBUFFER+=" "${abbreviations[$MATCH]:-$MATCH}
-#     LBUFFER=${LBUFFER## | }      # 行頭で展開するときはパイプを消す
-# 	if [ "${abbreviations[$MATCH][-1]}" != "'" ]; then
-# 	# 展開後の末尾が"'"でなければスぺ―ス自体を挿入
-#         zle self-insert
-#     fi
-# }
 magic-abbrev-expand() {
 	local MATCH
 	LBUFFER=${LBUFFER%%(#m)[-_a-zA-Z0-9]#}
 	LBUFFER+=${abbreviations[$MATCH]:-$MATCH}
 	LBUFFER=${LBUFFER##| }      # 行頭で展開するときはパイプを消す
 	if [ "${abbreviations[$MATCH][-1]}" != "'" ]; then
-		# 展開後の末尾が'でなければスぺ―ス自体を挿入
+		# 展開後の文字列の末尾が'でなければ、元の文字を挿入
 		zle self-insert
 	fi
 }
@@ -561,18 +553,19 @@ bindkey " " magic-abbrev-expand
 
 
 
-######## Math ########
+######## Math and Calculation ########
 
 ## 数学ライブラリをload
 zmodload -i zsh/mathfunc
 
 ## PIをシェル変数として定義
 PI=`awk 'BEGIN{ printf "%.12f", atan2(0,-1) }'`
+typeset -r PI
 
 
 
 
-######## Miscellaneous ########
+######## Miscellaneous ######## TODO
 
 # シェル関数やスクリプトの source 実行時に、 $0 を一時的にその関数／スクリプト名にセットする。
 setopt FUNCTION_ARGZERO
@@ -581,7 +574,7 @@ setopt FUNCTION_ARGZERO
 #setopt GLOB_DOTS
 
 # ZMV をLoad
-autoload zmv
+autoload -Uz zmv
 
 function xawk {
     if [ "${BUFFER}" = "" ] ; then
@@ -660,30 +653,30 @@ bindkey "^b" aawk
 
 
 ######## for GNU Screen ########
-
-preexec () {
-  if [ "$TERM" = "screen" ]; then
-    [ ${STY} ] && echo -ne "\ek${1%% *}\e\\"
-  fi
-}
-
-precmd() {
-  chpwd
-}
-
-chpwd() {
-  if [ "$TERM" = "screen" -a "$PWD" = "$HOME" ]; then
-      echo -n "\ek[~]\e\\"
-  elif [ "$TERM" = "screen" ]; then
-      echo -n "\ek[`basename $PWD`]\e\\"
-  fi
-}
-chpwd
-
-
+# 
+# preexec () {
+# 	if [ "$TERM" = "screen" ]; then
+# 		[ ${STY} ] && echo -ne "\ek${1%% *}\e\\"
+# 	fi
+# }
+# 
+# precmd() {
+# 	chpwd
+# }
+# 
+# chpwd() {
+# 	if [ "$TERM" = "screen" -a "$PWD" = "$HOME" ]; then
+# 		echo -n "\ek[~]\e\\"
+# 	elif [ "$TERM" = "screen" ]; then
+# 		echo -n "\ek[`basename $PWD`]\e\\"
+# 	fi
+# }
+# chpwd
 
 
-######## 実験場 ########
+
+
+######## 実験場 ######## TODO
 
 #function xawk {
 #    zle push-input
@@ -710,61 +703,6 @@ chpwd
 #zle -N zcalc-bc
 #bindkey "##" zcalc-bc
 
-### ^^で "cd -" 実行
-#function next-dir {
-#    zle push-input
-#    BUFFER="cd -"
-#    zle accept-line
-#}
-#zle -N next-dir
-#bindkey "^\^" next-dir
-
-#function input-cd2 {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	zle push-input
-#	BUFFER="cd  - "
-#	zle end-of-line
-#    else
-#	zle self-insert
-#    fi
-#}
-
-### ^^で "cd .." 実行
-#function top-dir {
-#    zle push-input
-#    BUFFER="cd .."
-#    zle accept-line
-#}
-#zle -N top-dir
-#bindkey "\^\^" top-dir
-
-### 行頭の ] で "ls" 実行
-#function beg-ls {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="ls"
-#	zle accept-line
-#    else
-#	zle self-insert
-#    fi
-#}
-#zle -N beg-ls
-#bindkey "]" beg-ls
-
-### [で "popd" 実行
-#function beg-popd {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="popd"
-#	zle accept-line
-#    else
-#	zle self-insert
-#    fi
-#}
-#zle -N beg-popd
-#bindkey "[" beg-popd
-
 
 # コマンドラインでもコメントを使う
 setopt interactivecomments
@@ -788,6 +726,10 @@ function tf {
 }
 
 alias dog='source-highlight-esc.sh'
+
+
+# vi風キーバインドにする
+#bindkey -v
 
 
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
