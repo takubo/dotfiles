@@ -4,12 +4,12 @@
 
 
 ######## Utilities ########
+
 # 行頭
 # パイプ後
 # セミコロン後
 # && または || 後
 # { または ( 後
-
 function is-head {
 	str=$1
 	case `echo -n ${str%%[ 	]*}` in
@@ -106,18 +106,30 @@ esac
 
 ######## Prompt ########
 
-autoload -Uz colors && colors
+# for c in {000..255}; do echo -n "\e[38;5;${c}m $c" ; [ $(($c%16)) -eq 15 ] && echo;done;echo
+# TODO BG
 
 case `uname` in
 	*CYGWIN* )
-		PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M} %n%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
-%%%{${reset_color}%} "
+		#autoload -Uz colors && colors
+		#PROMPT="%B%U%{${fg[red]}%}[%j] %w %D{%H:%M} %n%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
+#%%%{${reset_color}%} "
+		PROMPT=$'%U\e[38;5;009m[%j] %w %D{%H:%M} \e[38;5;229m%n%u %U\e[38;5;103m%~%u\e[38;5;009m
+%%%f '
+		PROMPT=$'%U%{\e[30;48;5;025m%}\e[38;5;009m[%j] %w %D{%H:%M} \e[38;5;075m%n%u %U\e[38;5;103m%~%u\e[38;5;009m
+%%%f '
+		PROMPT=$'%U\e[38;5;009m[%j] %w %D{%H:%M} \e[38;5;075m%n%u %U\e[38;5;247m%~%u\e[38;5;009m
+%%%f '
+		PROMPT=$'%U\e[38;5;009m[%j] %w %D{%H:%M} \e[38;5;009m%n%u %U\e[38;5;075m%~%u\e[38;5;009m
+%%%f '
 		;;
 	* )
 		PROMPT="%U%{${fg[red]}%}[%j] %w %D{%H:%M}%u %U%{${fg[red]}%}%{${fg[magenta]}%}%n%u %U%{${fg[green]}%}%m%u %{${fg[cyan]}%}%~%{${fg[red]}%}
 %%%{${reset_color}%} "
 		PROMPT="%U%{${fg[red]}%}[%j] %w %D{%H:%M} %n%u %U%{${fg[cyan]}%}%~%u%{${fg[red]}%}
 %%%{${reset_color}%} "
+		PROMPT="%U%F{009}[%j] %w %D{%H:%M} %n%u %U%F{075}%~%u%F{009}
+%%%f "
 		;;
 esac
 
@@ -455,6 +467,8 @@ case `uname` in
 	;;
 esac
 
+alias awk='awk -M'
+alias dog='source-highlight-esc.sh'
 
 
 
@@ -467,7 +481,7 @@ typeset -A abbreviations
 abbreviations=(
     "A"    "| awk '"
     "B"    "| bc -l"
-    "D"    "| cat -n"
+    "C"    "| cat -n"
 #   "CN"   "| cat -n"
     "DX"   "| d2x -s"
     "LC"   "LANG=C"
@@ -563,9 +577,63 @@ PI=`awk 'BEGIN{ printf "%.12f", atan2(0,-1) }'`
 typeset -r PI
 
 
+function xawk {
+	if [ "${BUFFER}" = "" ] ; then
+		LBUFFER="awk 'BEGIN{ print "
+		RBUFFER=" }'"
+	else
+		zle end-of-line
+	fi
+}
+zle -N xawk
+bindkey "^e" xawk
+
+function xawk-f {
+	if [ "${BUFFER}" = "" ] ; then
+		LBUFFER="awk -f "
+	else
+		zle beginning-of-line
+	fi
+}
+zle -N xawk-f
+bindkey "^a" xawk-f
+
+alias AWK="gawk -O -e '
+	BEGIN{ OFMT = \"%.8g\"; pi = atan2(0, -1) }
+	# deg2rad
+	function d2r(deg) { return deg * pi / 180 }
+	# rad2deg
+	function r2d(rad) { return rad * 180 / pi }
+' -e"
+function aawk {
+	if [ "${BUFFER}" = "" ] ; then
+		LBUFFER="AWK 'BEGIN{ print "
+		RBUFFER=" }'"
+	else
+		zle backward-char
+	fi
+}
+zle -N aawk
+bindkey "^b" aawk
+
+function zcalc {
+	if [ "${BUFFER}" = "" ] ; then
+		zle push-input
+		BUFFER='echo $((  ))'
+		zle forward-word
+		zle forward-word
+		zle backward-char
+	else
+		zle self-insert
+	fi
+}
+zle -N zcalc
+bindkey "#" zcalc
 
 
-######## Miscellaneous ######## TODO
+
+
+######## Miscellaneous ########
 
 # シェル関数やスクリプトの source 実行時に、 $0 を一時的にその関数／スクリプト名にセットする。
 setopt FUNCTION_ARGZERO
@@ -576,78 +644,14 @@ setopt FUNCTION_ARGZERO
 # ZMV をLoad
 autoload -Uz zmv
 
-function xawk {
-    if [ "${BUFFER}" = "" ] ; then
-	LBUFFER="awk 'BEGIN{ print "
-	RBUFFER=" }'"
-    else
-	zle end-of-line
-    fi
-}
-zle -N xawk
-bindkey "^e" xawk
+# コマンドラインでもコメントを使う
+setopt interactivecomments
 
-function xawk-f {
-    if [ "${BUFFER}" = "" ] ; then
-	LBUFFER="awk -f "
-    else
-	zle beginning-of-line
-    fi
-}
-zle -N xawk-f
-bindkey "^a" xawk-f
+# {}の中に no match があってもエラーとしない。
+setopt nonomatch
 
-alias AWK="gawk -O -e '
-    BEGIN{ OFMT = \"%.8g\"; pi = atan2(0, -1) }
-    # deg2rad
-    function d2r(deg) { return deg * pi / 180 }
-    # rad2deg
-    function r2d(rad) { return rad * 180 / pi }
-' -e"
-function aawk {
-    if [ "${BUFFER}" = "" ] ; then
-	LBUFFER="AWK 'BEGIN{ print "
-	RBUFFER=" }'"
-    else
-	zle backward-char
-    fi
-}
-zle -N aawk
-bindkey "^b" aawk
-
-#function AWK() {
-#gawk -e '
-#    BEGIN{ OFMT = "%.8g"; pi = atan2(0, -1) }
-#    # deg2rad
-#    function d2r(deg) { return deg * pi / 180 }
-#    # rad2deg
-#    function r2d(rad) { return rad * 180 / pi }
-#    ' -e "BEGIN{ print $* }"
-#}
-#
-#function aawk {
-#    local current=${BUFFER}
-#    if [ "${current}" = "" ] ; then
-#	BUFFER="AWK '  '"
-#	zle forward-word
-#	zle backward-char
-#	zle backward-char
-#    else
-#	zle delete-char-or-list
-#    fi
-#}
-#zle -N aawk
-#bindkey "^b" aawk
-
-#function zcalc {
-#    zle push-input
-#    BUFFER='echo $((  ))'
-#    zle forward-word
-#    zle forward-word
-#    zle backward-char
-#}
-#zle -N zcalc
-#bindkey "\#\$" zcalc
+export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36'
+export LESS='-i -M -R'
 
 
 
@@ -678,44 +682,7 @@ bindkey "^b" aawk
 
 ######## 実験場 ######## TODO
 
-#function xawk {
-#    zle push-input
-#    BUFFER="awk 'BEGIN{  }'"
-#    zle forward-word
-#    zle forward-word
-#    zle backward-char
-#}
-#zle -N xawk
-#bindkey "\@\@" xawk
-
-#function zcalc-bc {
-#    local current=${BUFFER}
-#    #local current
-#    #eval local current=${BUFFER}
-#    zle push-input
-#    #echo "\n"`echo "${BUFFER}" | bc -l`"\n"
-#    #echo "\n"$(( ${BUFFER} ))"\n"
-#    #BUFFER='echo "'${current}'" | bc -l'
-#    #BUFFER='echo $(( '${current}' ))'
-#    BUFFER="zgawk 'BEGIN{ print "${current}" }'"
-#    zle accept-line
-#}
-#zle -N zcalc-bc
-#bindkey "##" zcalc-bc
-
-
-# コマンドラインでもコメントを使う
-setopt interactivecomments
-
-# {}の中に no match があってもエラーとしない。
-setopt nonomatch
-
-alias awk='awk -M'
-
-export GREP_COLORS='ms=01;31:mc=01;31:sl=:cx=:fn=35:ln=32:bn=32:se=36'
-export LESS='-i -M -R'
-
-function tf {
+function mk_tmp_file {
 	unset tf
 
 	# trap '[[ "$tmpfile" ]] && rm -f $tmpfile' 1 2 3 15
@@ -725,15 +692,15 @@ function tf {
 	vgg $tf
 }
 
-alias dog='source-highlight-esc.sh'
-
-
 # vi風キーバインドにする
 #bindkey -v
 
-
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
-
 
 # for vim terminal
 LANG=ja_JP.UTF-8
+
+if (which zprof > /dev/null) ;then
+	zprof
+fi
+
