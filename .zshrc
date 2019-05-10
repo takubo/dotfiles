@@ -439,10 +439,7 @@ alias GS='git status .'
 alias gsh='git status | head -n 20'
 alias kakasi='kakasi -iutf8 -outf8'
 
-alias g='cd'
-alias e='echo'
 alias l='ls'
-alias t='cat'
 alias m='man'
 #alias v='vg'
 #alias vg='gvim'
@@ -451,12 +448,11 @@ alias af='awk -f'
 alias gt='git'
 alias mk='make'
 
-alias can='cat -n'
-alias dog='cat -n'
 alias s2t="sed -e 's/[ \t][ \t]*/\t/g'"
 alias psg='ps ax | grep'
 
 alias cc='gcc'
+
 case `uname` in
     *CYGWIN* )	# Cygwin
 	alias a='./a.exe'
@@ -481,7 +477,12 @@ typeset -A abbreviations
 abbreviations=(
     "A"    "| awk '"
     "AF"   "for (i = 1; i <= NF; i++) { "
+    "AB"   "| awk 'BEGIN{ "
+    "ABF"  "| awk 'BEGIN{ printf \"%"
     "C"    "| cat -n "
+    "CA"   "| --color=always "
+    "CN"   "| --color=none "
+    "D"    "| disp"
     "DB"   "| d2b -s "
     "DX"   "| d2x -s "
     "F"    "| find -name '*"
@@ -489,11 +490,15 @@ abbreviations=(
     "F1"   "| find -maxdepth 1 -name '*"
     "FO"   "-o -name '*"
     "FG"   "| find | xargs grep "
+    "FLD"  "| s2t | cut -f'"	#field
+    "FNS"  "| find -name '.svn' -prune -type f -o -name '"
+    "FNG"  "| find -name '.git' -prune -type f -o -name '"
     "G"    "| grep "
     "GV"   "| grep -v "
     "H"    "| head -n 20 "
     "HH"   '| head -n $(($LINES-4)) '
     "HN"   "| head -n "
+    "HL"   "--help"
     "I"    "| "
     "L"    "| clip"
     "LC"   "LANG=C "
@@ -520,15 +525,6 @@ abbreviations=(
     "X"    "| xargs "
     "XI"   "| xargs -i "
     "XN"   "| xargs -n "
-#   "FNS"  "| find -name '.svn' -prune -type f -o -name '"
-#   "M"    "| mc '"
-#   "B"    "| xc '"
-#   "AB"   "| awk 'BEGIN{"
-#   "ABF"  "| awk 'BEGIN{ printf \"%"
-#   "?"    "| japan_numerical"
-#   "Q"    "--help"
-#   "D"    "| disp"
-#   "F"    "| s2t | cut -f'	#field
 )
 
 magic-abbrev-expand() {
