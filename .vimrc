@@ -437,13 +437,15 @@ cnoremap >> \>
 cnoremap <Bar><Bar> \<Bar>
 
 " コメント行の後の新規行の自動コメント化のON/OFF
-nnoremap <expr> <leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':<C-u>set formatoptions+=o<CR>:set formatoptions+=r<CR>'
+nnoremap <expr> <Leader># &formatoptions =~# 'o' ? ':<C-u>set formatoptions-=o<CR>:set formatoptions-=r<CR>' : ':<C-u>set formatoptions+=o<CR>:set formatoptions+=r<CR>'
+nmap <Leader>3  <Leader>#
 
 "nnoremap <silent><expr> <leader>. stridx(&isk, '.') < 0 ? ':<C-u>setl isk+=.<CR>' : ':<C-u>setl isk-=.<CR>'
 "nnoremap <silent><expr> <leader>, stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 "nnoremap <silent><expr> <leader>u stridx(&isk, '_') < 0 ? ':<C-u>setl isk+=_<CR>' : ':<C-u>setl isk-=_<CR>'
 
 nnoremap <silent> <Leader>@ :<C-u>call <SID>ToggleNumber()<CR>
+nmap <Leader>2  <Leader>@
 
 function! s:ToggleNumber()
   if !&l:number && !&l:relativenumber
@@ -1449,7 +1451,7 @@ function! s:SetDefaultStatusline(fullpath)
 
   let s:stl .= "%#SLFileName# %{&l:scrollbind?'$':'@'} "
  "let s:stl .= "%#SLFileName# %1{stridx(&isk,'.')<0?' ':'.'} %1{stridx(&isk,'_')<0?' ':'_'} "
-  let s:stl .= "%1{c_jk_local!=0?'L':'G'} %1{&l:wrap?'<>':'>>'} %{g:clever_f_use_migemo?'(M)':'(F)'} %4{&iminsert?'Jpn':'Code'} "
+  let s:stl .= "%1{c_jk_local!=0?'L':'G'} %1{&l:wrap?'==':'>>'} %{g:clever_f_use_migemo?'(M)':'(F)'} %4{&iminsert?'Jpn':'Code'} "
 
   let s:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
 
