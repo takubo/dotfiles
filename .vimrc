@@ -994,10 +994,16 @@ nnoremap <expr> du match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>
 nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
 " diff Special
-nnoremap <expr> d<Space> &diff ? ':<C-u>diffupdate<CR>' :
-                       \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
-                       \ ':<C-u>diffthis<CR>'
-nmap d<CR> d<Space>
+nnoremap <expr> d<CR>
+        \ &diff ? ':<C-u>diffupdate<CR>' :
+        \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
+        \ ':<C-u>diffthis<CR>'
+
+" diff toggle
+nnoremap <expr> d<Space>
+        \ &diff ? ':<C-u>diffoff<CR>' :
+        \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
+        \ ':<C-u>diffthis<CR>'
 
 " diff off
 nnoremap d<S-Space> :<C-u>diffoff<CR>
