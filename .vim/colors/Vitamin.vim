@@ -1,14 +1,9 @@
 scriptencoding utf-8
 " vim:set ts=8 sts=2 sw=2 tw=0: (この行に関しては:help modelineを参照)
 "
-" Maintainer:	Henrique C. Alves (hcarvalhoalves@gmail.com)
-" Version:      1.1
-" Last Change:	September 23 2008
-"
 
-" favarite color
+" My favarite color
 "	#c0504d
-
 
 set background=dark
 hi clear
@@ -134,6 +129,7 @@ hi TabLine	guifg=#ee8855 guibg=#333333 gui=underline
 hi TabLine	guibg=black	guifg=#aaaaaa
 hi TabLine	guifg=#eeddcc guibg=#363330 gui=none
 hi TabLine	guifg=#eeddcc guibg=black gui=none
+hi WildMenu	guifg=#ffffff guibg=#000000
 
 
 " gui cursor
