@@ -519,8 +519,11 @@ let g:comfortable_motion_air_drag = 25.0
 let g:comfortable_motion_air_drag = 45.0
 let g:comfortable_motion_impulse_multiplier = 15.8
 
-nnoremap <silent> gj :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-nnoremap <silent> gk :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+nnoremap <silent> (ComfortableMotion-Flick-Down) :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+nnoremap <silent> (ComfortableMotion-Flick-Up)   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+
+nmap gj <Plug>(ComfortableMotion-Flick-Down)
+nmap gk <Plug>(ComfortableMotion-Flick-Up)
 
 vnoremap gj <C-d>
 vnoremap gk <C-u>
@@ -1137,8 +1140,10 @@ nnoremap <silent> <C-q><C-q> :<C-u>Kwbd<CR>
 " Focus
 
 " Basic
-nnoremap <silent> <Space>   <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
-nnoremap <silent> <S-Space> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+"nnoremap <silent> <Space>   <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+"nnoremap <silent> <S-Space> <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
+nnoremap <silent> <Plug>(MyVimrc-SkipTerm-Inc) <Esc>:exe <SID>SkipTerm(+1) . ' wincmd w'<CR>
+nnoremap <silent> <Plug>(MyVimrc-SkipTerm-Dec) <Esc>:exe <SID>SkipTerm(-1) . ' wincmd w'<CR>
 
 " Previouse
 "nnoremap <Tab> <C-w>p
@@ -1501,6 +1506,14 @@ let g:BatteryInfo = '? ---% [--:--:--]'
 
 " Battery }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
+
+
+" Unified_Space {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+"
+nmap <expr> <silent> <Space>   winnr('$') == 1 ? <Plug>(ComfortableMotion-Flick-Down) : '<Plug>(MyVimrc-SkipTerm-Inc)'
+nmap <expr> <silent> <S-Space> winnr('$') == 1 ? <Plug>(ComfortableMotion-Flick-Up)   : '<Plug>(MyVimrc-SkipTerm-Dec)'
+
+" Unified_Space }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
 " Mru {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
@@ -2323,3 +2336,4 @@ function! ZZ()
     redraw
   endfor
 endfunction
+
