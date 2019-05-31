@@ -519,8 +519,8 @@ let g:comfortable_motion_air_drag = 25.0
 let g:comfortable_motion_air_drag = 45.0
 let g:comfortable_motion_impulse_multiplier = 15.8
 
-nnoremap <silent> (ComfortableMotion-Flick-Down) :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
-nnoremap <silent> (ComfortableMotion-Flick-Up)   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
+nnoremap <silent> <Plug>(ComfortableMotion-Flick-Down) :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
+nnoremap <silent> <Plug>(ComfortableMotion-Flick-Up)   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
 
 nmap gj <Plug>(ComfortableMotion-Flick-Down)
 nmap gk <Plug>(ComfortableMotion-Flick-Up)
@@ -997,13 +997,13 @@ nnoremap <expr> du match(&diffopt, 'icase' ) < 0 ? ':<C-u>set diffopt+=icase<CR>
 nnoremap <expr> dy match(&diffopt, 'iwhite') < 0 ? ':<C-u>set diffopt+=iwhite<CR>' : ':<C-u>set diffopt-=iwhite<CR>'
 
 " diff Special
-nnoremap <expr> d<CR>
+nnoremap <expr> d<Space>
         \ &diff ? ':<C-u>diffupdate<CR>' :
         \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
         \ ':<C-u>diffthis<CR>'
 
 " diff toggle
-nnoremap <expr> d<Space>
+nnoremap <expr> d<CR>
         \ &diff ? ':<C-u>diffoff<CR>' :
         \ winnr('$') == 2 ? ':<C-u>call PushPos_All() <Bar> exe "windo diffthis" <Bar> call PopPos_All()<CR>' :
         \ ':<C-u>diffthis<CR>'
@@ -1471,6 +1471,9 @@ function! s:SetDefaultStatusline(fullpath)
   if 0
     let s:stl .= "%## %5l L, %3v C "
   endif
+  if 0
+    let s:stl .= "%#SLFileName# "
+  endif
 
   call RestoreDefaultStatusline(0)
 endfunction
@@ -1510,8 +1513,8 @@ let g:BatteryInfo = '? ---% [--:--:--]'
 
 " Unified_Space {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 "
-nmap <expr> <silent> <Space>   winnr('$') == 1 ? <Plug>(ComfortableMotion-Flick-Down) : '<Plug>(MyVimrc-SkipTerm-Inc)'
-nmap <expr> <silent> <S-Space> winnr('$') == 1 ? <Plug>(ComfortableMotion-Flick-Up)   : '<Plug>(MyVimrc-SkipTerm-Dec)'
+nmap <expr> <Space>   winnr('$') == 1 ? '<Plug>(ComfortableMotion-Flick-Down)' : '<Plug>(MyVimrc-SkipTerm-Inc)'
+nmap <expr> <S-Space> winnr('$') == 1 ? '<Plug>(ComfortableMotion-Flick-Up)'   : '<Plug>(MyVimrc-SkipTerm-Dec)'
 
 " Unified_Space }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
