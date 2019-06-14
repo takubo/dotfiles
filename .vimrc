@@ -515,9 +515,12 @@ let g:comfortable_motion_air_drag = 6.0
 let g:comfortable_motion_impulse_multiplier = 3.8
 
 let g:comfortable_motion_friction = 250.0
+let g:comfortable_motion_friction = 253.0
 let g:comfortable_motion_air_drag = 25.0
 let g:comfortable_motion_air_drag = 45.0
 let g:comfortable_motion_impulse_multiplier = 15.8
+let g:comfortable_motion_impulse_multiplier = 35.8
+let g:comfortable_motion_impulse_multiplier = 38.0
 
 nnoremap <silent> <Plug>(ComfortableMotion-Flick-Down) :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0)     )<CR>
 nnoremap <silent> <Plug>(ComfortableMotion-Flick-Up)   :call comfortable_motion#flick(g:comfortable_motion_impulse_multiplier * winheight(0) * -1)<CR>
@@ -544,7 +547,7 @@ nnoremap <silent> <leader>C :<C-u>setl cursorcolumn!<CR>
 " Scrolloff
 
 function! s:best_scrolloff()
-  " Quickfixでは、なぜかWinNewが聞かないので、exists()で変数の存在を確認せねばならない。
+  " Quickfixでは、なぜかWinNewが発火しないので、exists()で変数の存在を確認せねばならない。
   let &l:scrolloff = (g:BrowsingScroll || (exists('w:BrowsingScroll') && w:BrowsingScroll)) ? 99999 : ( winheight(0) < 10 ? 0 : winheight(0) < 20 ? 2 : 5 )
 endfunction
 
@@ -552,7 +555,7 @@ let g:BrowsingScroll = v:false
 nnoremap z<Space>  :<C-u> let g:BrowsingScroll = !g:BrowsingScroll
                   \ <Bar> exe g:BrowsingScroll ? 'normal! zz' : ''
                   \ <Bar> call <SID>best_scrolloff()
-                  \ <Bar> echo g:BrowsingScroll ? 'BrowsingScroll' : 'NoBrowsingScroll'<CR>
+                  \ <Bar> echo g:BrowsingScroll ? 'Global BrowsingScroll' : 'Global NoBrowsingScroll'<CR>
 nnoremap g<Space>  :<C-u> let w:BrowsingScroll = !w:BrowsingScroll
                   \ <Bar> exe w:BrowsingScroll ? 'normal! zz' : ''
                   \ <Bar> call <SID>best_scrolloff()
@@ -562,9 +565,9 @@ augroup MyVimrc_ScrollOff
   au!
   au WinNew              * let w:BrowsingScroll = v:false
   au WinEnter,VimResized * call <SID>best_scrolloff()
+  " -o, -Oオプション付きで起動したWindowでは、WinNew, WinEnterが発火しないので、別途設定。
+  au VimEnter * call PushPos_All() | exe 'tabdo windo let w:BrowsingScroll = v:false | call <SID>best_scrolloff()' | call PopPos_All()
 augroup end
-" 最初のWindowに対しては、WinNewが効かないので、別途設定。
-let w:BrowsingScroll = v:false
 
 " Cursor Move, CursorLine, CursorColumn, and Scroll }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -619,7 +622,8 @@ endfunction
 " 'noh'はユーザ定義関数内では(事実上)実行出来ないので、別途実行の要あり。
 nnoremap <silent> <Esc><Esc> <Esc>:<C-u>call Esc_Esc() <Bar> noh  <Bar> echon <CR>
 
-call EscEsc_Add('call RestoreDefaultStatusline(0)')
+" おかしくなったときにEscEscで復帰できるように、念のためforceをTrueにして呼び出す。
+call EscEsc_Add('call RestoreDefaultStatusline(v:true)')
 call EscEsc_Add('call clever_f#reset()')
 
 " Esc_Esc }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
@@ -882,6 +886,12 @@ function! Unified_CR(mode)
   endif
 endfunction
 
+
+augroup MyVimrc_TagMatch
+  au!
+  au ColorScheme * hi TagMatch	guibg=#c0504d	guifg=white
+augroup end
+
 " TODO
 "   ラベルならf:b
 "   変数なら、スクロールしない
@@ -891,8 +901,7 @@ function! JumpToDefine(mode)
   let w0 = expand("<cword>")
   let w = w0
 
- "for i in range(2)
-  for i in range(2 + 2)
+  for i in range(2)
     try
       if a:mode =~? 's'
 	exe (a:mode =~? 'p' ? 'p' : (a:mode =~? 'w' ? 's' : '')) . "tselect " . w
@@ -912,7 +921,9 @@ function! JumpToDefine(mode)
 	" 元の検索語は"_"始まりでない
 	let w = '_' . w0
       endif
-      let exception = v:exception
+      if i == 0
+	let exception = v:exception
+      endif
     catch /:E433:/
       echohl ErrorMsg | echo matchstr(v:exception, 'E\d\+:.*') | echohl None
       return
@@ -1424,11 +1435,19 @@ function! s:SetStatusline(stl, local, time)
 
   " タイマスタート
   if a:time > 0
-    let s:TimerUsl = timer_start(a:time, 'RestoreDefaultStatusline', {'repeat': 0})
+    let s:TimerUsl = timer_start(a:time, 'RestoreDefaultStatusline', {'repeat': v:false})
   endif
 endfunction
 
-function! RestoreDefaultStatusline(dummy)
+function! RestoreDefaultStatusline(force)
+  " 旧タイマの削除
+  if !exists('s:TimerUsl') && !a:force
+    return
+  elseif exists('s:TimerUsl')
+    call timer_stop(s:TimerUsl)
+    unlet s:TimerUsl
+  endif
+
   call s:SetStatusline(s:stl, '', -1)
   let cur_win = winnr()
   windo if exists('w:stl') | let &l:stl = w:stl | unlet w:stl | endif
@@ -1440,13 +1459,13 @@ endfunction
 "----------------------------------------------------------------------------------------
 " Make Default Statusline
 
-function! s:SetDefaultStatusline(fullpath)
+function! s:SetDefaultStatusline(statusline_contents)
 
   let s:stl = "  "
   let s:stl .= "%#SLFileName#[ %{winnr()} ]%## ( %n ) "
   let s:stl .= "%##%m%r%{(!&autoread&&!&l:autoread)?'[AR]':''}%h%w "
 
-  if a:fullpath
+  if a:statusline_contents['Fullpath']
     let s:stl .= "%<"
     let s:stl .= "%##%#SLFileName# %F "
   else
@@ -1466,26 +1485,34 @@ function! s:SetDefaultStatusline(fullpath)
 
   let s:stl .= "%#SLFileName#  %{repeat(' ',winwidth(0)-178)}"
 
-  let s:stl .= "%## %3p%% [%5L] "
+  let s:stl .= "%## %3p%% [%4L] "
  "let s:stl .= "%## %3p%%  %5L  "
-  if 0
-    let s:stl .= "%## %5l L, %3v C "
+  if a:statusline_contents['CurrentLineColumn']
+    let s:stl .= "%## %4lL, %3vC "
   endif
   if 0
     let s:stl .= "%#SLFileName# "
   endif
 
-  call RestoreDefaultStatusline(0)
+  call RestoreDefaultStatusline(v:true)
 endfunction
 
 "----------------------------------------------------------------------------------------
 " Switch Statusline Contents
 
-let g:stl_fullpath = v:false
-nnoremap <silent> <Leader>- :<C-u>let g:stl_fullpath = !g:stl_fullpath <Bar> call <SID>SetDefaultStatusline(g:stl_fullpath)<CR>
+let g:StatuslineContents = {}
+
+let g:StatuslineContents['Fullpath'] = v:false
+let g:StatuslineContents['CurrentLineColumn'] = v:false
+
+"nnoremap <silent> <Leader>- :<C-u>let g:StatuslineContents['Fullpath'] = !g:StatuslineContents['Fullpath'] <Bar> call <SID>SetDefaultStatusline(g:StatuslineContents)<CR>
+com! StlFullpath let g:StatuslineContents['Fullpath'] = !g:StatuslineContents['Fullpath'] | call <SID>SetDefaultStatusline(g:StatuslineContents)
+nnoremap <silent> <Leader>- :<C-u>StlFullpath<CR>
+
+com! StlCurrentLineColumn let g:StatuslineContents['CurrentLineColumn'] = !g:StatuslineContents['CurrentLineColumn'] | call <SID>SetDefaultStatusline(g:StatuslineContents)
 
 " 初期設定のために1回は呼び出す。
-call s:SetDefaultStatusline(g:stl_fullpath)
+call s:SetDefaultStatusline(g:StatuslineContents)
 
 "----------------------------------------------------------------------------------------
 " Alt Statusline API
@@ -1497,6 +1524,12 @@ endfunction
 function! AddAltStatusline(stl, local, time)
   call s:SetStatusline((a:local == 'l' ? &l:stl : &stl) . a:stl, a:local, a:time)
 endfunction
+
+"----------------------------------------------------------------------------------------
+" Alt Statusline Temporary
+nnoremap <silent> v     :<C-u>call RestoreDefaultStatusline(v:false)<CR>v
+nnoremap <silent> V     :<C-u>call RestoreDefaultStatusline(v:false)<CR>V
+nnoremap <silent> <C-v> :<C-u>call RestoreDefaultStatusline(v:false)<CR><C-v>
 
 " Statusline }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
@@ -2200,9 +2233,13 @@ nnoremap <silent> <nowait> yl :<C-u>vnew<CR>
 " : + |
 
 
-if filereadable('customer.vim')
+if filereadable($vim . '/customer.vim')
   so $vim/customer.vim
 endif
+if filereadable($vim . '/vim.vim')
+  so $vim/vim.vim
+endif
+
 
 
 com! AR :setl autoread!
@@ -2344,12 +2381,13 @@ endfunction
 
 " Cygwin {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-com! -nargs=0 SH call system('/cygdrive/C/cygwin/bin/mintty.exe --size maxheight,maxwidth')
-com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --title 'Vim Term' --size 160,50 -B void ")
-com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --title 'Vim Term' --size 160,50 -B frame")
-com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --title 'Vim Term' --size 160,50")
-com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --title 'Vim Term' --size 160,50 /cygdrive/C/cygwin/bin/zsh.exe")
+com! -nargs=0 SH call system('/cygdrive/C/cygwin/bin/mintty.exe --option Locale=ja_JP --option Charset=UTF-8 --size maxheight,maxwidth')
+com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --option Locale=ja_JP --option Charset=UTF-8 --title 'Vim Term' --size 160,50 /cygdrive/C/cygwin/bin/zsh.exe")
+com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --option Locale=ja_JP --option Charset=UTF-8 --title 'Vim Term' --size 160,50 --Border void  /cygdrive/C/cygwin/bin/zsh.exe")
+com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --option Locale=ja_JP --option Charset=UTF-8 --title 'Vim Term' --size 160,50 --Border frame /cygdrive/C/cygwin/bin/zsh.exe")
+com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --option Locale=ja_JP --option Charset=UTF-8 --title 'Vim Term' --size 160,50 /cygdrive/C/cygwin/bin/zsh.exe")
 
+com! -nargs=0 SH call system("/cygdrive/C/cygwin/bin/mintty.exe --option Locale=ja_JP --option Charset=UTF-8 --title 'Vim Term' --size 160,50 -")
 
 function! FrontSh()
 python3 << PYCODE
