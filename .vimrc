@@ -887,10 +887,25 @@ function! Unified_CR(mode)
 endfunction
 
 
+" ----------------------------------------------------------------------------------------------
+" Tag Match
+
 augroup MyVimrc_TagMatch
   au!
   au ColorScheme * hi TagMatch	guibg=#c0504d	guifg=white
 augroup end
+
+function! QQQQ(dummy)
+  "echo a:dummy
+  "sleep 5
+  "call matchdelete(g:TagMatch)
+  call matchdelete(g:TagMatchI[a:dummy])
+  call remove(g:TagMatchI, a:dummy . '')
+  "echo g:TagMatchI
+endfunction
+
+let g:TagMatchI = {}
+let s:TagHighlightTime = 1000  " [ms]
 
 " TODO
 "   ラベルならf:b
@@ -899,9 +914,19 @@ augroup end
 "   asmのタグ
 function! JumpToDefine(mode)
   let w0 = expand("<cword>")
+
+  if w0 !~ '\<\i\+\>'
+    return
+  endif
+
   let w = w0
 
-  for i in range(2)
+  let g:TagMatch0 = matchadd('TagMatch', '\<'.w.'\>')
+  let g:TimerTagMatch0 = timer_start(s:TagHighlightTime, 'QQQQ')
+  let g:TagMatchI[g:TimerTagMatch0] = g:TagMatch0
+  redraw
+
+  for i in range(2 + 2)
     try
       if a:mode =~? 's'
 	exe (a:mode =~? 'p' ? 'p' : (a:mode =~? 'w' ? 's' : '')) . "tselect " . w
@@ -912,6 +937,9 @@ function! JumpToDefine(mode)
       exe "normal! z\<CR>" . (winheight(0)/4) . "\<C-y>"
       " カーソル位置を調整 (C専用)
       call PostTagJumpCursor_C()
+      let g:TagMatch = matchadd('TagMatch', '\<'.w.'\>')
+      let g:TimerTagMatch = timer_start(s:TagHighlightTime, 'QQQQ')
+      let g:TagMatchI[g:TimerTagMatch] = g:TagMatch
       return
     catch /:E426:/
       if w0 =~ '^_'
@@ -1552,23 +1580,26 @@ nmap <expr> <S-Space> winnr('$') == 1 ? '<Plug>(ComfortableMotion-Flick-Up)'   :
 " Unified_Space }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
 
-" Mru {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
 
-if exists('loaded_mru') && 0
-  "let MRU_Window_Height = min([20, &lines / 4 ])
-  "let MRU_Window_Height = max([8, &lines / 4 ])
-  let MRU_Window_Height = 25
-  augroup MyVimrc_MRU
-    au!
-    "au VimResized * let MRU_Window_Height = min([25, &lines / 3 ])
-    au VimResized * let MRU_Window_Height = max([8, &lines / 3 ])
-  augroup end
-  nnoremap <silent> <leader>o :<C-u>MRU<CR>
-else
-  command! -nargs=* MRU exe 'browse filter %\c' . substitute(<q-args>, '[ *]', '.*', 'g') . '% oldfiles'
-  nnoremap <Leader>o :<C-u>MRU<Space>
-  " nnoremap <Leader>o  :<C-u>/ oldfiles<Home>browse filter /\c
-endif
+" MRU {{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{
+
+" MRU Plugin ----------------------------------------------------------------------------------------------
+"let MRU_Window_Height = min([20, &lines / 4 ])
+"let MRU_Window_Height = max([8, &lines / 4 ])
+let MRU_Window_Height = 25
+augroup MyVimrc_MRU
+  au!
+  "au VimResized * let MRU_Window_Height = min([25, &lines / 3 ])
+  au VimEnter,VimResized * let MRU_Window_Height = max([8, &lines / 3 ])
+augroup end
+" nnoremap <silent> <leader>o :<C-u>MRU<CR>
+
+" My MRU --------------------------------------------------------------------------------------------------
+command! -nargs=* MRU2 exe 'browse filter %\c' . substitute(<q-args>, '[ *]', '.*', 'g') . '% oldfiles'
+" nnoremap <Leader>o  :<C-u>/ oldfiles<Home>browse filter /\c
+
+" Common --------------------------------------------------------------------------------------------------
+nnoremap <Leader>o :<C-u>MRU<Space>
 
 " Mru }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}
 
