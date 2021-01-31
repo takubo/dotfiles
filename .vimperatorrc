@@ -1,4 +1,4 @@
-set toolbars=tabs
+"set toolbars=tabs
 set noscrollbars
 
 "ヒントを英字表記に
@@ -6,8 +6,8 @@ set hintchars=;asdfghjkl
 
 set complete=S
 
-autocmd PageLoad .* <silent> set toolbars=tabs
-autocmd PageLoad .* <silent> hi CmdLine font-size: 1px;
+"autocmd PageLoad .* <silent> set toolbars=tabs
+autocmd PageLoad * <silent> hi CmdLine font-size: 1px;
 autocmd LocationChange .* <silent> hi CmdLine font-size: 1px;
 
 "nnoremap j 3j "<down>
@@ -19,6 +19,9 @@ nnoremap H h
 nnoremap L l
 
 nnoremap d dgT
+
+nnoremap <c-f> gt
+nnoremap <c-b> gT
 
 nnoremap i gi<c-a>
 nnoremap I gi<c-a><c-k>
@@ -41,27 +44,46 @@ inoremap <c-p> <up>
 
 cnoremap <c-n> <down>
 cnoremap <c-p> <up>
+" cnoremap <c-n> <tab>
+" cnoremap <c-p> <s-tab>
+cnoremap <down> <tab>
+cnoremap <up> <s-tab>
+cnoremap j <tab>
+cnoremap k <s-tab>
 
 hi CmdLine -append font-size: 12px // コマンドラインの文字サイズを指定できる。
 
 nnoremap o :hi CmdLine font-size: 25px<CR>o
 nnoremap t :hi CmdLine font-size: 25px<CR>t
-nnoremap : :hi CmdLine font-size: 25px<CR>:
+nnoremap : :hi CmdLine font-size: 25px<CR>;
+nnoremap ; :hi CmdLine font-size: 25px<CR>:
 nnoremap / :hi CmdLine font-size: 25px<CR>/
-nnoremap f <Esc>:hi CmdLine font-size: 25px<CR>f
-nnoremap F <Esc>:hi CmdLine font-size: 25px<CR>F
+"nnoremap f <Esc>:hi CmdLine font-size: 25px<CR><Esc>f
+"nnoremap F <Esc>:hi CmdLine font-size: 25px<CR>F
+nnoremap b <Esc>:hi CmdLine font-size: 25px<CR>b
+nnoremap K <Esc>:hi CmdLine font-size: 25px<CR>b
+"nnoremap ; <Esc>:hi CmdLine font-size: 25px<CR>;
 
 cnoremap <CR> <CR>:hi CmdLine font-size: 1px<CR>
 "cnoremap <c-m> <c-m>:hi CmdLine font-size: 1px<CR>
 "cnoremap <c-j> <c-j>:hi CmdLine font-size: 1px<CR>
 cnoremap <Esc> <Esc>:hi CmdLine font-size: 1px<CR>
-nnoremap <Esc><Esc> <Esc>:hi CmdLine font-size: 12px<CR>
+"nnoremap <Esc><Esc> <Esc>:hi CmdLine font-size: 12px<CR>
 "nnoremap j <Esc>:hi CmdLine font-size: 12px<CR>3j "<down>
 "nnoremap k <Esc>:hi CmdLine font-size: 12px<CR>3k "<up>
-nnoremap j 3<c-e>
-nnoremap k 3<c-y>
+nnoremap j 3<down>
+nnoremap k 3<up>
 "inoremap <Esc> <Esc>:hi CmdLine font-size: 12px<CR>
 
+cnoremap <C-j> <Tab>
+cnoremap <C-k> <S-Tab>
+
+nnoremap <C-k> <Esc>o http://www.jorudan.co.jp/<CR>
+
+nnoremap <C-l> <F9>
+inoremap <C-l> <F9>
+vnoremap <C-l> <F9>
+cnoremap <C-l> <F9>
 
 
 "hi Hint -append font-size: 39px // コマンドラインの文字サイズを指定できる。
