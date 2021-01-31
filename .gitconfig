@@ -1,8 +1,17 @@
 [alias]
 	st = status
 	ci = commit
+	lg = log --graph
+	lo = log --graph --oneline
+	uno = status -uno
 [user]
 	name = Takubo Morio
 	email = takubo.morio@gmail.com
 [color]
-	ui = auto
+	ui = always
+	#ui = auto
+	#diff = always
+	#log = always
+	#status = always
+[core]
+	editor = vw  # for M$-Windows
