@@ -3,7 +3,7 @@
 " An example for a Japanese version gvimrc file.
 " 日本語版のデフォルトGUI設定ファイル(gvimrc) - Vim7用試作
 "
-" Last Change: 17-Sep-2014.
+" Last Change: 01-Feb-2015.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -200,3 +200,5 @@ endif
 colorscheme Vitamin
 
 set guioptions=
+
+autocmd GUIEnter * set transparency=230
