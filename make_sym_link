@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd `git rev-parse --show-toplevel`
+
+git ls-files | grep '^\.' | sed 's%/.*%%' | sort | uniq | xargs -i ln -s "$HOME/dotfiles/{}" "$HOME/{}"
